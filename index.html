@@ -323,6 +323,25 @@
     .message-reactions{margin-top:3px}
     .message-gif{display:block;width:min(360px,100%);max-height:260px;object-fit:contain;object-position:left center;border-radius:9px;margin-top:3px;background:#202125}
     .message.mine .message-gif{margin-left:auto;object-position:right center}
+
+    /* Discord-inspired call stage and a draggable lower resize edge. */
+    #callOverlay{flex:0 1 var(--call-panel-height,460px);height:var(--call-panel-height,460px);max-height:78vh;min-height:270px;overflow:visible}
+    #callOverlay .call-window{position:relative;min-height:0}
+    #callOverlay .call-stage{background:#1e1f22;gap:12px;padding:20px;align-content:center}
+    #callOverlay #remoteVideo{border-radius:12px;background:#232428;object-fit:contain}
+    #callOverlay .group-remote-tile{height:100%;max-width:none;min-width:0;min-height:150px;border:1px solid rgba(255,255,255,.07);border-radius:12px;background:#232428;box-shadow:0 2px 10px rgba(0,0,0,.18)}
+    #callOverlay .group-remote-tile video{object-fit:contain;background:#17181c}
+    #callOverlay .group-remote-tile span{left:10px;bottom:10px;padding:6px 9px;border-radius:6px;background:rgba(20,21,24,.82);font-size:.78rem;font-weight:650}
+    #callOverlay .group-remote-tile.is-speaking{outline:2px solid #23a55a;outline-offset:-2px;box-shadow:inset 0 0 0 1px rgba(35,165,90,.35)}
+    #callOverlay #remoteVideo.is-speaking{outline:2px solid #23a55a;outline-offset:-2px}
+    #callOverlay .camera-off-card{background:#232428}
+    #callOverlay .camera-off-banner{filter:brightness(.38) saturate(.72)}
+    #callOverlay .camera-off-avatar{width:clamp(76px,19%,132px);border:0;box-shadow:0 4px 24px rgba(0,0,0,.42)}
+    #callOverlay .call-resize-handle{position:absolute;z-index:8;left:0;right:0;bottom:-5px;height:12px;cursor:ns-resize;touch-action:none;display:flex;align-items:center;justify-content:center;background:transparent}
+    #callOverlay .call-resize-handle:after{content:"";width:44px;height:4px;border-radius:5px;background:#4e5058;transition:background .15s,width .15s}
+    #callOverlay .call-resize-handle:hover:after,#callOverlay .call-resize-handle.dragging:after{width:64px;background:#b5bac1}
+    @media(max-width:760px){#callOverlay{flex-basis:var(--call-panel-height,420px);height:var(--call-panel-height,420px);max-height:78vh;min-height:250px}#callOverlay .call-stage{padding:10px;gap:8px}#callOverlay .group-remote-tile{min-height:120px}}
+
     .profile-row{position:relative}
     .profile-row .profile-label span{font-size:.66rem;margin-top:2px}
     .status-trigger{width:22px;height:28px;border:0;background:transparent;display:grid;place-items:center;padding:0}
@@ -513,7 +532,7 @@
       </section>
       <section class="chat-panel" id="chatPanel" hidden>
         <header class="chat-head"><button class="icon-button back-mobile" id="chatBack" aria-label="Back to messages"><span class="material-symbol">arrow_back</span></button><div class="mini-avatar" id="chatAvatar"></div><div class="profile-label"><strong id="chatName"></strong><span id="chatBio" hidden></span></div><button class="icon-button" id="joinOngoingCall" title="Join an ongoing group call" aria-label="Join ongoing call" hidden><span class="material-symbol">video_call</span></button><button class="icon-button" id="startVoiceCall" title="Start voice/video call" aria-label="Start call"><span class="material-symbol">call</span></button><button class="small-button" id="viewChatProfile">Profile</button></header>
-          <div class="call-overlay" id="callOverlay" hidden><section class="call-window"><div class="call-stage"><video id="remoteVideo" autoplay playsinline></video><div id="directCameraOff" class="camera-off-card" hidden><div class="camera-off-banner"></div><img class="camera-off-avatar" alt="Participant avatar"></div><video id="localVideo" autoplay muted playsinline></video><div class="call-status" id="callStatus">Connecting…</div></div><div class="call-controls"><button class="call-control" id="toggleMic">Mute mic</button><button class="call-control" id="toggleCamera">Turn camera off</button><button class="call-control" id="shareScreen">Share screen</button><button class="call-control end" id="endCall">End call</button></div></section></div>
+          <div class="call-overlay" id="callOverlay" hidden><section class="call-window"><div class="call-stage"><video id="remoteVideo" autoplay playsinline></video><div id="directCameraOff" class="camera-off-card" hidden><div class="camera-off-banner"></div><img class="camera-off-avatar" alt="Participant avatar"></div><video id="localVideo" autoplay muted playsinline></video><div class="call-status" id="callStatus">Connecting…</div></div><div class="call-controls"><button class="call-control" id="toggleMic">Mute mic</button><button class="call-control" id="toggleCamera">Turn camera off</button><button class="call-control" id="shareScreen">Share screen</button><button class="call-control end" id="endCall">End call</button></div><div class="call-resize-handle" id="callResizeHandle" role="separator" aria-orientation="horizontal" aria-label="Resize call panel" title="Drag to resize call panel"></div></section></div>
         <div class="chat-messages" id="chatMessages" aria-live="polite"><div class="chat-empty">Loading messages…</div></div>
         <div class="composer-wrap"><div class="picker-panel" id="pickerPanel" hidden><div class="picker-tabs"><button type="button" class="picker-tab active" id="emojiTab">Emoji</button><button type="button" class="picker-tab" id="gifTab">GIFs</button><button type="button" class="icon-button picker-close" id="closePicker" aria-label="Close picker"><span class="material-symbol">close</span></button></div><div id="emojiPanel" class="emoji-grid" aria-label="Emoji picker"></div><div id="gifPanel" hidden><form class="gif-search" id="gifSearchForm"><input id="gifSearchInput" maxlength="50" placeholder="Search GIPHY" aria-label="Search GIFs"><button class="small-button" type="submit">Search</button></form><div class="gif-results" id="gifResults"><div class="result-message">Search for a GIF to send it in this chat.</div></div><div class="giphy-credit">Powered by GIPHY</div></div></div><form class="chat-composer" id="chatComposer"><button type="button" class="composer-tool" id="openEmoji" aria-label="Open emoji picker" title="Emoji">☺</button><button type="button" class="composer-tool" id="openGif" aria-label="Open GIF picker" title="GIF">GIF</button><textarea id="messageInput" rows="1" maxlength="4000" placeholder="Write a message…" aria-label="Write a message" required></textarea><button class="primary" id="sendMessage" type="submit">Send</button></form></div>
       </section>
@@ -1145,6 +1164,7 @@
     async function showDirectCameraCard(show=true){const card=$('directCameraOff');if(!card)return;card.hidden=!show;if(!show)return;const p=activeConversation?.otherProfile||{};card.querySelector('.camera-off-banner').style.backgroundImage=p.banner?'url("'+p.banner+'")':'linear-gradient(135deg,#343b52,#171a22)';setAvatar(card.querySelector('.camera-off-avatar'),p.avatar,p.name||'User');}
     function createPeerConnection() {
       peerConnection = new RTCPeerConnection(rtcConfig);
+      showDirectCameraCard(true);
       peerConnection.ontrack = event => {
         const stream = event.streams?.[0];
         if (stream) {
@@ -1474,6 +1494,28 @@
     $('joinOngoingCall').addEventListener('click',async()=>{if(!activeConversationId||!currentUser)return;try{const snap=await groupCallCollection(activeConversationId).where('calleeId','==',currentUser.uid).where('state','==','ringing').get();const match=snap.docs[0];if(match)await acceptGroupCall(match.id,match.data());else showToast('No joinable call invitation was found.');}catch(e){console.error(e);showToast('Could not check ongoing calls.');}});
     $('endCall').addEventListener('click', () => groupCallActive ? endGroupCall(true) : endCall(true));
     $('callOverlay').addEventListener('click', e => { if (e.target === $('callOverlay')) return; });
+    (() => {
+      const handle=$('callResizeHandle'), overlay=$('callOverlay');
+      if(!handle||!overlay)return;
+      let drag=null;
+      handle.addEventListener('pointerdown',e=>{
+        if(e.button!==0&&e.pointerType==='mouse')return;
+        const height=overlay.getBoundingClientRect().height;
+        drag={y:e.clientY,height};
+        handle.classList.add('dragging');handle.setPointerCapture(e.pointerId);e.preventDefault();
+      });
+      handle.addEventListener('pointermove',e=>{
+        if(!drag)return;
+        const parent=overlay.parentElement;
+        const available=parent?.getBoundingClientRect().height||window.innerHeight;
+        const next=Math.max(250,Math.min(Math.round(available*.82),Math.round(drag.height+e.clientY-drag.y)));
+        overlay.style.setProperty('--call-panel-height',next+'px');
+        overlay.style.flexBasis=next+'px';
+        overlay.style.height=next+'px';
+      });
+      const stop=()=>{drag=null;handle.classList.remove('dragging');};
+      handle.addEventListener('pointerup',stop);handle.addEventListener('pointercancel',stop);handle.addEventListener('lostpointercapture',stop);
+    })();
     
     const shortcodeEmoji = {
       sob:'😭',cry:'😢',joy:'😂',laughing:'😆',rofl:'🤣',skull:'💀',heart:'❤️',heart_eyes:'😍',
