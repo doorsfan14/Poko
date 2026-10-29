@@ -281,7 +281,7 @@
     $('profileRow').addEventListener('click', e => { if (!e.target.closest('#editProfile')) openProfile(); });
     $('profileRow').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openProfile(); } });
     $('editProfile').addEventListener('click', e => { e.stopPropagation(); openEditor(); });
-    function openProfile() { const name = $('displayName').textContent; $('profileViewName').textContent = name; $('profileViewBio').textContent = profileBio; setAvatar($('profileViewAvatar'), avatarUrl, name.slice(0,2).toUpperCase()); $('profileViewBanner').style.backgroundImage = bannerUrl ? 'url(\\"' + bannerUrl + '\\")' : ''; profileOpen.classList.add('open'); }
+    function openProfile() { const name = $('displayName').textContent; $('profileViewName').textContent = name; $('profileViewBio').textContent = profileBio; setAvatar($('profileViewAvatar'), avatarUrl, name.slice(0,2).toUpperCase()); $('profileViewBanner').style.backgroundImage = bannerUrl ? `url("${bannerUrl}")` : ''; profileOpen.classList.add('open'); }
     function closeProfile() { profileOpen.classList.remove('open'); }
     $('closeProfileView').addEventListener('click', closeProfile);
     profileOpen.addEventListener('click', e => { if (e.target === profileOpen) closeProfile(); });
