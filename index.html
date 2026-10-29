@@ -273,6 +273,21 @@
     .giphy-credit{padding:0 10px 10px;color:var(--muted);font-size:.62rem}
     .chat-composer{margin-top:0}
     @media(max-width:760px){.picker-panel{left:0;width:min(340px,calc(100vw - 24px))}.status-menu{left:66px}.chat-composer{gap:6px}.composer-tool{min-width:32px;padding:0 6px}}
+    @keyframes poko-overlay-in{from{opacity:0}to{opacity:1}}
+    @keyframes poko-modal-grow{from{opacity:.72;transform:scale(.94)}to{opacity:1;transform:scale(1)}}
+    .profile-open.open,.new-chat-overlay.open{animation:poko-overlay-in .16s ease-out both}
+    .profile-open.open .profile-card,.new-chat-overlay.open .new-chat-dialog{transform-origin:center;animation:poko-modal-grow .2s cubic-bezier(.2,.75,.25,1) both}
+    .profile-editor.open .dialog{transform-origin:center;animation:poko-modal-grow .2s cubic-bezier(.2,.75,.25,1) both}
+    .call-overlay:not([hidden]) .call-window{transform-origin:center;animation:poko-modal-grow .22s cubic-bezier(.2,.75,.25,1) both}
+    @media(prefers-reduced-motion:reduce){.profile-open.open,.new-chat-overlay.open,.profile-open.open .profile-card,.new-chat-overlay.open .new-chat-dialog,.profile-editor.open .dialog,.call-overlay:not([hidden]) .call-window{animation:none!important}}
+    .mini-avatar,.profile-view-avatar,.large-avatar{position:relative}
+    .avatar-status-badge{position:absolute;right:-1px;bottom:-1px;width:12px;height:12px;border:2px solid var(--panel);border-radius:50%;z-index:2;background:#4ac985;pointer-events:none}
+    .avatar-status-badge.online{background:#4ac985}.avatar-status-badge.idle{background:#f2bd4b}.avatar-status-badge.dnd{background:#f05261}.avatar-status-badge.invisible{background:#858995}
+    .mini-avatar .avatar-status-badge{width:11px;height:11px}
+    .profile-view-avatar .avatar-status-badge,.large-avatar .avatar-status-badge{width:17px;height:17px;border-width:3px}
+    #myStatusLabel,#myStatusDot{display:none!important}
+    .status-trigger{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:3}
+    .profile-row{position:relative}
   </style>
 </head>
 <body>
@@ -303,7 +318,7 @@
       <div class="profile-row" id="profileRow" role="button" tabindex="0" aria-label="View profile">
         <div class="mini-avatar" id="sideAvatar">You</div>
         <div class="profile-label"><strong id="displayName">your_username</strong><span id="myStatusLabel">Online</span></div>
-        <button class="status-trigger" id="statusTrigger" type="button" aria-label="Change activity status" title="Change activity status"><span class="status-dot online" id="myStatusDot"></span></button>
+        <button class="status-trigger" id="statusTrigger" type="button" aria-label="Change activity status" title="Change activity status"></button>
         <button class="icon-button" id="editProfile" aria-label="Edit profile" title="Edit profile"><span class="material-symbol">edit</span></button>
       </div>
       <div class="status-menu" id="statusMenu" hidden><button type="button" data-status="online"><span class="status-dot online"></span>Online</button><button type="button" data-status="idle"><span class="status-dot idle"></span>Idle</button><button type="button" data-status="dnd"><span class="status-dot dnd"></span>Do not disturb</button><button type="button" data-status="invisible"><span class="status-dot invisible"></span>Invisible</button></div>
@@ -387,6 +402,7 @@
     let micMuted = false;
     let knownConversations = [];
     const profileCache = new Map();
+    const profileStatusUnsubscribers = new Map();
 
     function applyProfile(saved = {}) {
       myActivityStatus = ['online','idle','dnd','invisible'].includes(saved.status) ? saved.status : 'online';
@@ -397,6 +413,8 @@
       $('displayName').textContent = name;
       setAvatar($('sideAvatar'), avatarUrl, name.slice(0,2).toUpperCase());
       setAvatar($('largeAvatar'), avatarUrl, name.slice(0,2).toUpperCase());
+      setAvatarStatus($('sideAvatar'),myActivityStatus);
+      setAvatarStatus($('largeAvatar'),myActivityStatus);
       $('profileViewName').textContent = name;
       $('profileViewBio').textContent = profileBio;
       $('profileViewBanner').style.backgroundImage = bannerUrl ? `url("${bannerUrl}")` : '';
@@ -433,11 +451,17 @@
       if (url) { const img = document.createElement('img'); img.src = url; img.alt = 'Profile picture'; el.append(img); }
       else el.textContent = fallback;
     }
+    function setAvatarStatus(el,status='online') {
+      if(!el)return;
+      el.querySelectorAll(':scope > .avatar-status-badge').forEach(node=>node.remove());
+      const badge=document.createElement('span');badge.className='avatar-status-badge '+(['online','idle','dnd','invisible'].includes(status)?status:'online');badge.title=({online:'Online',idle:'Idle',dnd:'Do not disturb',invisible:'Invisible'}[status]||'Online');badge.setAttribute('aria-label',badge.title);el.append(badge);
+    }
     function openEditor() {
       pendingAvatar = avatarUrl; pendingBanner = bannerUrl;
       $('nameInput').value = $('displayName').textContent === 'your_username' ? '' : $('displayName').textContent;
       $('bioInput').value = profileBio;
       setAvatar($('largeAvatar'), pendingAvatar);
+      setAvatarStatus($('largeAvatar'),myActivityStatus);
       $('bannerPreview').style.backgroundImage = pendingBanner ? 'url("' + pendingBanner + '")' : '';
       const trigger = document.activeElement;
       const rect = trigger && trigger.getBoundingClientRect ? trigger.getBoundingClientRect() : $('profileRow').getBoundingClientRect();
@@ -506,7 +530,7 @@
     $('profileRow').addEventListener('click', e => { if (!e.target.closest('#editProfile') && !e.target.closest('#statusTrigger')) openProfile(); });
     $('profileRow').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openProfile(); } });
     $('editProfile').addEventListener('click', e => { e.stopPropagation(); openEditor(); });
-    function openProfile() { const name = $('displayName').textContent; $('profileViewName').textContent = name; $('profileViewBio').textContent = profileBio; setAvatar($('profileViewAvatar'), avatarUrl, name.slice(0,2).toUpperCase()); $('profileViewBanner').style.backgroundImage = bannerUrl ? `url("${bannerUrl}")` : ''; profileOpen.classList.add('open'); }
+    function openProfile() { const name = $('displayName').textContent; $('profileViewName').textContent = name; $('profileViewBio').textContent = profileBio; setAvatar($('profileViewAvatar'), avatarUrl, name.slice(0,2).toUpperCase()); setAvatarStatus($('profileViewAvatar'),myActivityStatus); $('profileViewBanner').style.backgroundImage = bannerUrl ? `url("${bannerUrl}")` : ''; profileOpen.classList.add('open'); }
     function closeProfile() { profileOpen.classList.remove('open'); }
     $('closeProfileView').addEventListener('click', closeProfile);
     profileOpen.addEventListener('click', e => { if (e.target === profileOpen) closeProfile(); });
@@ -559,6 +583,7 @@
     });
 
     function stopMessagingListeners() {
+      profileStatusUnsubscribers.forEach(unsubscribe=>unsubscribe()); profileStatusUnsubscribers.clear();
       if (conversationUnsubscribe) conversationUnsubscribe();
       if (messagesUnsubscribe) messagesUnsubscribe();
       if (conversationListUnsubscribe) conversationListUnsubscribe();
@@ -583,7 +608,22 @@
           const profile = await getPublicProfile(otherUid);
           return {id:doc.id, ...data, otherUid, otherProfile:profile};
         }));
-        knownConversations = items.filter(Boolean).sort((a,b) => {
+        const validItems=items.filter(Boolean);
+        const wantedUids=new Set(validItems.map(item=>item.otherUid));
+        for(const [uid,unsubscribe] of profileStatusUnsubscribers){if(!wantedUids.has(uid)){unsubscribe();profileStatusUnsubscribers.delete(uid);}}
+        validItems.forEach(item=>{
+          if(profileStatusUnsubscribers.has(item.otherUid))return;
+          const unsubscribe=profileDb.collection('profiles').doc(item.otherUid).onSnapshot(profileSnapshot=>{
+            const data=profileSnapshot.exists?(profileSnapshot.data()||{}):{};
+            const profile={uid:item.otherUid,name:data.name||'Poko user',avatar:data.avatar||'',banner:data.banner||'',bio:data.bio||'',status:['online','idle','dnd','invisible'].includes(data.status)?data.status:'online'};
+            profileCache.set(item.otherUid,profile);
+            knownConversations=knownConversations.map(existing=>existing.otherUid===item.otherUid?{...existing,otherProfile:profile}:existing);
+            if(activeConversationId){const active=knownConversations.find(existing=>existing.id===activeConversationId);if(active){activeConversation=active;if($('chatName'))$('chatName').textContent=profile.name;const dot=$('chatStatusDot');if(dot){dot.className='status-dot '+profile.status;dot.title=({online:'Online',idle:'Idle',dnd:'Do not disturb',invisible:'Offline'}[profile.status]);}setAvatarStatus($('chatAvatar'),profile.status);}}
+            renderConversationList();
+          },error=>console.error('Friend activity status listener failed:',error));
+          profileStatusUnsubscribers.set(item.otherUid,unsubscribe);
+        });
+        knownConversations = validItems.sort((a,b) => {
           const ta = a.updatedAt?.toMillis?.() || 0, tb = b.updatedAt?.toMillis?.() || 0;
           return tb - ta;
         });
@@ -632,7 +672,7 @@
       items.forEach(item => {
         const button = document.createElement('button');
         button.className = 'conversation-item' + (item.id === activeConversationId ? ' active' : '');
-        const avatar = document.createElement('div'); avatar.className = 'mini-avatar'; setAvatar(avatar,item.otherProfile.avatar,item.otherProfile.name.slice(0,2).toUpperCase());
+        const avatar = document.createElement('div'); avatar.className = 'mini-avatar'; setAvatar(avatar,item.otherProfile.avatar,item.otherProfile.name.slice(0,2).toUpperCase()); setAvatarStatus(avatar,item.otherProfile.status);
         const label = document.createElement('div'); label.className = 'profile-label';
         const name = document.createElement('strong'); name.textContent = item.otherProfile.name;
         const last = document.createElement('span'); last.textContent = item.lastMessage || 'Start a conversation';
@@ -701,6 +741,7 @@
       $('chatBio').textContent = item.otherProfile.bio || '';
       $('chatBio').hidden = !item.otherProfile.bio;
       $('chatStatusDot')?.remove(); const statusDot=document.createElement('span'); statusDot.id='chatStatusDot'; statusDot.className='status-dot '+(item.otherProfile.status||'online'); statusDot.title=({online:'Online',idle:'Idle',dnd:'Do not disturb',invisible:'Offline'}[item.otherProfile.status||'online']); $('chatName').parentElement.append(statusDot);
+      setAvatar($('chatAvatar'),item.otherProfile.avatar,item.otherProfile.name.slice(0,2).toUpperCase()); setAvatarStatus($('chatAvatar'),item.otherProfile.status);
       setAvatar($('chatAvatar'),item.otherProfile.avatar,item.otherProfile.name.slice(0,2).toUpperCase());
       $('chatMessages').replaceChildren();
       const loading = document.createElement('div'); loading.className = 'chat-empty'; loading.textContent = 'Loading messages…'; $('chatMessages').append(loading);
@@ -911,7 +952,7 @@
     $('openEmoji').addEventListener('click',()=>openPicker('emoji'));$('openGif').addEventListener('click',()=>openPicker('gif'));$('emojiTab').addEventListener('click',()=>openPicker('emoji'));$('gifTab').addEventListener('click',()=>openPicker('gif'));$('closePicker').addEventListener('click',closePicker);
     $('gifSearchForm').addEventListener('submit',e=>{e.preventDefault();const q=$('gifSearchInput').value.trim();if(q)loadGifs(q);});
     $('statusTrigger').addEventListener('click',e=>{e.stopPropagation();$('statusMenu').hidden=!$('statusMenu').hidden;});
-    $('statusMenu').querySelectorAll('[data-status]').forEach(button=>button.addEventListener('click',async()=>{const status=button.dataset.status;myActivityStatus=status;const labels={online:'Online',idle:'Idle',dnd:'Do not disturb',invisible:'Invisible'};$('myStatusLabel').textContent=labels[status];$('myStatusDot').className='status-dot '+status;$('statusMenu').hidden=true;try{const user=firebaseAuth?.currentUser;if(user&&profileDb)await profileDb.collection('profiles').doc(user.uid).set({status,updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});const profile=JSON.parse(localStorage.getItem('poko-profile')||'{}');profile.status=status;localStorage.setItem('poko-profile',JSON.stringify(profile));showToast('Activity status set to '+labels[status]+'.');}catch(error){console.error('Status update failed:',error);showToast('Status could not save. Check Firestore rules.');}}));
+    $('statusMenu').querySelectorAll('[data-status]').forEach(button=>button.addEventListener('click',async()=>{const status=button.dataset.status;myActivityStatus=status;const labels={online:'Online',idle:'Idle',dnd:'Do not disturb',invisible:'Invisible'};$('myStatusLabel').textContent=labels[status];$('myStatusDot').className='status-dot '+status;setAvatarStatus($('sideAvatar'),status);setAvatarStatus($('largeAvatar'),status);setAvatarStatus($('profileViewAvatar'),status);$('statusMenu').hidden=true;try{const user=firebaseAuth?.currentUser;if(user&&profileDb)await profileDb.collection('profiles').doc(user.uid).set({status,updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});const profile=JSON.parse(localStorage.getItem('poko-profile')||'{}');profile.status=status;localStorage.setItem('poko-profile',JSON.stringify(profile));showToast('Activity status set to '+labels[status]+'.');}catch(error){console.error('Status update failed:',error);showToast('Status could not save. Check Firestore rules.');}}));
     document.addEventListener('click',e=>{if(!pickerPanel.contains(e.target)&&!['openEmoji','openGif'].includes(e.target.id))closePicker();if(!$('statusMenu').contains(e.target)&&e.target.id!=='statusTrigger')$('statusMenu').hidden=true;});
     $('chatComposer').addEventListener('submit', async e => {
       e.preventDefault();
