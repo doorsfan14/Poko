@@ -433,7 +433,7 @@
       $('profileViewBanner').style.backgroundImage = bannerUrl ? `url("${bannerUrl}")` : '';
       const statusLabels={online:'Online',idle:'Idle',dnd:'Do not disturb',invisible:'Invisible'};
       if($('myStatusLabel')) $('myStatusLabel').textContent=statusLabels[myActivityStatus];
-      if($('myStatusDot')) $('myStatusDot').className='status-dot '+myActivityStatus;
+      if($('myStatusDot')) $('myStatusDot').className='status-dot '+myActivityStatus;if($('statusTriggerDot')) $('statusTriggerDot').className='status-dot '+myActivityStatus;
     }
     function restoreProfile() {
       try { applyProfile(JSON.parse(localStorage.getItem('poko-profile') || '{}')); }
