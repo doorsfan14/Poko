@@ -233,6 +233,45 @@
       .dialog{max-height:90dvh}
     }
 
+    .profile-row{border:0!important;border-top:0!important;outline:0!important;box-shadow:none!important}
+    .profile-row:focus,.profile-row:focus-visible,.profile-row:hover{outline:none!important;box-shadow:none!important;border:0!important}
+    .conversation-item.active{box-shadow:none}
+    .message{padding-top:2px;padding-bottom:2px}
+    .message-head{min-height:20px}
+    .message-reactions:empty{display:none}
+    .message-reactions{margin-top:3px}
+    .message-gif{display:block;width:min(360px,100%);max-height:260px;object-fit:contain;object-position:left center;border-radius:9px;margin-top:3px;background:#202125}
+    .message.mine .message-gif{margin-left:auto;object-position:right center}
+    .profile-row{position:relative}
+    .profile-row .profile-label span{font-size:.66rem;margin-top:2px}
+    .status-trigger{width:22px;height:28px;border:0;background:transparent;display:grid;place-items:center;padding:0}
+    .status-dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex:0 0 9px;background:#4ac985}
+    .status-dot.online{background:#4ac985}.status-dot.idle{background:#f2bd4b}.status-dot.dnd{background:#f05261}.status-dot.invisible{background:#858995}
+    .status-menu{position:absolute;left:12px;bottom:74px;z-index:1100;width:210px;padding:6px;border:1px solid var(--line);border-radius:12px;background:#292b30;box-shadow:0 14px 40px rgba(0,0,0,.4)}
+    .status-menu button{width:100%;display:flex;align-items:center;gap:10px;padding:10px;border:0;border-radius:8px;background:transparent;color:var(--text);text-align:left;font-size:.78rem}
+    .status-menu button:hover{background:var(--hover)}
+    .conversation-status{display:flex!important;align-items:center;gap:4px;margin-top:3px!important;font-size:.62rem!important;color:var(--muted)}
+    .conversation-status .status-dot{width:7px;height:7px;flex-basis:7px}
+    .composer-wrap{position:relative;flex:0 0 auto;min-width:0}
+    .composer-tool{height:42px;min-width:36px;padding:0 9px;border:1px solid var(--line);border-radius:9px;background:#292b30;color:#dbe5ff;font-size:.85rem;font-weight:800}
+    .composer-tool:hover{background:#373a42;border-color:rgba(91,140,255,.35)}
+    .picker-panel{position:absolute;left:18px;bottom:calc(100% + 8px);z-index:1100;width:min(360px,calc(100vw - 36px));max-height:min(370px,55dvh);overflow:hidden;border:1px solid var(--line);border-radius:13px;background:#292b30;box-shadow:0 18px 48px rgba(0,0,0,.45)}
+    .picker-tabs{height:46px;display:flex;align-items:center;gap:5px;padding:7px;border-bottom:1px solid var(--line)}
+    .picker-tab{height:30px;padding:0 12px;border:0;border-radius:7px;background:transparent;color:var(--muted);font-size:.76rem;font-weight:700}
+    .picker-tab.active{background:rgba(91,140,255,.18);color:#dbe5ff}
+    .picker-close{margin-left:auto}
+    .emoji-grid{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:3px;padding:10px;max-height:300px;overflow:auto}
+    .emoji-choice{border:0;border-radius:7px;background:transparent;padding:7px 0;font-size:1.35rem}
+    .emoji-choice:hover{background:#373a42}
+    .gif-search{display:flex;gap:7px;padding:10px}
+    .gif-search input{flex:1;min-width:0;background:#222428;border:1px solid var(--line);border-radius:8px;color:var(--text);padding:9px 10px;font:inherit;font-size:.76rem}
+    .gif-results{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;padding:0 10px 10px;max-height:230px;overflow:auto}
+    .gif-result{min-width:0;min-height:75px;border:1px solid transparent;border-radius:8px;background:#222428;overflow:hidden;padding:0}
+    .gif-result:hover{border-color:var(--accent)}
+    .gif-result img{display:block;width:100%;height:105px;object-fit:cover}
+    .giphy-credit{padding:0 10px 10px;color:var(--muted);font-size:.62rem}
+    .chat-composer{margin-top:0}
+    @media(max-width:760px){.picker-panel{left:0;width:min(340px,calc(100vw - 24px))}.chat-composer{gap:6px}.composer-tool{min-width:32px;padding:0 6px}}
   </style>
 </head>
 <body>
@@ -262,9 +301,11 @@
       <div class="conversation-list" id="conversationList" hidden></div>
       <div class="profile-row" id="profileRow" role="button" tabindex="0" aria-label="View profile">
         <div class="mini-avatar" id="sideAvatar">You</div>
-        <div class="profile-label"><strong id="displayName">your_username</strong></div>
+        <div class="profile-label"><strong id="displayName">your_username</strong><span id="myStatusLabel">Online</span></div>
+        <button class="status-trigger" id="statusTrigger" type="button" aria-label="Change activity status" title="Change activity status"><span class="status-dot online" id="myStatusDot"></span></button>
         <button class="icon-button" id="editProfile" aria-label="Edit profile" title="Edit profile"><span class="material-symbol">edit</span></button>
       </div>
+      <div class="status-menu" id="statusMenu" hidden><button type="button" data-status="online"><span class="status-dot online"></span>Online</button><button type="button" data-status="idle"><span class="status-dot idle"></span>Idle</button><button type="button" data-status="dnd"><span class="status-dot dnd"></span>Do not disturb</button><button type="button" data-status="invisible"><span class="status-dot invisible"></span>Invisible</button></div>
     </aside>
     <main class="main">
       <div class="topbar"><button class="icon-button back-mobile" id="backToList" aria-label="Back to messages" title="Back to messages"><span class="material-symbol">arrow_back</span></button><span class="topbar-title" aria-hidden="true"></span><div class="topbar-tools"><button class="icon-button" id="topNewMessage" aria-label="New message" title="New message"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></div></div>
@@ -279,7 +320,7 @@
       <section class="chat-panel" id="chatPanel" hidden>
         <header class="chat-head"><button class="icon-button back-mobile" id="chatBack" aria-label="Back to messages"><span class="material-symbol">arrow_back</span></button><div class="mini-avatar" id="chatAvatar"></div><div class="profile-label"><strong id="chatName"></strong><span id="chatBio" hidden></span></div><button class="icon-button" id="startVoiceCall" title="Start voice/video call" aria-label="Start call"><span class="material-symbol">call</span></button><button class="small-button" id="viewChatProfile">Profile</button></header>
         <div class="chat-messages" id="chatMessages" aria-live="polite"><div class="chat-empty">Loading messages…</div></div>
-        <form class="chat-composer" id="chatComposer"><textarea id="messageInput" rows="1" maxlength="4000" placeholder="Write a message…" aria-label="Write a message" required></textarea><button class="primary" id="sendMessage" type="submit">Send</button></form>
+        <div class="composer-wrap"><div class="picker-panel" id="pickerPanel" hidden><div class="picker-tabs"><button type="button" class="picker-tab active" id="emojiTab">Emoji</button><button type="button" class="picker-tab" id="gifTab">GIFs</button><button type="button" class="icon-button picker-close" id="closePicker" aria-label="Close picker"><span class="material-symbol">close</span></button></div><div id="emojiPanel" class="emoji-grid" aria-label="Emoji picker"></div><div id="gifPanel" hidden><form class="gif-search" id="gifSearchForm"><input id="gifSearchInput" maxlength="50" placeholder="Search GIPHY" aria-label="Search GIFs"><button class="small-button" type="submit">Search</button></form><div class="gif-results" id="gifResults"><div class="result-message">Search for a GIF to send it in this chat.</div></div><div class="giphy-credit">Powered by GIPHY</div></div></div><form class="chat-composer" id="chatComposer"><button type="button" class="composer-tool" id="openEmoji" aria-label="Open emoji picker" title="Emoji">☺</button><button type="button" class="composer-tool" id="openGif" aria-label="Open GIF picker" title="GIF">GIF</button><textarea id="messageInput" rows="1" maxlength="4000" placeholder="Write a message…" aria-label="Write a message" required></textarea><button class="primary" id="sendMessage" type="submit">Send</button></form></div>
       </section>
     </main>
   </div>
@@ -326,6 +367,8 @@
     let pendingAvatarFile = null;
     let pendingBannerFile = null;
     let activeProfileLoad = 0;
+    let myActivityStatus = 'online';
+    const GIPHY_API_KEY = 'dc6zaTOxFJmzC';
     let currentUser = null;
     let activeConversationId = null;
     let activeConversation = null;
@@ -345,6 +388,7 @@
     const profileCache = new Map();
 
     function applyProfile(saved = {}) {
+      myActivityStatus = ['online','idle','dnd','invisible'].includes(saved.status) ? saved.status : 'online';
       avatarUrl = saved.avatar || '';
       bannerUrl = saved.banner || '';
       profileBio = saved.bio || '';
@@ -355,6 +399,9 @@
       $('profileViewName').textContent = name;
       $('profileViewBio').textContent = profileBio;
       $('profileViewBanner').style.backgroundImage = bannerUrl ? `url("${bannerUrl}")` : '';
+      const statusLabels={online:'Online',idle:'Idle',dnd:'Do not disturb',invisible:'Invisible'};
+      if($('myStatusLabel')) $('myStatusLabel').textContent=statusLabels[myActivityStatus];
+      if($('myStatusDot')) $('myStatusDot').className='status-dot '+myActivityStatus;
     }
     function restoreProfile() {
       try { applyProfile(JSON.parse(localStorage.getItem('poko-profile') || '{}')); }
@@ -455,7 +502,7 @@
       if (!response.ok || !result.secure_url) throw new Error(result.error?.message || 'Cloudinary upload failed.');
       return result.secure_url;
     }
-    $('profileRow').addEventListener('click', e => { if (!e.target.closest('#editProfile')) openProfile(); });
+    $('profileRow').addEventListener('click', e => { if (!e.target.closest('#editProfile') && !e.target.closest('#statusTrigger')) openProfile(); });
     $('profileRow').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openProfile(); } });
     $('editProfile').addEventListener('click', e => { e.stopPropagation(); openEditor(); });
     function openProfile() { const name = $('displayName').textContent; $('profileViewName').textContent = name; $('profileViewBio').textContent = profileBio; setAvatar($('profileViewAvatar'), avatarUrl, name.slice(0,2).toUpperCase()); $('profileViewBanner').style.backgroundImage = bannerUrl ? `url("${bannerUrl}")` : ''; profileOpen.classList.add('open'); }
@@ -486,7 +533,7 @@
         if (pendingBannerFile) nextBanner = await uploadToCloudinary(pendingBannerFile);
         const name = $('nameInput').value.trim().replace(/^@+/, '') || 'your_username';
         const bio = $('bioInput').value.trim();
-        const profile = {name, avatar:nextAvatar, banner:nextBanner, bio};
+        const profile = {name, avatar:nextAvatar, banner:nextBanner, bio, status:myActivityStatus};
         const user = firebaseAuth?.currentUser;
         if (user && profileDb) await profileDb.collection('profiles').doc(user.uid).set({...profile, updatedAt:firebase.firestore.FieldValue.serverTimestamp()}, {merge:true});
         try { localStorage.setItem('poko-profile', JSON.stringify(profile)); }
@@ -554,12 +601,12 @@
       try {
         const snapshot = await profileDb.collection('profiles').doc(uid).get();
         const data = snapshot.exists ? snapshot.data() : {};
-        const profile = {uid, name:data.name || 'Poko user', avatar:data.avatar || '', banner:data.banner || '', bio:data.bio || ''};
+        const profile = {uid, name:data.name || 'Poko user', avatar:data.avatar || '', banner:data.banner || '', bio:data.bio || '', status:['online','idle','dnd','invisible'].includes(data.status) ? data.status : 'online'};
         profileCache.set(uid, profile);
         return profile;
       } catch (error) {
         console.error('Profile lookup failed:', error);
-        return {uid, name:'Poko user', avatar:'', banner:'', bio:''};
+        return {uid, name:'Poko user', avatar:'', banner:'', bio:'', status:'online'};
       }
     }
     function renderConversationList() {
@@ -588,7 +635,8 @@
         const label = document.createElement('div'); label.className = 'profile-label';
         const name = document.createElement('strong'); name.textContent = item.otherProfile.name;
         const last = document.createElement('span'); last.textContent = item.lastMessage || 'Start a conversation';
-        label.append(name,last); button.append(avatar,label);
+        const status = document.createElement('span'); status.className='conversation-status'; const dot=document.createElement('i'); dot.className='status-dot '+(item.otherProfile.status||'online'); status.append(dot,document.createTextNode(' '+({online:'Online',idle:'Idle',dnd:'Do not disturb',invisible:'Offline'}[item.otherProfile.status||'online'])));
+        label.append(name,last,status); button.append(avatar,label);
         button.addEventListener('click', () => openConversation(item));
         list.append(button);
       });
@@ -616,7 +664,7 @@
             try {
               const id = conversationKey(currentUser.uid,user.uid);
               const ref = profileDb.collection('conversations').doc(id);
-              const profile = {uid:user.uid,name:user.name || 'Poko user',avatar:user.avatar || '',banner:user.banner || '',bio:user.bio || ''};
+              const profile = {uid:user.uid,name:user.name || 'Poko user',avatar:user.avatar || '',banner:user.banner || '',bio:user.bio || '',status:user.status || 'online'};
               await ref.set({
                 participants:[currentUser.uid,user.uid].sort(),
                 updatedAt:firebase.firestore.FieldValue.serverTimestamp(),
@@ -650,6 +698,8 @@
       if (window.matchMedia('(max-width: 760px)').matches) app.classList.add('show-main');
       $('chatName').textContent = item.otherProfile.name;
       $('chatBio').textContent = item.otherProfile.bio || '';
+      $('chatBio').hidden = !item.otherProfile.bio;
+      $('chatStatusDot')?.remove(); const statusDot=document.createElement('span'); statusDot.id='chatStatusDot'; statusDot.className='status-dot '+(item.otherProfile.status||'online'); statusDot.title=({online:'Online',idle:'Idle',dnd:'Do not disturb',invisible:'Offline'}[item.otherProfile.status||'online']); $('chatName').parentElement.append(statusDot);
       setAvatar($('chatAvatar'),item.otherProfile.avatar,item.otherProfile.name.slice(0,2).toUpperCase());
       $('chatMessages').replaceChildren();
       const loading = document.createElement('div'); loading.className = 'chat-empty'; loading.textContent = 'Loading messages…'; $('chatMessages').append(loading);
@@ -671,7 +721,8 @@
           const meta = document.createElement('span'); meta.className = 'message-meta'; meta.textContent = message.createdAt?.toDate ? message.createdAt.toDate().toLocaleTimeString([], {hour:'numeric',minute:'2-digit'}) : '';
           head.append(authorEl,meta);
           const body = document.createElement('div'); body.className = 'message-text'; body.textContent = message.text || '';
-          content.append(head,body);
+          content.append(head); if(message.text) content.append(body);
+          if(message.gifUrl){const gif=document.createElement('img');gif.className='message-gif';gif.src=message.gifUrl;gif.alt='GIF';gif.loading='lazy';content.append(gif);}
           const reactions = document.createElement('div'); reactions.className = 'message-reactions';
           const reactionMap = message.reactions || {};
           Object.entries(reactionMap).forEach(([emoji, users]) => {
@@ -849,6 +900,18 @@
     $('endCall').addEventListener('click', () => endCall(true));
     $('callOverlay').addEventListener('click', e => { if (e.target === $('callOverlay')) return; });
     
+    const pickerPanel=$('pickerPanel');
+    const emojiList=['😀','😃','😄','😁','😆','😅','😂','🤣','🥹','😊','😍','🥰','😘','😎','🤔','🫡','🙃','😴','😭','💀','🤯','😮','😡','🥳','😇','🤗','🫠','😬','😔','😌','🤨','😏','🙄','😤','🥺','😱','🤝','🙏','👏','👍','👎','🫶','❤️','🩷','🧡','💛','💚','💙','💜','🤍','🖤','✨','🔥','🎉','💯','✅','❌','⭐','🌙','☀️','🍀','🐈','🐱','🐶','🍕','🎮','💻','🚀'];
+    emojiList.forEach(emoji=>{const b=document.createElement('button');b.type='button';b.className='emoji-choice';b.textContent=emoji;b.title=emoji;b.addEventListener('click',()=>{const input=$('messageInput');const start=input.selectionStart??input.value.length;const end=input.selectionEnd??start;input.setRangeText(emoji,start,end,'end');input.focus();});$('emojiPanel').append(b);});
+    function closePicker(){pickerPanel.hidden=true;}
+    function openPicker(tab){pickerPanel.hidden=false;$('emojiPanel').hidden=tab!=='emoji';$('gifPanel').hidden=tab!=='gif';$('emojiTab').classList.toggle('active',tab==='emoji');$('gifTab').classList.toggle('active',tab==='gif');if(tab==='gif'&&!$('gifResults').dataset.loaded)loadGifs('trending');}
+    async function loadGifs(query){const results=$('gifResults');results.replaceChildren();const loading=document.createElement('div');loading.className='result-message';loading.textContent='Loading GIFs…';results.append(loading);try{const endpoint=query==='trending'?'https://api.giphy.com/v1/gifs/trending?api_key='+encodeURIComponent(GIPHY_API_KEY)+'&limit=12&rating=g':'https://api.giphy.com/v1/gifs/search?api_key='+encodeURIComponent(GIPHY_API_KEY)+'&q='+encodeURIComponent(query)+'&limit=12&rating=g';const response=await fetch(endpoint);if(!response.ok)throw new Error('GIPHY request failed');const data=await response.json();results.replaceChildren();const gifs=(data.data||[]).filter(g=>g.images?.fixed_width?.url&&g.images?.original?.url);if(!gifs.length){const empty=document.createElement('div');empty.className='result-message';empty.textContent='No GIFs found.';results.append(empty);return;}gifs.forEach(g=>{const b=document.createElement('button');b.type='button';b.className='gif-result';b.title='Send GIF';const img=document.createElement('img');img.src=g.images.fixed_width.url;img.alt=g.title||'GIF';img.loading='lazy';b.append(img);b.addEventListener('click',()=>sendGif(g.images.original.url));results.append(b);});results.dataset.loaded='true';}catch(error){console.error('GIPHY search failed:',error);results.replaceChildren();const msg=document.createElement('div');msg.className='result-message';msg.textContent='GIF search is unavailable right now.';results.append(msg);}}
+    async function sendGif(url){if(!currentUser||!activeConversationId||!profileDb){showToast('Sign in and open a conversation to send a GIF.');return;}try{const ref=profileDb.collection('conversations').doc(activeConversationId);await ref.collection('messages').add({text:'',gifUrl:url,senderId:currentUser.uid,createdAt:firebase.firestore.FieldValue.serverTimestamp()});await ref.update({lastMessage:'GIF',lastSenderId:currentUser.uid,updatedAt:firebase.firestore.FieldValue.serverTimestamp()});closePicker();}catch(error){console.error('GIF send failed:',error);showToast('GIF could not send. Check Firestore rules.');}}
+    $('openEmoji').addEventListener('click',()=>openPicker('emoji'));$('openGif').addEventListener('click',()=>openPicker('gif'));$('emojiTab').addEventListener('click',()=>openPicker('emoji'));$('gifTab').addEventListener('click',()=>openPicker('gif'));$('closePicker').addEventListener('click',closePicker);
+    $('gifSearchForm').addEventListener('submit',e=>{e.preventDefault();const q=$('gifSearchInput').value.trim();if(q)loadGifs(q);});
+    $('statusTrigger').addEventListener('click',e=>{e.stopPropagation();$('statusMenu').hidden=!$('statusMenu').hidden;});
+    $('statusMenu').querySelectorAll('[data-status]').forEach(button=>button.addEventListener('click',async()=>{const status=button.dataset.status;myActivityStatus=status;const labels={online:'Online',idle:'Idle',dnd:'Do not disturb',invisible:'Invisible'};$('myStatusLabel').textContent=labels[status];$('myStatusDot').className='status-dot '+status;$('statusMenu').hidden=true;try{const user=firebaseAuth?.currentUser;if(user&&profileDb)await profileDb.collection('profiles').doc(user.uid).set({status,updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});const profile=JSON.parse(localStorage.getItem('poko-profile')||'{}');profile.status=status;localStorage.setItem('poko-profile',JSON.stringify(profile));showToast('Activity status set to '+labels[status]+'.');}catch(error){console.error('Status update failed:',error);showToast('Status could not save. Check Firestore rules.');}}));
+    document.addEventListener('click',e=>{if(!pickerPanel.contains(e.target)&&!['openEmoji','openGif'].includes(e.target.id))closePicker();if(!$('statusMenu').contains(e.target)&&e.target.id!=='statusTrigger')$('statusMenu').hidden=true;});
     $('chatComposer').addEventListener('submit', async e => {
       e.preventDefault();
       const input = $('messageInput'), text = input.value.trim();
