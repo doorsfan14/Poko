@@ -67,9 +67,20 @@
     .preview-wrap { position: relative; min-width: 0; }
     .preview-glow { position: absolute; inset: 9% 4%; background: rgba(132,166,222,.14); filter: blur(60px); border-radius: 50%; pointer-events: none; }
     .chat-window { position: relative; overflow: hidden; border: 1px solid rgba(255,255,255,.13); border-radius: 25px; background: #303237; box-shadow: 0 30px 80px rgba(0,0,0,.19); transform: rotate(1deg); }
-    .window-top { height: 56px; display: flex; align-items: center; gap: 8px; padding: 0 18px; border-bottom: 1px solid var(--line); }
-    .window-dot { width: 8px; height: 8px; border-radius: 50%; background: #666970; }
-    .window-title { margin-left: 8px; font-size: .78rem; font-weight: 700; color: #e5e6e9; }
+    .window-top { position: relative; height: 48px; display: flex; align-items: center; gap: 8px; padding: 0 15px; border-bottom: 1px solid rgba(255,255,255,.09); background: #383a3f; }
+    .traffic-lights { display: flex; align-items: center; gap: 7px; }
+    .window-dot { width: 12px; height: 12px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(0,0,0,.12); }
+    .window-dot.red { background: #ff5f57; }
+    .window-dot.yellow { background: #febc2e; }
+    .window-dot.green { background: #28c840; }
+    .window-title { position: absolute; left: 50%; transform: translateX(-50%); max-width: 55%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .75rem; font-weight: 600; color: #c8cad0; }
+    .message-head strong.mika { color: #c2d8ff; }
+    .message-head strong.jules { color: #f0c6aa; }
+    .message-head strong.alex { color: #b7d8c2; }
+    .message-head strong.rory { color: #d9baff; }
+    .typing { display: flex; align-items: center; gap: 9px; margin: 15px 0 0 45px; color: #aeb1ba; font-size: .69rem; }
+    .typing-dots { display: inline-flex; gap: 3px; }
+    .typing-dots span { width: 4px; height: 4px; border-radius: 50%; background: #b8bbc4; }
     .chat-body { padding: 24px 20px 19px; }
     .channel { display: flex; align-items: center; gap: 10px; padding-bottom: 18px; margin-bottom: 20px; border-bottom: 1px solid var(--line); }
     .channel-icon { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 12px; background: #464950; color: var(--blue); font-weight: 800; }
@@ -162,26 +173,33 @@
           <div class="preview-glow"></div>
           <div class="chat-window">
             <div class="window-top">
-              <span class="window-dot"></span><span class="window-dot"></span><span class="window-dot"></span>
-              <span class="window-title">the usual people</span>
+              <div class="traffic-lights" aria-label="Window controls">
+                <span class="window-dot red"></span><span class="window-dot yellow"></span><span class="window-dot green"></span>
+              </div>
+              <span class="window-title">the usual people · Poko</span>
             </div>
             <div class="chat-body">
               <div class="channel">
                 <div class="channel-icon">#</div>
-                <div><strong>the usual people</strong><small>4 members · your little corner</small></div>
+                <div><strong>the usual people</strong><small>4 members · currently unserious</small></div>
               </div>
               <div class="message">
                 <div class="avatar blue">M</div>
-                <div class="message-content"><div class="message-head"><strong>Mika</strong><time>4:18 PM</time></div><p>anyone around? I have absolutely no plans</p></div>
+                <div class="message-content"><div class="message-head"><strong class="mika">Mika</strong><time>4:18 PM</time></div><p>anyone alive in here or did we all become houseplants</p></div>
               </div>
               <div class="message">
                 <div class="avatar peach">J</div>
-                <div class="message-content"><div class="message-head"><strong>Jules</strong><time>4:19 PM</time></div><p>excellent. doing nothing is a group activity now</p><span class="reply">♡ 3 &nbsp; same honestly</span></div>
+                <div class="message-content"><div class="message-head"><strong class="jules">Jules</strong><time>4:19 PM</time></div><p>physically? yes. emotionally? loading...</p><span class="reply">♡ 3 &nbsp; painfully relatable</span></div>
               </div>
               <div class="message">
                 <div class="avatar green">A</div>
-                <div class="message-content"><div class="message-head"><strong>Alex</strong><time>4:20 PM</time></div><p>I'm bringing snacks. this meeting has an agenda.</p></div>
+                <div class="message-content"><div class="message-head"><strong class="alex">Alex</strong><time>4:20 PM</time></div><p>i brought snacks. please respect the snack-based economy.</p></div>
               </div>
+              <div class="message">
+                <div class="avatar" style="background:#d9baff">R</div>
+                <div class="message-content"><div class="message-head"><strong class="rory">Rory</strong><time>4:21 PM</time></div><p>who gave alex admin privileges over the crackers</p></div>
+              </div>
+              <div class="typing"><span class="typing-dots"><span></span><span></span><span></span></span> Mika is typing something dramatic…</div>
               <div class="composer"><span class="composer-plus">＋</span><span>Message the usual people…</span><span class="composer-send">↑</span></div>
             </div>
           </div>
