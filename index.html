@@ -16,6 +16,13 @@
     [hidden]{display:none!important}
     body{margin:0;background:var(--bg);color:var(--text);font-family:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
     button,input{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+    body.poko-loading{background:var(--bg)}
+    .page-loader{position:fixed;inset:0;z-index:3000;background:var(--bg);opacity:1;visibility:visible;transition:opacity .28s ease-in-out,visibility .28s}
+    body.poko-loading #app,body.poko-loading .login-screen{visibility:hidden}
+    body.poko-ready .page-loader{opacity:0;visibility:hidden;pointer-events:none}
+    body.poko-ready #app,body.poko-ready .login-screen.visible{animation:poko-page-reveal .48s ease-in-out both;transform-origin:center center}
+    @keyframes poko-page-reveal{from{opacity:0;transform:scale(.75)}to{opacity:1;transform:scale(1)}}
+    @media(prefers-reduced-motion:reduce){body.poko-ready #app,body.poko-ready .login-screen.visible{animation:none}.page-loader{transition:none}}
     .app{min-height:100dvh;display:grid;grid-template-columns:76px 300px minmax(0,1fr)}
     .rail{background:#1d1f23;border-right:1px solid var(--line);display:flex;flex-direction:column;align-items:center;gap:12px;padding:20px 0}
     .rail-button{width:44px;height:44px;border:0;border-radius:15px;background:transparent;color:var(--muted);display:grid;place-items:center;position:relative;transition:background .16s,color .16s,border-radius .16s}
@@ -394,7 +401,8 @@
 
   </style>
 </head>
-<body>
+<body class="poko-loading">
+  <div class="page-loader" id="pageLoader" aria-hidden="true"></div>
 
   <section class="login-screen" id="loginScreen" aria-labelledby="loginTitle">
     <div class="login-card">
@@ -623,6 +631,14 @@
       editor.classList.add('open');
     }
     function closeEditor() { if (!editor.classList.contains('open') || editor.classList.contains('closing')) return; editor.classList.add('closing'); setTimeout(() => { editor.classList.remove('open','closing'); }, 160); }
+    let initialPageRevealed = false;
+    function revealInitialPage() {
+      if (initialPageRevealed) return;
+      initialPageRevealed = true;
+      document.body.classList.remove('poko-loading');
+      document.body.classList.add('poko-ready');
+    }
+    const initialLoadFallback = window.setTimeout(revealInitialPage, 7000);
     function setAuthStatus(user) {
       const status = $('authStatus');
       const signIn = $('googleSignIn');
@@ -685,11 +701,12 @@
         updatePresence('online');
         subscribeConversations(user);
       } else {
+        revealInitialPage();
         knownConversations = [];
         renderConversationList();
         closeConversation();
       }
-    }); else { setAuthStatus(null); setLoginScreen(true); }
+    }); else { setAuthStatus(null); setLoginScreen(true); revealInitialPage(); }
     function showToast(message) {
       const toast = $('toast'); toast.textContent = message; toast.classList.add('show');
       window.clearTimeout(showToast.timer); showToast.timer = window.setTimeout(() => toast.classList.remove('show'), 2600);
@@ -835,6 +852,7 @@
           return tb - ta;
         });
         renderConversationList();
+        revealInitialPage();
         if (activeConversationId) {
           const updated = knownConversations.find(item => item.id === activeConversationId);
           if (updated) activeConversation = updated;
