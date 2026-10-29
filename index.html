@@ -184,10 +184,17 @@
     .message-reactions{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
     .reaction{border:1px solid rgba(91,140,255,.28);border-radius:8px;background:#303238;color:#e4ebff;padding:3px 7px;font-size:.78rem}
     .reaction:hover,.reaction.selected{background:rgba(91,140,255,.2);border-color:var(--accent)}
-    .message-tools{display:none;gap:3px;margin-top:5px;opacity:0;transition:opacity .12s}
-    .message:hover .message-tools,.message:focus-within .message-tools{display:flex;opacity:1}
-    .reaction-add{width:28px;height:26px;display:grid;place-items:center;border:0;border-radius:6px;background:#303238;color:#dbe5ff;font-size:.9rem}
-    .reaction-add:hover{background:#373a42}
+    .message-actions{position:absolute;right:22px;top:2px;z-index:5;display:none}
+    .message:hover .message-actions,.message:focus-within .message-actions,.message-actions.open{display:block}
+    .message-more{width:28px;height:28px;display:grid;place-items:center;border:0;border-radius:7px;background:var(--panel);color:var(--muted);cursor:pointer}
+    .message-more:hover,.message-actions.open .message-more{background:var(--hover);color:var(--text)}
+    .message-action-menu{position:absolute;right:0;top:32px;min-width:140px;padding:5px;background:var(--panel);border:1px solid var(--line);border-radius:9px;box-shadow:0 8px 24px rgba(0,0,0,.28)}
+    .message-action-menu[hidden],.message-reaction-menu[hidden]{display:none}
+    .message-action-item{display:flex;width:100%;align-items:center;gap:9px;padding:8px 10px;border:0;border-radius:6px;background:transparent;color:var(--text);text-align:left;font:inherit;font-size:.8rem;cursor:pointer}
+    .message-action-item:hover{background:var(--hover)}
+    .message-reaction-menu{position:absolute;right:0;top:32px;display:flex;gap:3px;padding:6px;background:var(--panel);border:1px solid var(--line);border-radius:9px;box-shadow:0 8px 24px rgba(0,0,0,.28)}
+    .reaction-add{width:30px;height:30px;display:grid;place-items:center;border:0;border-radius:6px;background:var(--panel-2);color:var(--text);font-size:.95rem;cursor:pointer}
+    .reaction-add:hover{background:var(--hover)}
     .chat-composer{flex:0 0 auto;margin:0 18px 16px;padding:10px 0 0;border:0;gap:10px;align-items:flex-end;background:var(--bg)}
     .chat-composer textarea{min-height:44px;max-height:140px;resize:none;border:1px solid var(--line);border-radius:10px;background:#292b30;color:var(--text);padding:13px 15px;font-size:.9rem;line-height:1.4}
     .chat-composer textarea:focus{border-color:var(--accent);outline:2px solid rgba(91,140,255,.18)}
@@ -958,12 +965,20 @@
             button.addEventListener('click', () => toggleReaction(doc.id, emoji, users));
             reactions.append(button);
           });
-          const tools = document.createElement('div'); tools.className = 'message-tools';
+          const actions = document.createElement('div'); actions.className = 'message-actions';
+          const more = document.createElement('button'); more.className = 'message-more'; more.type = 'button'; more.innerHTML = '<span class="material-symbol">more_vert</span>'; more.title = 'More message actions'; more.setAttribute('aria-label','More message actions');
+          const actionMenu = document.createElement('div'); actionMenu.className = 'message-action-menu'; actionMenu.hidden = true;
+          const reactOption = document.createElement('button'); reactOption.className = 'message-action-item'; reactOption.type = 'button'; reactOption.innerHTML = '<span class="material-symbol">add_reaction</span> Reactions';
+          const reactionMenu = document.createElement('div'); reactionMenu.className = 'message-reaction-menu'; reactionMenu.hidden = true;
           ['👍','❤️','😂','😮','🎉'].forEach(emoji => {
             const button = document.createElement('button'); button.className = 'reaction-add'; button.type = 'button'; button.textContent = emoji; button.title = 'React ' + emoji;
-            button.addEventListener('click', () => toggleReaction(doc.id, emoji, reactionMap[emoji] || [])); tools.append(button);
+            button.addEventListener('click', () => { toggleReaction(doc.id, emoji, reactionMap[emoji] || []); actions.classList.remove('open'); actionMenu.hidden = true; reactionMenu.hidden = true; });
+            reactionMenu.append(button);
           });
-          content.append(reactions,tools); wrap.append(avatar,content); container.append(wrap);
+          more.addEventListener('click', e => { e.stopPropagation(); const opening = actionMenu.hidden; document.querySelectorAll('.message-actions.open').forEach(el => { el.classList.remove('open'); el.querySelector('.message-action-menu').hidden = true; el.querySelector('.message-reaction-menu').hidden = true; }); actions.classList.toggle('open',opening); actionMenu.hidden = !opening; reactionMenu.hidden = true; });
+          reactOption.addEventListener('click', e => { e.stopPropagation(); actionMenu.hidden = true; reactionMenu.hidden = false; });
+          actionMenu.append(reactOption); actions.append(more,actionMenu,reactionMenu);
+          content.append(reactions); wrap.append(avatar,content,actions); container.append(wrap);
         });
         container.scrollTop = container.scrollHeight;
       }, error => {
@@ -1150,7 +1165,7 @@
     $('themeToggle').addEventListener('click', () => applyTheme(document.documentElement.dataset.theme === 'light' ? 'dark' : 'light'));
     $('statusTrigger').addEventListener('click',e=>{e.stopPropagation();$('statusMenu').hidden=!$('statusMenu').hidden;});
     $('statusMenu').querySelectorAll('[data-status]').forEach(button=>button.addEventListener('click',async()=>{const status=button.dataset.status;myActivityStatus=status;const labels={online:'Online',idle:'Idle',dnd:'Do not disturb',invisible:'Invisible'};const profile=(()=>{try{return JSON.parse(localStorage.getItem('poko-profile')||'{}')}catch{return {}}})();profile.status=status;try{localStorage.setItem('poko-profile',JSON.stringify(profile));}catch(error){console.warn('Could not save local activity status:',error);}if($('myStatusLabel'))$('myStatusLabel').textContent=labels[status];if($('myStatusDot'))$('myStatusDot').className='status-dot '+status;$('statusTriggerDot').className='status-dot '+status;setAvatarStatus($('sideAvatar'),status);setAvatarStatus($('largeAvatar'),status);if($('profileViewAvatar'))setAvatarStatus($('profileViewAvatar'),status);$('statusMenu').hidden=true;const user=firebaseAuth?.currentUser;if(user&&profileDb){try{await profileDb.collection('profiles').doc(user.uid).set({status,updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});showToast('Activity status updated.');}catch(error){console.error('Status update failed:',error);showToast('Status saved on this device, but cloud sync failed. Check Firestore rules.');}}else{showToast('Activity status saved on this device. Sign in to sync it with friends.');}}));
-    document.addEventListener('click',e=>{if(!pickerPanel.contains(e.target)&&!['openEmoji','openGif'].includes(e.target.id))closePicker();if(!$('statusMenu').contains(e.target)&&e.target.id!=='statusTrigger')$('statusMenu').hidden=true;});
+    document.addEventListener('click',e=>{if(!pickerPanel.contains(e.target)&&!['openEmoji','openGif'].includes(e.target.id))closePicker();if(!$('statusMenu').contains(e.target)&&e.target.id!=='statusTrigger')$('statusMenu').hidden=true;if(!e.target.closest('.message-actions'))document.querySelectorAll('.message-actions.open').forEach(el=>{el.classList.remove('open');el.querySelector('.message-action-menu').hidden=true;el.querySelector('.message-reaction-menu').hidden=true;});});
     $('messageInput').addEventListener('keydown', e => {
       if (e.key !== 'Enter' || e.shiftKey || e.isComposing) return;
       e.preventDefault();
