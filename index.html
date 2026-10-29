@@ -126,7 +126,107 @@
     @media(min-width:761px){.back-mobile{display:none!important}}
     @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important}}
 
-    /* Discord-inspired direct message layout */
+
+    /* Poko identity and viewport/layout repairs */
+    :root{--bg:#101a2d;--panel:#15243b;--panel-2:#1c3150;--hover:#233d60;--line:rgba(137,183,255,.13);--text:#edf5ff;--muted:#9db4d4;--soft:#7e9bc2;--accent:#2587ff;--accent-ink:#fff}
+    html,body{width:100%;height:100%;min-height:0;overflow:hidden}
+    body{background:var(--bg)}
+    .app{width:100%;height:100dvh;min-height:0;overflow:hidden;grid-template-columns:68px 276px minmax(0,1fr)}
+    .rail{background:#0b1425;border-color:var(--line);padding:14px 0;gap:9px}
+    .rail-button{background:#14243d;color:#91afd8;border-radius:14px}
+    .rail-button:hover,.rail-button.active{background:var(--accent);color:white;border-radius:12px}
+    .rail-button.active:before{background:#64c4ff}
+    .sidebar{height:100%;min-height:0;background:#14233a;border-color:var(--line)}
+    .side-header{padding:19px 14px 9px}
+    .side-header h1{color:#f2f7ff;letter-spacing:-.035em}
+    .search{background:#0c1729;border:1px solid rgba(110,166,255,.14);border-radius:9px}
+    .search:focus-within{border-color:var(--accent)}
+    .side-section{color:#8faed5;letter-spacing:.07em}
+    .conversation-list{min-height:0;overflow-y:auto;overscroll-behavior:contain}
+    .conversation-item{border-radius:9px}
+    .conversation-item:hover{background:#1c3150}
+    .conversation-item.active{background:#234675;box-shadow:inset 3px 0 #3f9bff}
+    .empty-symbol{background:#1c3150;color:#73baff;border-color:rgba(95,166,255,.16)}
+    .profile-row{background:#0d192b;border-top:1px solid var(--line)}
+    .profile-row:hover{background:#14243d}
+    .main{height:100%;min-height:0;overflow:hidden;background:#101a2d}
+    .topbar{height:58px;flex:0 0 58px;background:#122039;border-color:var(--line)}
+    .topbar-title{color:#e8f2ff}
+    .content-empty{min-height:0;overflow:auto}
+    .welcome-art{background:linear-gradient(145deg,#1b4d83,#1b2e4c);color:#9dd7ff;border:1px solid rgba(95,166,255,.22)}
+    .welcome h2{color:#f2f7ff}
+    .welcome p{color:#a9bfdf}
+    .primary{background:linear-gradient(135deg,#268cff,#1764d8);color:#fff;border-radius:9px;box-shadow:0 4px 14px rgba(20,111,235,.16)}
+    .primary:hover{background:linear-gradient(135deg,#49a1ff,#2377eb);filter:none}
+    .chat-panel{min-height:0;height:100%;overflow:hidden}
+    .chat-head{flex:0 0 62px;height:62px;background:#122039;border-color:var(--line);gap:11px;padding:0 20px}
+    .chat-head .mini-avatar{width:34px;height:34px;flex-basis:34px}
+    .chat-head .profile-label strong{color:#f2f7ff}
+    .chat-head .profile-label span{color:#9db4d4}
+    .chat-head .icon-button{color:#9dbce4}
+    .chat-head .icon-button:hover,.icon-button:hover{background:#23416a;color:#fff}
+    .chat-head .small-button{background:#1b3150;color:#cfe4ff;border:1px solid rgba(110,166,255,.16)}
+    .chat-messages{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:18px 0 22px}
+    .message{padding:5px 22px 5px 18px}
+    .message:hover{background:rgba(55,111,181,.09)}
+    .message-author{color:#82c7ff}
+    .message-text{color:#e4efff}
+    .message-meta{color:#8da8cc}
+    .reaction{background:#172944;border-color:#31527c;color:#dcecff;border-radius:7px}
+    .reaction:hover,.reaction.selected{background:#1d4b82;border-color:#3c9aff}
+    .reaction-add{background:#1b3150;color:#cfe4ff}
+    .reaction-add:hover{background:#285080}
+    .chat-composer{flex:0 0 auto;margin:0 18px 16px;padding:10px 0 0;background:#101a2d}
+    .chat-composer textarea{background:#192b46;border:1px solid rgba(110,166,255,.14);border-radius:10px;color:#eff6ff}
+    .chat-composer textarea:focus{border-color:#2587ff;outline:2px solid rgba(37,135,255,.2)}
+    .chat-composer textarea::placeholder{color:#89a4ca}
+    .profile-open,.new-chat-overlay{position:fixed;inset:0;z-index:1000;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(3,9,20,.72);backdrop-filter:blur(7px)}
+    .profile-open.open,.new-chat-overlay.open{display:flex}
+    .profile-card,.new-chat-dialog{max-height:min(86dvh,720px);overflow:auto;background:#14243b;border:1px solid rgba(110,166,255,.18);box-shadow:0 24px 90px rgba(0,0,0,.5)}
+    .profile-view-banner{background-color:#1768ba}
+    .profile-view-avatar,.large-avatar{background:#1d3b60}
+    .profile-editor{position:fixed;left:50%!important;top:50%!important;right:auto!important;bottom:auto!important;transform:translate(-50%,-50%);z-index:1001;width:min(420px,calc(100vw - 24px));max-height:86dvh}
+    .profile-editor.open{display:block}
+    .dialog{max-height:86dvh;background:#14243b;border-color:rgba(110,166,255,.18)}
+    .dialog-header{border-color:var(--line)}
+    .file-control,.auth-section,.field input,.field textarea{background:#0c1729!important;border-color:var(--line)!important;color:var(--text)!important}
+    .auth-button{background:#1b3150;border-color:var(--line)}
+    .call-overlay{position:fixed;inset:0;z-index:1200;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(3,9,20,.82);backdrop-filter:blur(9px)}
+    .call-overlay[hidden]{display:none!important}
+    .call-window{width:min(900px,100%);max-height:calc(100dvh - 40px);display:flex;flex-direction:column;overflow:hidden;background:#14243b;border:1px solid rgba(95,166,255,.24);border-radius:18px;box-shadow:0 28px 100px rgba(0,0,0,.6)}
+    .call-stage{position:relative;min-height:220px;height:min(65dvh,560px);background:#07101e;display:grid;place-items:center;overflow:hidden}
+    #remoteVideo{width:100%;height:100%;object-fit:contain;background:#07101e}
+    #localVideo{position:absolute;right:18px;bottom:18px;width:clamp(110px,22%,220px);aspect-ratio:16/10;height:auto;object-fit:cover;background:#172944;border:1px solid rgba(145,196,255,.45);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.35)}
+    .call-status{position:absolute;left:16px;bottom:16px;max-width:calc(100% - 260px);padding:9px 12px;background:rgba(8,20,38,.86);border:1px solid rgba(145,196,255,.2);border-radius:9px;color:#eaf4ff;font-size:.82rem;backdrop-filter:blur(8px)}
+    .call-controls{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;padding:16px;background:#14243b}
+    .call-control{border:1px solid rgba(110,166,255,.2);border-radius:10px;background:#203b60;color:#edf6ff;padding:11px 16px;font-size:.82rem;font-weight:700}
+    .call-control:hover{background:#2a507e}
+    .call-control.end{background:#c83e58;border-color:#c83e58;color:white}
+    .call-control.end:hover{background:#e04b65}
+    .toast{z-index:1300;background:#19365a;border-color:rgba(110,166,255,.22)}
+    /* The conversation header replaces the generic page header while chatting. */
+    .main:has(#chatPanel:not([hidden]))>.topbar{display:none}
+    @media(max-width:760px){
+      .app{grid-template-columns:56px minmax(0,1fr)}
+      .sidebar{height:100%;grid-column:2;grid-row:1}
+      .main{height:100%;grid-column:2}
+      .chat-head{height:58px;flex-basis:58px;padding:0 10px}
+      .chat-messages{padding:12px 0 16px}
+      .message{padding:5px 12px;gap:11px}
+      .message>.mini-avatar{width:36px;height:36px;flex-basis:36px}
+      .chat-composer{margin:0 10px 10px;padding-top:8px}
+      .call-overlay{padding:10px}
+      .call-window{max-height:calc(100dvh - 20px);border-radius:13px}
+      .call-stage{height:55dvh;min-height:190px}
+      #localVideo{right:10px;bottom:10px;width:30%}
+      .call-status{left:10px;bottom:10px;max-width:62%;font-size:.72rem}
+      .call-controls{gap:7px;padding:12px}
+      .call-control{padding:10px 11px;font-size:.75rem}
+      .profile-editor{max-height:90dvh;width:min(420px,calc(100vw - 20px))}
+      .dialog{max-height:90dvh}
+    }
+
+        /* Discord-inspired direct message layout */
     :root{--bg:#313338;--panel:#2b2d31;--panel-2:#383a40;--hover:#35373c;--line:rgba(255,255,255,.055);--text:#dbdee1;--muted:#949ba4;--soft:#80848e;--accent:#5865f2;--accent-ink:#fff;--radius:8px}
     body{background:var(--bg)}
     .app{grid-template-columns:64px 280px minmax(0,1fr)}
@@ -241,7 +341,7 @@
       </div>
     </aside>
     <main class="main">
-      <div class="topbar"><button class="icon-button back-mobile" id="backToList" aria-label="Back to messages" title="Back to messages"><span class="material-symbol">arrow_back</span></button><span class="topbar-title">Direct messages</span><div class="topbar-tools"><button class="icon-button" id="topNewMessage" aria-label="New message" title="New message"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></div></div>
+      <div class="topbar"><button class="icon-button back-mobile" id="backToList" aria-label="Back to messages" title="Back to messages"><span class="material-symbol">arrow_back</span></button><span class="topbar-title" aria-hidden="true"></span><div class="topbar-tools"><button class="icon-button" id="topNewMessage" aria-label="New message" title="New message"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></div></div>
       <section class="content-empty" id="welcomePanel">
         <div class="welcome">
           <div class="welcome-art"><span class="material-symbol">swap_horiz</span></div>
@@ -251,7 +351,7 @@
         </div>
       </section>
       <section class="chat-panel" id="chatPanel" hidden>
-        <header class="chat-head"><button class="icon-button back-mobile" id="chatBack" aria-label="Back to messages"><span class="material-symbol">arrow_back</span></button><div class="mini-avatar" id="chatAvatar"></div><div class="profile-label"><strong id="chatName"></strong><span id="chatBio"></span></div><button class="icon-button" id="startVoiceCall" title="Start voice/video call" aria-label="Start call"><span class="material-symbol">call</span></button><button class="small-button" id="viewChatProfile">Profile</button></header>
+        <header class="chat-head"><button class="icon-button back-mobile" id="chatBack" aria-label="Back to messages"><span class="material-symbol">arrow_back</span></button><div class="mini-avatar" id="chatAvatar"></div><div class="profile-label"><strong id="chatName"></strong><span id="chatBio" hidden></span></div><button class="icon-button" id="startVoiceCall" title="Start voice/video call" aria-label="Start call"><span class="material-symbol">call</span></button><button class="small-button" id="viewChatProfile">Profile</button></header>
         <div class="chat-messages" id="chatMessages" aria-live="polite"><div class="chat-empty">Loading messages…</div></div>
         <form class="chat-composer" id="chatComposer"><textarea id="messageInput" rows="1" maxlength="4000" placeholder="Write a message…" aria-label="Write a message" required></textarea><button class="primary" id="sendMessage" type="submit">Send</button></form>
       </section>
