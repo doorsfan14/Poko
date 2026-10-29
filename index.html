@@ -88,7 +88,14 @@
     .field label{display:block;font-size:.78rem;font-weight:700;margin-bottom:7px}
     .field small{display:block;font-size:.7rem;color:var(--muted);line-height:1.6;margin-top:6px}
     .file-control{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid var(--line);background:#222428;border-radius:11px;padding:11px 12px;font-size:.75rem;color:var(--muted)}
-    .file-control input{max-width:185px;font-size:.7rem;color:var(--muted)}
+    .file-control input{min-width:0;max-width:185px;font-size:.7rem;color:var(--muted);font:inherit;font-size:.72rem}
+    .file-control input::file-selector-button{margin-right:9px;padding:7px 11px;border:1px solid rgba(91,140,255,.32);border-radius:7px;background:#303b52;color:#e7efff;font:inherit;font-size:.72rem;font-weight:600;cursor:pointer;transition:background .15s,border-color .15s}
+    .file-control input::file-selector-button:hover{background:#3b4b69;border-color:#5B8CFF}
+    html[data-theme="light"] .file-control input{color:#667085}
+    html[data-theme="light"] .file-control input::file-selector-button{background:#edf1fb;color:#34405b;border-color:rgba(28,39,65,.15)}
+    html[data-theme="light"] .file-control input::file-selector-button:hover{background:#e1e8f7;border-color:#5B8CFF}
+    #bioInput{background:#222428!important;color:#f1f2f4!important;border-color:rgba(255,255,255,.16)!important}
+    #bioInput::placeholder{color:#a4a7b0!important}
     .auth-section{border:1px solid var(--line);border-radius:12px;padding:13px;margin:0 0 18px;background:#222428}.auth-status{font-size:.75rem;color:var(--muted);line-height:1.5;margin-bottom:10px;overflow-wrap:anywhere}.auth-actions{display:flex;gap:8px;flex-wrap:wrap}.auth-button{border:1px solid var(--line);background:#303238;color:var(--text);border-radius:10px;padding:10px 12px;font-size:.75rem;font-weight:700}.auth-button:hover{background:var(--hover)}.auth-button:disabled{opacity:.6;cursor:wait}.dialog-actions{display:flex;justify-content:flex-end;gap:9px;padding-top:5px}
     .toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,12px);opacity:0;pointer-events:none;background:#393c43;color:var(--text);border:1px solid var(--line);padding:10px 15px;border-radius:11px;font-size:.76rem;transition:opacity .18s,transform .18s;z-index:10}
     .conversation-list{flex:1;min-height:0;overflow:auto;padding:8px}
@@ -482,20 +489,24 @@
     const editor = $('profileEditor');
     const profileOpen = $('profileOpen');
     const DEFAULT_BANNER = '#5865f2';
-    function applyTheme(theme) {
-      const next = theme === 'light' ? 'light' : 'dark';
-      document.documentElement.dataset.theme = next;
-      try { localStorage.setItem('poko-theme', next); } catch {}
+    const systemTheme = window.matchMedia('(prefers-color-scheme: light)');
+    let themeMode = 'system';
+    function applyTheme(mode, persist = true) {
+      themeMode = ['light','dark','system'].includes(mode) ? mode : 'system';
+      const resolved = themeMode === 'system' ? (systemTheme.matches ? 'light' : 'dark') : themeMode;
+      document.documentElement.dataset.theme = resolved;
+      if (persist) { try { localStorage.setItem('poko-theme', themeMode); } catch {} }
       const toggle = $('themeToggle');
       const icon = $('themeToggleIcon');
       if (toggle) {
-        const light = next === 'light';
-        toggle.setAttribute('aria-label', light ? 'Switch to dark mode' : 'Switch to light mode');
-        toggle.title = light ? 'Switch to dark mode' : 'Switch to light mode';
-        if (icon) icon.textContent = light ? 'dark_mode' : 'light_mode';
+        const labels = {system:'Using system theme. Switch to light mode',light:'Light mode. Switch to dark mode',dark:'Dark mode. Switch to system theme'};
+        toggle.setAttribute('aria-label', labels[themeMode]);
+        toggle.title = labels[themeMode];
+        if (icon) icon.textContent = themeMode === 'system' ? 'brightness_auto' : themeMode === 'light' ? 'dark_mode' : 'light_mode';
       }
     }
-    try { applyTheme(localStorage.getItem('poko-theme') || 'dark'); } catch { applyTheme('dark'); }
+    try { applyTheme(localStorage.getItem('poko-theme') || 'system', false); } catch { applyTheme('system', false); }
+    systemTheme.addEventListener('change', () => { if (themeMode === 'system') applyTheme('system', false); });
     let avatarUrl = '';
     let bannerUrl = '';
     let pendingAvatar = '';
@@ -1169,7 +1180,7 @@
     async function sendGif(url){if(!currentUser||!activeConversationId||!profileDb){showToast('Sign in and open a conversation to send a GIF.');return;}try{const ref=profileDb.collection('conversations').doc(activeConversationId);await ref.collection('messages').add({text:'',gifUrl:url,senderId:currentUser.uid,createdAt:firebase.firestore.FieldValue.serverTimestamp()});await ref.update({lastMessage:'GIF',lastSenderId:currentUser.uid,updatedAt:firebase.firestore.FieldValue.serverTimestamp()});closePicker();}catch(error){console.error('GIF send failed:',error);showToast('GIF could not send. Check Firestore rules.');}}
     $('openEmoji').addEventListener('click',()=>openPicker('emoji'));$('openGif').addEventListener('click',()=>openPicker('gif'));$('emojiTab').addEventListener('click',()=>openPicker('emoji'));$('gifTab').addEventListener('click',()=>openPicker('gif'));$('closePicker').addEventListener('click',closePicker);
     $('gifSearchForm').addEventListener('submit',e=>{e.preventDefault();const q=$('gifSearchInput').value.trim();if(q)loadGifs(q);});
-    $('themeToggle').addEventListener('click', () => applyTheme(document.documentElement.dataset.theme === 'light' ? 'dark' : 'light'));
+    $('themeToggle').addEventListener('click', () => applyTheme(themeMode === 'system' ? 'light' : themeMode === 'light' ? 'dark' : 'system'));
     $('statusTrigger').addEventListener('click',e=>{e.stopPropagation();$('statusMenu').hidden=!$('statusMenu').hidden;});
     $('statusMenu').querySelectorAll('[data-status]').forEach(button=>button.addEventListener('click',async()=>{const status=button.dataset.status;myActivityStatus=status;const labels={online:'Online',idle:'Idle',dnd:'Do not disturb',invisible:'Invisible'};const profile=(()=>{try{return JSON.parse(localStorage.getItem('poko-profile')||'{}')}catch{return {}}})();profile.status=status;try{localStorage.setItem('poko-profile',JSON.stringify(profile));}catch(error){console.warn('Could not save local activity status:',error);}if($('myStatusLabel'))$('myStatusLabel').textContent=labels[status];if($('myStatusDot'))$('myStatusDot').className='status-dot '+status;$('statusTriggerDot').className='status-dot '+status;setAvatarStatus($('sideAvatar'),status);setAvatarStatus($('largeAvatar'),status);if($('profileViewAvatar'))setAvatarStatus($('profileViewAvatar'),status);$('statusMenu').hidden=true;const user=firebaseAuth?.currentUser;if(user&&profileDb){try{await profileDb.collection('profiles').doc(user.uid).set({status,updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});showToast('Activity status updated.');}catch(error){console.error('Status update failed:',error);showToast('Status saved on this device, but cloud sync failed. Check Firestore rules.');}}else{showToast('Activity status saved on this device. Sign in to sync it with friends.');}}));
     document.addEventListener('click',e=>{if(!pickerPanel.contains(e.target)&&!['openEmoji','openGif'].includes(e.target.id))closePicker();if(!$('statusMenu').contains(e.target)&&e.target.id!=='statusTrigger')$('statusMenu').hidden=true;if(!e.target.closest('.message-actions'))document.querySelectorAll('.message-actions.open').forEach(el=>{el.classList.remove('open');el.querySelector('.message-action-menu').hidden=true;el.querySelector('.message-reaction-menu').hidden=true;});});
