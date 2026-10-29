@@ -1180,7 +1180,7 @@
         }
       }
       if (!localStream.getAudioTracks().length) peerConnection.addTransceiver('audio',{direction:'recvonly'});
-      if (!localStream.getVideoTracks().length) peerConnection.addTransceiver('video',{direction:'recvonly'});
+      if (!localStream.getVideoTracks().length) peerConnection.addTransceiver('video',{direction:'sendrecv'});
       $('localVideo').srcObject = localStream.getTracks().length ? localStream : null;
       if (!localStream.getAudioTracks().length && !localStream.getVideoTracks().length) updateCallStatus('Joining without a microphone or camera…');
       else if (!localStream.getAudioTracks().length) updateCallStatus('Listening mode · no microphone detected');
@@ -1272,7 +1272,7 @@
           const state=createGroupPeer(uid,docRef,true);
           groupLocalStream.getTracks().forEach(track=>state.pc.addTrack(track,groupLocalStream));
           if(!groupLocalStream.getAudioTracks().length)state.pc.addTransceiver('audio',{direction:'recvonly'});
-          if(!groupLocalStream.getVideoTracks().length)state.pc.addTransceiver('video',{direction:'recvonly'});
+          if(!groupLocalStream.getVideoTracks().length)state.pc.addTransceiver('video',{direction:'sendrecv'});
           const offer=await state.pc.createOffer();await state.pc.setLocalDescription(offer);
           await docRef.update({offer:{type:offer.type,sdp:offer.sdp}});
           groupUnsubscribers.set(docRef.id,docRef.onSnapshot(async snap=>{
@@ -1284,7 +1284,7 @@
         }));
         renderGroupCallTiles();$('localVideo').srcObject=groupLocalStream.getTracks().length?groupLocalStream:null;
         return true;
-      }catch(error){console.error('Group call failed:',error);showToast('Could not start group call: '+(error.message||error));await endGroupCall(false);return true;}
+      }catch(error){console.error('Group call failed:',error);showToast('Could not start group call: '+(error.message||error));await endGroupCall(false);await establishGroupMesh();\n         return true;}
     }
     async function acceptGroupCall(docId,data) {
       if(!activeConversationId||!currentUser)return;
@@ -1295,7 +1295,7 @@
         const state=createGroupPeer(data.callerId,ref,false);
         groupLocalStream.getTracks().forEach(track=>state.pc.addTrack(track,groupLocalStream));
         if(!groupLocalStream.getAudioTracks().length)state.pc.addTransceiver('audio',{direction:'recvonly'});
-        if(!groupLocalStream.getVideoTracks().length)state.pc.addTransceiver('video',{direction:'recvonly'});
+        if(!groupLocalStream.getVideoTracks().length)state.pc.addTransceiver('video',{direction:'sendrecv'});
         await state.pc.setRemoteDescription(new RTCSessionDescription(data.offer));
         const answer=await state.pc.createAnswer();await state.pc.setLocalDescription(answer);
         await ref.update({state:'active',answer:{type:answer.type,sdp:answer.sdp}});
@@ -1305,7 +1305,32 @@
           if(d.state==='ended')removeGroupPeer(data.callerId);
         }));
         renderGroupCallTiles();$('localVideo').srcObject=groupLocalStream.getTracks().length?groupLocalStream:null;
-      }catch(error){console.error('Could not join group call:',error);showToast('Could not join group call: '+(error.message||error));}
+        await establishGroupMesh();\n      }catch(error){console.error('Could not join group call:',error);showToast('Could not join group call: '+(error.message||error));}
+    }
+    async function establishGroupMesh(){
+      if(!groupCallActive||!groupCallId||!groupCallConversationId||!currentUser)return;
+      const members=(activeConversation?.participants||[]).filter(uid=>uid!==currentUser.uid);
+      await Promise.all(members.map(async uid=>{
+        const [low,high]=[currentUser.uid,uid].sort();if(currentUser.uid!==low||groupPeers.has(uid))return;
+        const docId=groupCallId+'_mesh_'+low+'_'+high,ref=groupCallCollection(groupCallConversationId).doc(docId);
+        const old=await ref.get();if(old.exists&&['active','ringing'].includes(old.data().state))return;
+        await ref.set({mesh:true,callId:groupCallId,conversationId:groupCallConversationId,callerId:low,calleeId:high,state:'ringing',offer:null,answer:null,callerCandidates:[],calleeCandidates:[],createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+        const state=createGroupPeer(uid,ref,true);groupLocalStream.getTracks().forEach(t=>state.pc.addTrack(t,groupLocalStream));
+        if(!groupLocalStream.getAudioTracks().length)state.pc.addTransceiver('audio',{direction:'recvonly'});
+        if(!groupLocalStream.getVideoTracks().length)state.pc.addTransceiver('video',{direction:'sendrecv'});
+        const offer=await state.pc.createOffer();await state.pc.setLocalDescription(offer);await ref.update({offer:{type:offer.type,sdp:offer.sdp}});
+        groupUnsubscribers.set(docId,ref.onSnapshot(async snap=>{if(!snap.exists||!groupPeers.has(uid))return;const d=snap.data();if(d.answer&&!state.pc.currentRemoteDescription)try{await state.pc.setRemoteDescription(new RTCSessionDescription(d.answer));}catch(e){console.warn(e);}const cs=d.calleeCandidates||[];while(state.remoteCandidateCount<cs.length){try{await state.pc.addIceCandidate(new RTCIceCandidate(cs[state.remoteCandidateCount++]));}catch(e){console.warn(e);}}if(d.state==='ended')removeGroupPeer(uid);}));
+      }));
+    }
+    async function acceptMeshPeer(docId,data){
+      const uid=data.callerId;if(!groupCallActive||groupPeers.has(uid)||!data.offer)return;
+      const ref=groupCallCollection(groupCallConversationId).doc(docId),state=createGroupPeer(uid,ref,false);
+      groupLocalStream.getTracks().forEach(t=>state.pc.addTrack(t,groupLocalStream));
+      if(!groupLocalStream.getAudioTracks().length)state.pc.addTransceiver('audio',{direction:'recvonly'});
+      if(!groupLocalStream.getVideoTracks().length)state.pc.addTransceiver('video',{direction:'sendrecv'});
+      await state.pc.setRemoteDescription(new RTCSessionDescription(data.offer));const answer=await state.pc.createAnswer();await state.pc.setLocalDescription(answer);await ref.update({state:'active',answer:{type:answer.type,sdp:answer.sdp}});
+      groupUnsubscribers.set(docId,ref.onSnapshot(async snap=>{if(!snap.exists||!groupPeers.has(uid))return;const d=snap.data(),cs=d.callerCandidates||[];while(state.remoteCandidateCount<cs.length){try{await state.pc.addIceCandidate(new RTCIceCandidate(cs[state.remoteCandidateCount++]));}catch(e){console.warn(e);}}if(d.state==='ended')removeGroupPeer(uid);}));
+      renderGroupCallTiles();
     }
     function removeGroupPeer(uid) {
       const state=groupPeers.get(uid);if(state){state.pc.close();groupPeers.delete(uid);}
@@ -1325,12 +1350,14 @@
       const unsub=groupCallCollection(conversationId).onSnapshot(snapshot=>{
         snapshot.docChanges().forEach(change=>{
           const data=change.doc.data()||{};
-          if(data.calleeId===currentUser.uid&&data.state==='ringing'&&!groupPeers.has(data.callerId)&&!groupCallActive){$('joinOngoingCall').hidden=false;$('joinOngoingCall').hidden=false;
+          if(data.mesh&&groupCallActive&&data.callId===groupCallId&&data.calleeId===currentUser.uid&&data.state==='ringing'&&!groupPeers.has(data.callerId)){acceptMeshPeer(change.doc.id,data).catch(e=>console.error('Mesh peer join failed',e));}
+          if(data.mesh&&groupCallActive&&data.callId===groupCallId&&data.callerId===currentUser.uid&&data.state==='ended')removeGroupPeer(data.calleeId);
+          if(!data.mesh&&data.calleeId===currentUser.uid&&data.state==='ringing'&&!groupPeers.has(data.callerId)&&!groupCallActive){$('joinOngoingCall').hidden=false;$('joinOngoingCall').hidden=false;
             $('callOverlay').hidden=false;updateCallStatus((profileCache.get(data.callerId)?.name||'A group member')+' invited you to a group call');
             let accept=$('acceptGroupCall');if(!accept){accept=document.createElement('button');accept.id='acceptGroupCall';accept.className='call-control';accept.textContent='Join group call';accept.addEventListener('click',()=>{const id=accept.dataset.doc;const d=accept._callData;if(id&&d)acceptGroupCall(id,d);});$('callOverlay').querySelector('.call-controls').prepend(accept);}
             accept.dataset.doc=change.doc.id;accept._callData=data;accept.hidden=false;
           }
-          if(data.calleeId===currentUser.uid&&data.state==='ended')refreshJoinableGroupCall(conversationId);
+          if(!data.mesh&&data.calleeId===currentUser.uid&&data.state==='ended')refreshJoinableGroupCall(conversationId);
           if(data.callerId===currentUser.uid&&data.state==='active'&&$('callOverlay').hidden===false)updateCallStatus('Group call · participant joined');
         });
       },err=>console.error('Group call listener failed:',err));
@@ -1375,7 +1402,7 @@
         if(groupScreenStream){
           groupScreenStream.getTracks().forEach(t=>t.stop());groupScreenStream=null;
           const track=groupLocalStream?.getVideoTracks()[0]||null;
-          for(const state of groupPeers.values()){const sender=getVideoSender(state.pc);if(sender)await sender.replaceTrack(track);}
+          for(const state of groupPeers.values()){const sender=getVideoSender(state.pc);if(sender){const transceiver=state.pc.getTransceivers().find(t=>t.sender===sender);if(transceiver&&transceiver.direction==='recvonly')transceiver.direction='sendrecv';await sender.replaceTrack(track);}}
           $('localVideo').srcObject=groupLocalStream?.getTracks().length?groupLocalStream:null;
           $('shareScreen').textContent='Share screen';return;
         }
@@ -1395,7 +1422,7 @@
         if (screenStream) {
           screenStream.getTracks().forEach(track => track.stop()); screenStream = null;
           const cameraTrack = localStream?.getVideoTracks()[0];
-          const sender = peerConnection.getSenders().find(item => item.track?.kind === 'video');
+          const sender = getVideoSender(peerConnection);
           if (sender) await sender.replaceTrack(cameraTrack || null);
           $('localVideo').srcObject = localStream;
           $('shareScreen').textContent = 'Share screen';
@@ -1406,7 +1433,7 @@
         const screenTrack = screenStream.getVideoTracks()[0];
         let sender = getVideoSender(peerConnection);
         if (!sender) sender = peerConnection.addTransceiver('video',{direction:'sendrecv'}).sender;
-        await sender.replaceTrack(screenTrack);
+        const transceiver=peerConnection.getTransceivers().find(t=>t.sender===sender);if(transceiver&&transceiver.direction==='recvonly')transceiver.direction='sendrecv';\n        await sender.replaceTrack(screenTrack);
         $('localVideo').srcObject = screenStream;
         $('shareScreen').textContent = 'Stop sharing';
         screenTrack.onended = () => { if (screenStream) shareScreen(); };
