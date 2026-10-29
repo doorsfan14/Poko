@@ -294,6 +294,13 @@
     #myStatusLabel,#myStatusDot{display:none!important}
     .status-trigger{position:absolute;left:auto;right:42px;top:0;width:28px;height:100%;opacity:0;cursor:pointer;z-index:3}
     .profile-row{position:relative}
+    .status-trigger{position:relative;inset:auto;opacity:1;z-index:4;flex:0 0 28px;width:28px;height:32px;border:1px solid rgba(91,140,255,.24);border-radius:9px;background:#303238;display:grid;place-items:center;padding:0;margin-left:auto;cursor:pointer}
+    .status-trigger:hover,.status-trigger:focus-visible{background:#373a42;border-color:rgba(91,140,255,.65)}
+    .status-trigger .status-dot{width:10px;height:10px;flex-basis:10px;box-shadow:0 0 0 3px rgba(255,255,255,.035)}
+    .status-menu{left:12px;bottom:74px;z-index:1205}
+    body:has(.profile-editor.open)::before{content:"";position:fixed;inset:0;z-index:1000;background:rgba(8,10,16,.22);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);pointer-events:auto}
+    .profile-editor{z-index:1001}
+    .profile-editor .dialog{position:relative}
   </style>
 </head>
 <body>
@@ -324,7 +331,7 @@
       <div class="profile-row" id="profileRow" role="button" tabindex="0" aria-label="View profile">
         <div class="mini-avatar" id="sideAvatar">You</div>
         <div class="profile-label"><strong id="displayName">your_username</strong><span id="myStatusLabel">Online</span></div>
-        <button class="status-trigger" id="statusTrigger" type="button" aria-label="Change activity status" title="Change activity status"></button>
+        <button class="status-trigger" id="statusTrigger" type="button" aria-label="Change activity status" title="Change activity status"><span class="status-dot online" id="statusTriggerDot" aria-hidden="true"></span></button>
         <button class="icon-button" id="editProfile" aria-label="Edit profile" title="Edit profile"><span class="material-symbol">edit</span></button>
       </div>
       <div class="status-menu" id="statusMenu" hidden><button type="button" data-status="online"><span class="status-dot online"></span>Online</button><button type="button" data-status="idle"><span class="status-dot idle"></span>Idle</button><button type="button" data-status="dnd"><span class="status-dot dnd"></span>Do not disturb</button><button type="button" data-status="invisible"><span class="status-dot invisible"></span>Invisible</button></div>
@@ -959,7 +966,7 @@
     $('openEmoji').addEventListener('click',()=>openPicker('emoji'));$('openGif').addEventListener('click',()=>openPicker('gif'));$('emojiTab').addEventListener('click',()=>openPicker('emoji'));$('gifTab').addEventListener('click',()=>openPicker('gif'));$('closePicker').addEventListener('click',closePicker);
     $('gifSearchForm').addEventListener('submit',e=>{e.preventDefault();const q=$('gifSearchInput').value.trim();if(q)loadGifs(q);});
     $('statusTrigger').addEventListener('click',e=>{e.stopPropagation();$('statusMenu').hidden=!$('statusMenu').hidden;});
-    $('statusMenu').querySelectorAll('[data-status]').forEach(button=>button.addEventListener('click',async()=>{const status=button.dataset.status;myActivityStatus=status;const labels={online:'Online',idle:'Idle',dnd:'Do not disturb',invisible:'Invisible'};$('myStatusLabel').textContent=labels[status];$('myStatusDot').className='status-dot '+status;setAvatarStatus($('sideAvatar'),status);setAvatarStatus($('largeAvatar'),status);setAvatarStatus($('profileViewAvatar'),status);$('statusMenu').hidden=true;try{const user=firebaseAuth?.currentUser;if(user&&profileDb)await profileDb.collection('profiles').doc(user.uid).set({status,updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});const profile=JSON.parse(localStorage.getItem('poko-profile')||'{}');profile.status=status;localStorage.setItem('poko-profile',JSON.stringify(profile));showToast('Activity status set to '+labels[status]+'.');}catch(error){console.error('Status update failed:',error);showToast('Status could not save. Check Firestore rules.');}}));
+    $('statusMenu').querySelectorAll('[data-status]').forEach(button=>button.addEventListener('click',async()=>{const status=button.dataset.status;myActivityStatus=status;const labels={online:'Online',idle:'Idle',dnd:'Do not disturb',invisible:'Invisible'};const profile=(()=>{try{return JSON.parse(localStorage.getItem('poko-profile')||'{}')}catch{return {}}})();profile.status=status;try{localStorage.setItem('poko-profile',JSON.stringify(profile));}catch(error){console.warn('Could not save local activity status:',error);}if($('myStatusLabel'))$('myStatusLabel').textContent=labels[status];if($('myStatusDot'))$('myStatusDot').className='status-dot '+status;$('statusTriggerDot').className='status-dot '+status;setAvatarStatus($('sideAvatar'),status);setAvatarStatus($('largeAvatar'),status);if($('profileViewAvatar'))setAvatarStatus($('profileViewAvatar'),status);$('statusMenu').hidden=true;const user=firebaseAuth?.currentUser;if(user&&profileDb){try{await profileDb.collection('profiles').doc(user.uid).set({status,updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});showToast('Activity status updated.');}catch(error){console.error('Status update failed:',error);showToast('Status saved on this device, but cloud sync failed. Check Firestore rules.');}}else{showToast('Activity status saved on this device. Sign in to sync it with friends.');}}));
     document.addEventListener('click',e=>{if(!pickerPanel.contains(e.target)&&!['openEmoji','openGif'].includes(e.target.id))closePicker();if(!$('statusMenu').contains(e.target)&&e.target.id!=='statusTrigger')$('statusMenu').hidden=true;});
     $('chatComposer').addEventListener('submit', async e => {
       e.preventDefault();
