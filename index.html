@@ -228,6 +228,33 @@
 .group-selection{display:flex;flex-wrap:wrap;gap:6px;padding:0 18px}.group-chip{display:inline-flex;align-items:center;gap:7px;padding:6px 9px;border-radius:20px;background:rgba(91,140,255,.16);color:#dbe5ff;font-size:.72rem}.group-chip button{border:0;background:transparent;color:inherit;font-size:1rem}.group-create{margin:8px 18px 4px}.user-result.selected{background:rgba(91,140,255,.16);border-color:var(--accent)}
     .call-overlay{position:fixed;inset:0;z-index:1200;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(12,14,20,.92);backdrop-filter:blur(12px)}
     .call-overlay[hidden]{display:none!important}
+    .call-window{width:min(1120px,100%);height:min(820px,calc(100dvh - 32px));max-height:calc(100dvh - 32px);background:#313338;border:0;border-radius:12px;box-shadow:0 24px 80px rgba(0,0,0,.65)}
+    .call-stage{flex:1;height:auto;min-height:240px;background:#1e1f22;display:flex;align-items:center;justify-content:center;gap:14px;padding:24px;flex-wrap:wrap}
+    #remoteVideo{width:min(100%,900px);height:100%;min-height:220px;object-fit:contain;border-radius:10px}
+    #localVideo{right:24px;bottom:24px;width:clamp(120px,19%,230px);border:2px solid #313338;border-radius:12px}
+    .call-status{top:16px;bottom:auto;left:18px;background:rgba(30,31,34,.88);border:0;border-radius:8px}
+    .call-controls{background:#232428;border:0;padding:18px;gap:10px}
+    .call-control{min-width:52px;height:48px;padding:0 17px;border:0;border-radius:9px;background:#383a40;color:#f2f3f5}
+    .call-control:hover{background:#454850}
+    .call-control.end{min-width:66px;background:#da373c;border-radius:14px}
+    .call-control.end:hover{background:#f04747}
+    .group-remote-tile{width:min(100%,420px);height:clamp(180px,35vh,330px);max-height:none;border:0;border-radius:12px;background:#232428}
+    .group-remote-tile video{min-height:0;object-fit:cover}
+    .call-setup{position:fixed;inset:0;z-index:1300;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;padding:18px}
+    .call-setup[hidden]{display:none!important}
+    .call-setup-card{width:min(420px,100%);background:#313338;border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:24px;box-shadow:0 22px 70px rgba(0,0,0,.5)}
+    .call-setup-card h2{font-size:1.15rem;margin:0 0 7px}.call-setup-card p{font-size:.78rem;color:#b5bac1;line-height:1.6;margin:0 0 20px}
+    .call-setup-option{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-top:1px solid rgba(255,255,255,.07);font-size:.84rem;font-weight:700}
+    .call-setup-option input{width:18px;height:18px;accent-color:#5865f2}
+    .call-setup-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:22px}
+    .call-setup-actions button{padding:11px 15px;border-radius:8px}
+    .call-setup-join{border:0;background:#5865f2;color:white;font-weight:800}
+    .call-setup-cancel{border:0;background:#4e5058;color:white}
+    .group-avatar-collage{display:grid!important;grid-template-columns:repeat(2,1fr);grid-template-rows:repeat(2,1fr);gap:1px;overflow:hidden!important;background:#222428}
+    .group-avatar-collage img{width:100%;height:100%;min-width:0;min-height:0;object-fit:cover;aspect-ratio:1}
+    .group-avatar-collage .collage-empty{background:#41454d}
+    .call-empty-video{font-size:.9rem;color:#b5bac1;text-align:center;padding:30px}
+
     .group-remote-tile{position:relative;min-width:0;min-height:0;width:100%;height:100%;max-height:100%;background:#242630;border:1px solid rgba(167,198,255,.16);border-radius:12px;overflow:hidden}
     .call-stage:has(.group-remote-tile){display:grid;grid-template-columns:repeat(auto-fit,minmax(min(260px,45%),1fr));grid-auto-rows:minmax(150px,1fr);gap:10px;padding:14px;align-content:center}
     .group-remote-tile video{width:100%;height:100%;min-height:150px;object-fit:contain;background:#17191f}
@@ -461,7 +488,7 @@
         </div>
       </section>
       <section class="chat-panel" id="chatPanel" hidden>
-        <header class="chat-head"><button class="icon-button back-mobile" id="chatBack" aria-label="Back to messages"><span class="material-symbol">arrow_back</span></button><div class="mini-avatar" id="chatAvatar"></div><div class="profile-label"><strong id="chatName"></strong><span id="chatBio" hidden></span></div><button class="icon-button" id="startVoiceCall" title="Start voice/video call" aria-label="Start call"><span class="material-symbol">call</span></button><button class="small-button" id="viewChatProfile">Profile</button></header>
+        <header class="chat-head"><button class="icon-button back-mobile" id="chatBack" aria-label="Back to messages"><span class="material-symbol">arrow_back</span></button><div class="mini-avatar" id="chatAvatar"></div><div class="profile-label"><strong id="chatName"></strong><span id="chatBio" hidden></span></div><button class="icon-button" id="joinOngoingCall" title="Join an ongoing group call" aria-label="Join ongoing call" hidden><span class="material-symbol">video_call</span></button><button class="icon-button" id="startVoiceCall" title="Start voice/video call" aria-label="Start call"><span class="material-symbol">call</span></button><button class="small-button" id="viewChatProfile">Profile</button></header>
         <div class="chat-messages" id="chatMessages" aria-live="polite"><div class="chat-empty">Loading messages…</div></div>
         <div class="composer-wrap"><div class="picker-panel" id="pickerPanel" hidden><div class="picker-tabs"><button type="button" class="picker-tab active" id="emojiTab">Emoji</button><button type="button" class="picker-tab" id="gifTab">GIFs</button><button type="button" class="icon-button picker-close" id="closePicker" aria-label="Close picker"><span class="material-symbol">close</span></button></div><div id="emojiPanel" class="emoji-grid" aria-label="Emoji picker"></div><div id="gifPanel" hidden><form class="gif-search" id="gifSearchForm"><input id="gifSearchInput" maxlength="50" placeholder="Search GIPHY" aria-label="Search GIFs"><button class="small-button" type="submit">Search</button></form><div class="gif-results" id="gifResults"><div class="result-message">Search for a GIF to send it in this chat.</div></div><div class="giphy-credit">Powered by GIPHY</div></div></div><form class="chat-composer" id="chatComposer"><button type="button" class="composer-tool" id="openEmoji" aria-label="Open emoji picker" title="Emoji">☺</button><button type="button" class="composer-tool" id="openGif" aria-label="Open GIF picker" title="GIF">GIF</button><textarea id="messageInput" rows="1" maxlength="4000" placeholder="Write a message…" aria-label="Write a message" required></textarea><button class="primary" id="sendMessage" type="submit">Send</button></form></div>
       </section>
@@ -484,7 +511,8 @@
       </div>
     </section>
   </div>
-  <div class="call-overlay" id="callOverlay" hidden><section class="call-window"><div class="call-stage"><video id="remoteVideo" autoplay playsinline></video><video id="localVideo" autoplay muted playsinline></video><div class="call-status" id="callStatus">Connecting…</div></div><div class="call-controls"><button class="call-control" id="toggleMic">Mute mic</button><button class="call-control" id="shareScreen">Share screen</button><button class="call-control end" id="endCall">End call</button></div></section></div>
+  <div class="call-overlay" id="callOverlay" hidden><section class="call-window"><div class="call-stage"><video id="remoteVideo" autoplay playsinline></video><video id="localVideo" autoplay muted playsinline></video><div class="call-status" id="callStatus">Connecting…</div></div><div class="call-controls"><button class="call-control" id="toggleMic">Mute mic</button><button class="call-control" id="toggleCamera">Turn camera off</button><button class="call-control" id="shareScreen">Share screen</button><button class="call-control end" id="endCall">End call</button></div></section></div>
+  <div class="call-setup" id="callSetup" hidden><section class="call-setup-card" role="dialog" aria-modal="true" aria-labelledby="callSetupTitle"><h2 id="callSetupTitle">Call settings</h2><p>Choose what to share before joining. You can change these during the call too.</p><label class="call-setup-option"><span>Microphone</span><input type="checkbox" id="preCallMic" checked></label><label class="call-setup-option"><span>Camera</span><input type="checkbox" id="preCallCamera" checked></label><div class="call-setup-actions"><button class="call-setup-cancel" id="cancelCallSetup" type="button">Cancel</button><button class="call-setup-join" id="confirmCallSetup" type="button">Join call</button></div></section></div>
   <div class="new-chat-overlay" id="newChatOverlay" role="dialog" aria-modal="true" aria-labelledby="newChatTitle"><section class="new-chat-dialog"><div class="dialog-header"><h2 id="newChatTitle">New message</h2><button class="icon-button" id="closeNewChat" aria-label="Close"><span class="material-symbol">close</span></button></div><form class="new-chat-search" id="userSearchForm"><input id="userSearchInput" type="search" maxlength="40" placeholder="Enter an exact username" aria-label="Username to find" required><button class="primary" type="submit">Find</button></form><div class="group-selection" id="groupSelection"></div><button class="small-button group-create" id="toggleGroupSelection" type="button">Select people for a group</button><button class="small-button group-create" id="createGroupChat" type="button" hidden>Create group chat</button><div class="user-results" id="userResults"><div class="result-message">Search for someone's exact profile name to start a conversation, or select people for a group.</div></div></section></div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
@@ -544,7 +572,7 @@
     let callInitiator = false;
     let seenRemoteCandidates = 0;
     let seenLocalCandidates = 0;
-    let micMuted = false;
+    let micMuted = false;\n    let cameraDisabled = false;
     let knownConversations = [];
     const profileCache = new Map();
     const profileStatusUnsubscribers = new Map();
@@ -884,7 +912,7 @@
         return {uid, name:'Poko user', avatar:'', banner:'', bio:'', status:'online'};
       }
     }
-    function renderConversationList() {
+    function setGroupAvatar(el,item){el.classList.add('group-avatar-collage');el.replaceChildren();const members=(item.memberProfiles||[]).slice(0,4);members.forEach(profile=>{const cell=document.createElement('div');cell.className='collage-empty';if(profile.avatar){const img=document.createElement('img');img.src=profile.avatar;img.alt='';img.loading='lazy';img.referrerPolicy='no-referrer';cell.append(img);}el.append(cell);});while(el.children.length<4){const cell=document.createElement('div');cell.className='collage-empty';el.append(cell);}}\n    function renderConversationList() {
       const list = $('conversationList'), empty = $('emptyConversationList');
       const q = $('search').value.trim().toLowerCase();
       const items = knownConversations.filter(item => {
@@ -906,7 +934,7 @@
       items.forEach(item => {
         const button = document.createElement('button');
         button.className = 'conversation-item' + (item.id === activeConversationId ? ' active' : '');
-        const avatar = document.createElement('div'); avatar.className = 'mini-avatar'; setAvatar(avatar,item.group ? '' : item.otherProfile.avatar,(item.displayName || item.otherProfile.name).slice(0,2).toUpperCase()); if(!item.group)setAvatarStatus(avatar,item.otherProfile.status);
+        const avatar = document.createElement('div'); avatar.className = 'mini-avatar'; if(item.group)setGroupAvatar(avatar,item);else{setAvatar(avatar,item.otherProfile.avatar,(item.displayName || item.otherProfile.name).slice(0,2).toUpperCase());setAvatarStatus(avatar,item.otherProfile.status);}
         const label = document.createElement('div'); label.className = 'profile-label';
         const name = document.createElement('strong'); name.textContent = item.displayName || item.otherProfile.name;
         const last = document.createElement('span'); last.textContent = item.lastMessage || 'Start a conversation';
@@ -1061,7 +1089,7 @@
         showToast('Could not load conversation. Check Firestore rules.');
       });
       watchCallDocument(item.id, false);
-      if(item.group)watchGroupCalls(item.id);
+      if(item.group){watchGroupCalls(item.id);$('joinOngoingCall').hidden=false;refreshJoinableGroupCall(item.id);}else $('joinOngoingCall').hidden=true;
     }
     function closeConversation() {
       if (messagesUnsubscribe) messagesUnsubscribe();
@@ -1260,18 +1288,18 @@
       groupCallActive=false;groupCallId=null;groupCallConversationId=null;$('localVideo').srcObject=null;
       $('callOverlay').querySelectorAll('.group-remote-tile').forEach(el=>el.remove());$('callOverlay').hidden=true;
     }
-    function watchGroupCalls(conversationId) {
+    async function refreshJoinableGroupCall(conversationId){try{const snap=await groupCallCollection(conversationId).where('calleeId','==',currentUser.uid).where('state','in',['ringing','active']).get();$('joinOngoingCall').hidden=!snap.docs.some(d=>d.data().state==='ringing');}catch(e){console.warn('Could not check active group calls',e);}}\n    function watchGroupCalls(conversationId) {
       if(!currentUser||!profileDb)return;
       const key='watch_'+conversationId;if(groupUnsubscribers.has(key))groupUnsubscribers.get(key)();
       const unsub=groupCallCollection(conversationId).onSnapshot(snapshot=>{
         snapshot.docChanges().forEach(change=>{
           const data=change.doc.data()||{};
-          if(data.calleeId===currentUser.uid&&data.state==='ringing'&&!groupPeers.has(data.callerId)&&!groupCallActive){
+          if(data.calleeId===currentUser.uid&&data.state==='ringing'&&!groupPeers.has(data.callerId)&&!groupCallActive){$('joinOngoingCall').hidden=false;
             $('callOverlay').hidden=false;updateCallStatus((profileCache.get(data.callerId)?.name||'A group member')+' invited you to a group call');
             let accept=$('acceptGroupCall');if(!accept){accept=document.createElement('button');accept.id='acceptGroupCall';accept.className='call-control';accept.textContent='Join group call';accept.addEventListener('click',()=>{const id=accept.dataset.doc;const d=accept._callData;if(id&&d)acceptGroupCall(id,d);});$('callOverlay').querySelector('.call-controls').prepend(accept);}
             accept.dataset.doc=change.doc.id;accept._callData=data;accept.hidden=false;
           }
-          if(data.callerId===currentUser.uid&&data.state==='active'&&$('callOverlay').hidden===false)updateCallStatus('Group call · participant joined');
+          if(data.calleeId===currentUser.uid&&data.state==='ended')refreshJoinableGroupCall(conversationId);\n          if(data.callerId===currentUser.uid&&data.state==='active'&&$('callOverlay').hidden===false)updateCallStatus('Group call · participant joined');
         });
       },err=>console.error('Group call listener failed:',err));
       groupUnsubscribers.set(key,unsub);
@@ -1339,8 +1367,8 @@
       $('callOverlay').hidden = true; $('shareScreen').textContent = 'Share screen'; updateCallStatus('Call ended');
       callConversationId = null; seenRemoteCandidates = seenLocalCandidates = 0;
     }
-    $('startVoiceCall').addEventListener('click', startCall);
-    $('toggleMic').addEventListener('click', () => {
+    $('startVoiceCall').addEventListener('click', startCall);\n    $('cancelCallSetup').addEventListener('click',closeCallSetup);\n    $('confirmCallSetup').addEventListener('click',beginCallWithOptions);\n    $('callSetup').addEventListener('click',e=>{if(e.target===$('callSetup'))closeCallSetup();});\n    $('joinOngoingCall').addEventListener('click',async()=>{if(!activeConversationId||!currentUser)return;try{const snap=await groupCallCollection(activeConversationId).where('calleeId','==',currentUser.uid).where('state','in',['ringing','active']).get();const match=snap.docs.find(d=>d.data().state==='ringing');if(match)await acceptGroupCall(match.id,match.data());else showToast('No joinable call invitation was found.');}catch(e){console.error(e);showToast('Could not check ongoing calls.');}});
+    $('toggleCamera').addEventListener('click',()=>{const stream=groupCallActive?groupLocalStream:localStream;const tracks=stream?.getVideoTracks()||[];if(!tracks.length){showToast('Camera is off or unavailable.');return;}cameraDisabled=!cameraDisabled;tracks.forEach(t=>t.enabled=!cameraDisabled);$('toggleCamera').textContent=cameraDisabled?'Turn camera on':'Turn camera off';});\n    $('toggleMic').addEventListener('click', () => {
       if(groupCallActive){if(!groupLocalStream?.getAudioTracks().length){showToast('No microphone available. You can still listen.');return;}micMuted=!micMuted;groupLocalStream.getAudioTracks().forEach(t=>t.enabled=!micMuted);$('toggleMic').textContent=micMuted?'Unmute mic':'Mute mic';return;}
       if (!localStream?.getAudioTracks().length) { showToast('No microphone is available on this device. You can still listen.'); return; }
       micMuted = !micMuted; localStream.getAudioTracks().forEach(track => track.enabled = !micMuted);
