@@ -272,7 +272,17 @@
     .group-remote-tile{position:relative;min-width:0;min-height:0;width:100%;height:100%;max-height:100%;background:#242630;border:1px solid rgba(167,198,255,.16);border-radius:12px;overflow:hidden}
     .call-stage:has(.group-remote-tile){display:grid;grid-template-columns:repeat(auto-fit,minmax(min(260px,45%),1fr));grid-auto-rows:minmax(150px,1fr);gap:10px;padding:14px;align-content:center}
     .group-remote-tile video{width:100%;height:100%;min-height:150px;object-fit:contain;background:#17191f}
-    .group-remote-tile span{position:absolute;left:10px;bottom:9px;padding:5px 8px;border-radius:7px;background:rgba(15,17,22,.78);color:#fff;font-size:.75rem}
+    .group-remote-tile span{position:absolute;left:10px;bottom:9px;padding:5px 8px;border-radius:7px;background:rgba(15,17,22,.78);color:#fff;font-size:.75rem;z-index:3}
+    .group-remote-tile.is-speaking,#remoteVideo.is-speaking{outline:3px solid #35d07f;outline-offset:-3px;box-shadow:0 0 0 2px rgba(53,208,127,.25)}
+    .camera-off-card{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#252832}
+    .camera-off-card[hidden]{display:none}
+    .camera-off-banner{position:absolute;inset:0;background-position:center;background-size:cover;filter:brightness(.42) saturate(.8);transform:scale(1.04)}
+    .camera-off-card:after{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(10,12,18,.35),rgba(10,12,18,.72))}
+    .camera-off-avatar{position:relative;z-index:1;width:clamp(76px,28%,150px);aspect-ratio:1;border-radius:50%;object-fit:cover;border:4px solid rgba(255,255,255,.85);box-shadow:0 8px 32px rgba(0,0,0,.5)}
+    .group-remote-tile video{position:relative;z-index:1}
+    #directCameraOff{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
+    #directCameraOff[hidden]{display:none}
+    #directCameraOff .camera-off-avatar{width:clamp(100px,22%,190px)}
     .call-window{width:min(1100px,100%);max-height:calc(100dvh - 40px);display:flex;flex-direction:column;overflow:hidden;background:#202127;border:1px solid rgba(167,198,255,.16);border-radius:18px;box-shadow:0 28px 90px rgba(0,0,0,.58)}
     .call-stage{position:relative;min-height:260px;height:min(68dvh,680px);background:radial-gradient(ellipse at center,#303541 0%,#191a1e 72%);display:grid;place-items:center;overflow:hidden}
     #remoteVideo{width:100%;height:100%;object-fit:contain;background:#191a1e}
@@ -503,7 +513,7 @@
       </section>
       <section class="chat-panel" id="chatPanel" hidden>
         <header class="chat-head"><button class="icon-button back-mobile" id="chatBack" aria-label="Back to messages"><span class="material-symbol">arrow_back</span></button><div class="mini-avatar" id="chatAvatar"></div><div class="profile-label"><strong id="chatName"></strong><span id="chatBio" hidden></span></div><button class="icon-button" id="joinOngoingCall" title="Join an ongoing group call" aria-label="Join ongoing call" hidden><span class="material-symbol">video_call</span></button><button class="icon-button" id="startVoiceCall" title="Start voice/video call" aria-label="Start call"><span class="material-symbol">call</span></button><button class="small-button" id="viewChatProfile">Profile</button></header>
-          <div class="call-overlay" id="callOverlay" hidden><section class="call-window"><div class="call-stage"><video id="remoteVideo" autoplay playsinline></video><video id="localVideo" autoplay muted playsinline></video><div class="call-status" id="callStatus">Connecting…</div></div><div class="call-controls"><button class="call-control" id="toggleMic">Mute mic</button><button class="call-control" id="toggleCamera">Turn camera off</button><button class="call-control" id="shareScreen">Share screen</button><button class="call-control end" id="endCall">End call</button></div></section></div>
+          <div class="call-overlay" id="callOverlay" hidden><section class="call-window"><div class="call-stage"><video id="remoteVideo" autoplay playsinline></video><div id="directCameraOff" class="camera-off-card" hidden><div class="camera-off-banner"></div><img class="camera-off-avatar" alt="Participant avatar"></div><video id="localVideo" autoplay muted playsinline></video><div class="call-status" id="callStatus">Connecting…</div></div><div class="call-controls"><button class="call-control" id="toggleMic">Mute mic</button><button class="call-control" id="toggleCamera">Turn camera off</button><button class="call-control" id="shareScreen">Share screen</button><button class="call-control end" id="endCall">End call</button></div></section></div>
         <div class="chat-messages" id="chatMessages" aria-live="polite"><div class="chat-empty">Loading messages…</div></div>
         <div class="composer-wrap"><div class="picker-panel" id="pickerPanel" hidden><div class="picker-tabs"><button type="button" class="picker-tab active" id="emojiTab">Emoji</button><button type="button" class="picker-tab" id="gifTab">GIFs</button><button type="button" class="icon-button picker-close" id="closePicker" aria-label="Close picker"><span class="material-symbol">close</span></button></div><div id="emojiPanel" class="emoji-grid" aria-label="Emoji picker"></div><div id="gifPanel" hidden><form class="gif-search" id="gifSearchForm"><input id="gifSearchInput" maxlength="50" placeholder="Search GIPHY" aria-label="Search GIFs"><button class="small-button" type="submit">Search</button></form><div class="gif-results" id="gifResults"><div class="result-message">Search for a GIF to send it in this chat.</div></div><div class="giphy-credit">Powered by GIPHY</div></div></div><form class="chat-composer" id="chatComposer"><button type="button" class="composer-tool" id="openEmoji" aria-label="Open emoji picker" title="Emoji">☺</button><button type="button" class="composer-tool" id="openGif" aria-label="Open GIF picker" title="GIF">GIF</button><textarea id="messageInput" rows="1" maxlength="4000" placeholder="Write a message…" aria-label="Write a message" required></textarea><button class="primary" id="sendMessage" type="submit">Send</button></form></div>
       </section>
@@ -1129,6 +1139,10 @@
     }
     const rtcConfig = {iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'}]};
     function updateCallStatus(text) { $('callStatus').textContent = text; }
+    const speakingMonitors=new Map();
+    function monitorSpeaking(uid,stream,element){stopSpeakingMonitor(uid);const AC=window.AudioContext||window.webkitAudioContext;if(!AC||!stream?.getAudioTracks().length||!element)return;try{const ctx=new AC(),analyser=ctx.createAnalyser(),source=ctx.createMediaStreamSource(stream);analyser.fftSize=512;source.connect(analyser);const data=new Uint8Array(analyser.frequencyBinCount);let raf=0;const tick=()=>{analyser.getByteTimeDomainData(data);let sum=0;for(const n of data){const v=(n-128)/128;sum+=v*v;}element.classList.toggle('is-speaking',Math.sqrt(sum/data.length)>.045);raf=requestAnimationFrame(tick);};tick();speakingMonitors.set(uid,{ctx,raf,element});}catch(e){console.warn('Speaking detection unavailable',e);}}
+    function stopSpeakingMonitor(uid){const m=speakingMonitors.get(uid);if(!m)return;cancelAnimationFrame(m.raf);m.element?.classList.remove('is-speaking');m.ctx.close().catch(()=>{});speakingMonitors.delete(uid);}
+    async function showDirectCameraCard(show=true){const card=$('directCameraOff');if(!card)return;card.hidden=!show;if(!show)return;const p=activeConversation?.otherProfile||{};card.querySelector('.camera-off-banner').style.backgroundImage=p.banner?'url("'+p.banner+'")':'linear-gradient(135deg,#343b52,#171a22)';setAvatar(card.querySelector('.camera-off-avatar'),p.avatar,p.name||'User');}
     function createPeerConnection() {
       peerConnection = new RTCPeerConnection(rtcConfig);
       peerConnection.ontrack = event => {
@@ -1140,7 +1154,7 @@
           if (!current.getTracks().some(track => track.id === event.track.id)) current.addTrack(event.track);
           $('remoteVideo').srcObject = current;
         }
-        $('remoteVideo').play?.().catch(() => {});
+        $('remoteVideo').play?.().catch(() => {});\n        if(event.track.kind==='video'){showDirectCameraCard(event.track.muted||!event.track.enabled);event.track.onmute=()=>showDirectCameraCard(true);event.track.onunmute=()=>showDirectCameraCard(false);}\n        if(event.track.kind==='audio')monitorSpeaking('direct',$('remoteVideo').srcObject,$('callOverlay').querySelector('.call-stage'));
       };
       peerConnection.onconnectionstatechange = () => {
         if (peerConnection && peerConnection.connectionState === 'connected') updateCallStatus('Connected');
@@ -1222,18 +1236,7 @@
     let groupScreenStream = null;
     const groupRemoteStreams = new Map();
     function groupCallCollection(conversationId) { return profileDb.collection('conversations').doc(conversationId).collection('groupCalls'); }
-    function renderGroupCallTiles() {
-      const stage=$('callOverlay').querySelector('.call-stage');
-      stage.querySelectorAll('.group-remote-tile').forEach(el=>el.remove());
-      groupRemoteStreams.forEach((stream,uid)=>{
-        const tile=document.createElement('div');tile.className='group-remote-tile';
-        const video=document.createElement('video');video.autoplay=true;video.playsInline=true;video.srcObject=stream;
-        const label=document.createElement('span');label.textContent=profileCache.get(uid)?.name||'Participant';
-        tile.append(video,label);stage.append(tile);
-      });
-      const count=groupPeers.size+1;
-      updateCallStatus('Group call · '+count+' participant'+(count===1?'':'s'));
-    }
+    function renderGroupCallTiles(){const stage=$('callOverlay').querySelector('.call-stage'),existing=new Map([...stage.querySelectorAll('.group-remote-tile')].map(el=>[el.dataset.uid,el]));groupRemoteStreams.forEach((stream,uid)=>{let tile=existing.get(uid);if(!tile){tile=document.createElement('div');tile.className='group-remote-tile';tile.dataset.uid=uid;const video=document.createElement('video');video.autoplay=true;video.playsInline=true;const card=document.createElement('div');card.className='camera-off-card';card.innerHTML='<div class="camera-off-banner"></div><img class="camera-off-avatar" alt="Participant avatar">';const label=document.createElement('span');label.textContent=profileCache.get(uid)?.name||'Participant';tile.append(video,card,label);stage.append(tile);getPublicProfile(uid).then(p=>{if(!tile.isConnected)return;label.textContent=p.name||'Participant';card.querySelector('.camera-off-banner').style.backgroundImage=p.banner?'url("'+p.banner+'")':'linear-gradient(135deg,#343b52,#171a22)';setAvatar(card.querySelector('.camera-off-avatar'),p.avatar,p.name||'User');}).catch(()=>{});}else existing.delete(uid);const video=tile.querySelector('video'),card=tile.querySelector('.camera-off-card');if(video.srcObject!==stream)video.srcObject=stream;video.play?.().catch(()=>{});const live=stream.getVideoTracks().some(t=>t.readyState==='live'&&t.enabled&&!t.muted);video.hidden=!live;card.hidden=live;if(stream.getAudioTracks().length&&!speakingMonitors.has(uid))monitorSpeaking(uid,stream,tile);});existing.forEach((tile,uid)=>{stopSpeakingMonitor(uid);tile.remove();});updateCallStatus('Group call · '+(groupPeers.size+1)+' participants');}
     let preCallMedia={audio:true,video:true};
     async function getGroupLocalMedia() {
       if(groupLocalStream)return groupLocalStream;
@@ -1251,9 +1254,9 @@
       const state={pc,docRef,initiator,remoteCandidateCount:0};
       groupPeers.set(remoteUid,state);
       const remoteStream=new MediaStream();groupRemoteStreams.set(remoteUid,remoteStream);
-      pc.ontrack=e=>{if(e.streams[0])e.streams[0].getTracks().forEach(t=>{if(!remoteStream.getTracks().some(x=>x.id===t.id))remoteStream.addTrack(t);});else if(!remoteStream.getTracks().some(x=>x.id===e.track.id))remoteStream.addTrack(e.track);renderGroupCallTiles();};
+      pc.ontrack=e=>{(e.streams?.[0]?.getTracks()||[e.track]).forEach(t=>{if(!remoteStream.getTracks().some(x=>x.id===t.id))remoteStream.addTrack(t);});renderGroupCallTiles();};
       pc.onicecandidate=e=>{if(e.candidate)docRef.update({[initiator?'callerCandidates':'calleeCandidates']:firebase.firestore.FieldValue.arrayUnion(e.candidate.toJSON())}).catch(err=>console.warn('Group ICE write failed',err));};
-      pc.onconnectionstatechange=()=>{if(['failed','closed'].includes(pc.connectionState)){groupRemoteStreams.delete(remoteUid);renderGroupCallTiles();}};
+      pc.onconnectionstatechange=()=>{if(['failed','closed'].includes(pc.connectionState)){stopSpeakingMonitor(remoteUid);groupRemoteStreams.delete(remoteUid);renderGroupCallTiles();}};
       return state;
     }
     async function startGroupCall() {
@@ -1306,11 +1309,11 @@
     }
     function removeGroupPeer(uid) {
       const state=groupPeers.get(uid);if(state){state.pc.close();groupPeers.delete(uid);}
-      groupRemoteStreams.delete(uid);renderGroupCallTiles();
+      stopSpeakingMonitor(uid);groupRemoteStreams.delete(uid);renderGroupCallTiles();
     }
     async function endGroupCall(signal=true) {
       for(const [uid,state] of groupPeers){if(signal)try{await state.docRef.update({state:'ended',endedAt:firebase.firestore.FieldValue.serverTimestamp()});}catch(e){}state.pc.close();}
-      groupPeers.clear();groupRemoteStreams.clear();groupUnsubscribers.forEach(unsub=>unsub());groupUnsubscribers.clear();
+      groupPeers.clear();groupRemoteStreams.clear();speakingMonitors.forEach((_,uid)=>stopSpeakingMonitor(uid));groupUnsubscribers.forEach(unsub=>unsub());groupUnsubscribers.clear();
       groupLocalStream?.getTracks().forEach(t=>t.stop());groupLocalStream=null;groupScreenStream?.getTracks().forEach(t=>t.stop());groupScreenStream=null;
       groupCallActive=false;groupCallId=null;groupCallConversationId=null;$('localVideo').srcObject=null;
       $('callOverlay').querySelectorAll('.group-remote-tile').forEach(el=>el.remove());$('callOverlay').hidden=true;
@@ -1418,7 +1421,7 @@
       if (peerConnection) peerConnection.close(); peerConnection = null;
       if (localStream) localStream.getTracks().forEach(track => track.stop()); localStream = null;
       if (screenStream) screenStream.getTracks().forEach(track => track.stop()); screenStream = null;
-      $('localVideo').srcObject = null; $('remoteVideo').srcObject = null;
+      stopSpeakingMonitor('direct');$('remoteVideo').classList.remove('is-speaking');showDirectCameraCard(false);$('localVideo').srcObject = null; $('remoteVideo').srcObject = null;
       $('callOverlay').hidden = true; $('shareScreen').textContent = 'Share screen'; updateCallStatus('Call ended');
       callConversationId = null; seenRemoteCandidates = seenLocalCandidates = 0;
     }
