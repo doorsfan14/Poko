@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:FILL,opsz,wght@0..1,20..48,100..700&icon_names=add,arrow_back,chat,close,edit,person,search,swap_horiz&display=block" rel="stylesheet">
   <style>
     :root{color-scheme:dark;--bg:#222428;--panel:#292b30;--panel-2:#303238;--hover:#373a42;--line:rgba(255,255,255,.075);--text:#f1f2f4;--muted:#a4a7b0;--soft:#777b85;--accent:#b5ceff;--accent-ink:#20242b;--radius:16px}
     *{box-sizing:border-box}
@@ -19,7 +20,10 @@
     .rail-button{width:44px;height:44px;border:0;border-radius:15px;background:transparent;color:var(--muted);display:grid;place-items:center;position:relative;transition:background .16s,color .16s,border-radius .16s}
     .rail-button:hover,.rail-button.active{background:var(--hover);color:var(--text);border-radius:13px}
     .rail-button.active:before{content:"";position:absolute;left:-16px;width:3px;height:23px;border-radius:0 4px 4px 0;background:var(--accent)}
-    .rail-button svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+    .material-symbol{font-family:"Material Symbols Outlined";font-weight:400;font-style:normal;font-size:22px;line-height:1;letter-spacing:normal;text-transform:none;display:inline-block;white-space:nowrap;word-wrap:normal;direction:ltr;font-feature-settings:"liga";-webkit-font-smoothing:antialiased}
+    .rail-button .material-symbol{font-size:23px}
+    .icon-button .material-symbol{font-size:19px}
+    .search .material-symbol{font-size:18px}
     .rail-spacer{flex:1}
     .rail-divider{height:1px;width:32px;background:var(--line);margin:5px 0}
     .sidebar{min-width:0;background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;height:100dvh}
@@ -86,39 +90,40 @@
   <div class="app" id="app">
     <aside class="rail" aria-label="Navigation">
       <button class="rail-button active" aria-label="Direct messages" title="Direct messages" id="dmNav">
-        <svg viewBox="0 0 24 24"><path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5H5l-2 2v-7.5A7.5 7.5 0 0 1 10.5 6h2A7.5 7.5 0 0 1 20 13.5z"/><path d="M8 12h.01M12 12h.01M16 12h.01"/></svg>
+        <span class="material-symbol">chat</span>
       </button>
       <div class="rail-spacer"></div>
       <div class="rail-divider"></div>
       <button class="rail-button" id="profileButton" aria-label="Edit profile" title="Edit profile">
-        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>
+        <span class="material-symbol">person</span>
       </button>
     </aside>
     <aside class="sidebar" aria-label="Direct messages list">
       <div class="side-header">
         <h1>Messages</h1>
         <label class="search">
-          <svg viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg>
+          <span class="material-symbol">search</span>
           <input id="search" type="search" placeholder="Search messages" aria-label="Search messages">
         </label>
       </div>
-      <div class="side-section"><span>Direct messages</span><button class="icon-button" id="newMessage" aria-label="New message" title="New message"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></div>
+      <div class="side-section"><span>Direct messages</span><button class="icon-button" id="newMessage" aria-label="New message" title="New message"><span class="material-symbol">add</span></button></div>
       <div class="empty-list">
-        <div class="empty-symbol"><svg viewBox="0 0 24 24"><path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5H5l-2 2v-7.5A7.5 7.5 0 0 1 10.5 6h2A7.5 7.5 0 0 1 20 13.5z"/></svg></div>
+        <div class="empty-symbol"><span class="material-symbol">chat</span></div>
         <strong>No conversations yet</strong>
         <p>Your direct messages will show up here when you start talking to someone.</p>
         <button class="small-button" id="startChat">Start a conversation</button>
       </div>
       <div class="profile-row">
+        <div class="mini-avatar" id="sideAvatar">You</div>
         <div class="profile-label"><strong id="displayName">your_username</strong></div>
-        <button class="icon-button" id="editProfile" aria-label="Edit profile" title="Edit profile"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg></button>
+        <button class="icon-button" id="editProfile" aria-label="Edit profile" title="Edit profile"><span class="material-symbol">edit</span></button>
       </div>
     </aside>
     <main class="main">
-      <div class="topbar"><button class="icon-button back-mobile" id="backToList" aria-label="Back to messages" title="Back to messages"><svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></button><span class="topbar-title">Direct messages</span><div class="topbar-tools"><button class="icon-button" id="topNewMessage" aria-label="New message" title="New message"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></div></div>
+      <div class="topbar"><button class="icon-button back-mobile" id="backToList" aria-label="Back to messages" title="Back to messages"><span class="material-symbol">arrow_back</span></button><span class="topbar-title">Direct messages</span><div class="topbar-tools"><button class="icon-button" id="topNewMessage" aria-label="New message" title="New message"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></div></div>
       <section class="content-empty">
         <div class="welcome">
-          <div class="welcome-art"><svg viewBox="0 0 24 24"><path d="M7 7h10a4 4 0 0 1 0 8h-1"/><path d="M17 17H7a4 4 0 0 1 0-8h1"/><path d="m8 6-2 3 2 3M16 12l2 3-2 3"/></svg></div>
+          <div class="welcome-art"><span class="material-symbol">swap_horiz</span></div>
           <h2>Your conversations live here.</h2>
           <p>Choose someone to message and your conversation will appear here. Nothing here yet, just a clean slate.</p>
           <button class="primary" id="mainNewMessage">New message</button>
@@ -129,7 +134,7 @@
 
   <div class="profile-editor" id="profileEditor" role="dialog" aria-modal="true" aria-labelledby="profileTitle">
     <section class="dialog">
-      <div class="dialog-header"><h2 id="profileTitle">Personalize your profile</h2><button class="icon-button" id="closeEditor" aria-label="Close profile editor">×</button></div>
+      <div class="dialog-header"><h2 id="profileTitle">Personalize your profile</h2><button class="icon-button" id="closeEditor" aria-label="Close profile editor"><span class="material-symbol">close</span></button></div>
       <div class="dialog-body">
         <div class="banner-preview" id="bannerPreview"></div>
         <div class="avatar-edit-row"><div class="large-avatar" id="largeAvatar">You</div><div><strong style="font-size:.83rem">Your profile</strong><div style="font-size:.72rem;color:var(--muted);margin-top:4px">Make it yours.</div></div></div>
@@ -157,6 +162,7 @@
         bannerUrl = saved.banner || '';
         const name = saved.name || 'your_username';
         $('displayName').textContent = name;
+        setAvatar($('sideAvatar'), avatarUrl, name.slice(0,2).toUpperCase());
         setAvatar($('largeAvatar'), avatarUrl, name.slice(0,2).toUpperCase());
       } catch (_) {}
     }
@@ -204,6 +210,7 @@
       const name = $('nameInput').value.trim().replace(/^@+/, '') || 'your_username';
       try { localStorage.setItem('poko-profile', JSON.stringify({name, avatar: avatarUrl, banner: bannerUrl})); } catch (_) { showToast('Could not save profile in this browser.'); }
       $('displayName').textContent = name;
+      setAvatar($('sideAvatar'), avatarUrl, name.slice(0,2).toUpperCase());
       setAvatar($('largeAvatar'), avatarUrl, name.slice(0,2).toUpperCase());
       closeEditor(); showToast('Username saved on this device.');
     });
