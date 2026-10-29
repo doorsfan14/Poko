@@ -1154,7 +1154,9 @@
           if (!current.getTracks().some(track => track.id === event.track.id)) current.addTrack(event.track);
           $('remoteVideo').srcObject = current;
         }
-        $('remoteVideo').play?.().catch(() => {});\n        if(event.track.kind==='video'){showDirectCameraCard(event.track.muted||!event.track.enabled);event.track.onmute=()=>showDirectCameraCard(true);event.track.onunmute=()=>showDirectCameraCard(false);}\n        if(event.track.kind==='audio')monitorSpeaking('direct',$('remoteVideo').srcObject,$('callOverlay').querySelector('.call-stage'));
+        $('remoteVideo').play?.().catch(() => {});
+        if(event.track.kind==='video'){showDirectCameraCard(event.track.muted||!event.track.enabled);event.track.onmute=()=>showDirectCameraCard(true);event.track.onunmute=()=>showDirectCameraCard(false);}
+        if(event.track.kind==='audio')monitorSpeaking('direct',$('remoteVideo').srcObject,$('callOverlay').querySelector('.call-stage'));
       };
       peerConnection.onconnectionstatechange = () => {
         if (peerConnection && peerConnection.connectionState === 'connected') updateCallStatus('Connected');
@@ -1283,8 +1285,9 @@
           }));
         }));
         renderGroupCallTiles();$('localVideo').srcObject=groupLocalStream.getTracks().length?groupLocalStream:null;
+        await establishGroupMesh();
         return true;
-      }catch(error){console.error('Group call failed:',error);showToast('Could not start group call: '+(error.message||error));await endGroupCall(false);await establishGroupMesh();\n         return true;}
+      }catch(error){console.error('Group call failed:',error);showToast('Could not start group call: '+(error.message||error));await endGroupCall(false);return true;}
     }
     async function acceptGroupCall(docId,data) {
       if(!activeConversationId||!currentUser)return;
@@ -1305,7 +1308,8 @@
           if(d.state==='ended')removeGroupPeer(data.callerId);
         }));
         renderGroupCallTiles();$('localVideo').srcObject=groupLocalStream.getTracks().length?groupLocalStream:null;
-        await establishGroupMesh();\n      }catch(error){console.error('Could not join group call:',error);showToast('Could not join group call: '+(error.message||error));}
+        await establishGroupMesh();
+      }catch(error){console.error('Could not join group call:',error);showToast('Could not join group call: '+(error.message||error));}
     }
     async function establishGroupMesh(){
       if(!groupCallActive||!groupCallId||!groupCallConversationId||!currentUser)return;
@@ -1433,7 +1437,8 @@
         const screenTrack = screenStream.getVideoTracks()[0];
         let sender = getVideoSender(peerConnection);
         if (!sender) sender = peerConnection.addTransceiver('video',{direction:'sendrecv'}).sender;
-        const transceiver=peerConnection.getTransceivers().find(t=>t.sender===sender);if(transceiver&&transceiver.direction==='recvonly')transceiver.direction='sendrecv';\n        await sender.replaceTrack(screenTrack);
+        const transceiver=peerConnection.getTransceivers().find(t=>t.sender===sender);if(transceiver&&transceiver.direction==='recvonly')transceiver.direction='sendrecv';
+        await sender.replaceTrack(screenTrack);
         $('localVideo').srcObject = screenStream;
         $('shareScreen').textContent = 'Stop sharing';
         screenTrack.onended = () => { if (screenStream) shareScreen(); };
