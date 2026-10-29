@@ -34,7 +34,7 @@
     .icon-button:hover{background:var(--hover);color:var(--text)}
     .icon-button svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
     .empty-list{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:22px;color:var(--muted)}
-    .empty-symbol{width:48px;height:48px;display:grid;place-items:center;border:1px solid var(--line);border-radius:16px;color:#c0c4ce;background:rgba(255,255,255,.025);margin-bottom:15px}
+    .empty-symbol{width:48px;height:48px;display:grid;place-items:center;border:1px solid var(--line);border-radius:13px;color:#c0c4ce;background:#303238;margin-bottom:15px}
     .empty-symbol svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
     .empty-list strong{color:#e3e4e8;font-size:.85rem;font-weight:700}
     .empty-list p{max-width:210px;margin:8px 0 17px;font-size:.77rem;line-height:1.65;color:var(--muted)}
@@ -53,7 +53,7 @@
     .topbar-tools{display:flex;align-items:center;gap:8px}
     .content-empty{flex:1;display:flex;align-items:center;justify-content:center;text-align:center;padding:32px}
     .welcome{max-width:400px}
-    .welcome-art{width:64px;height:64px;margin:0 auto 24px;border-radius:18px;background:#303238;border:1px solid var(--line);display:grid;place-items:center;color:#c7d8ff}
+    .welcome-art{width:64px;height:64px;margin:0 auto 24px;border-radius:16px;background:#303238;border:1px solid var(--line);display:grid;place-items:center;color:#c7d8ff;box-shadow:none}
     .welcome-art svg{width:31px;height:31px;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
     .welcome h2{font-size:1.5rem;letter-spacing:-.055em;margin:0 0 11px}
     .welcome p{font-size:.87rem;line-height:1.8;color:var(--muted);margin:0 auto 23px;max-width:350px}
@@ -113,7 +113,7 @@
       <div class="profile-banner-card" id="profileBanner" aria-label="Profile banner"></div>
       <div class="profile-row">
         <div class="mini-avatar" id="sideAvatar">You</div>
-        <div class="profile-label"><strong id="displayName">Your profile</strong><span>Personal account</span></div>
+        <div class="profile-label"><strong id="displayName">your_username</strong></div>
         <button class="icon-button" id="editProfile" aria-label="Edit profile" title="Edit profile"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg></button>
       </div>
     </aside>
@@ -121,7 +121,7 @@
       <div class="topbar"><button class="icon-button back-mobile" id="backToList" aria-label="Back to messages" title="Back to messages"><svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></button><span class="topbar-title">Direct messages</span><div class="topbar-tools"><button class="icon-button" id="topNewMessage" aria-label="New message" title="New message"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></div></div>
       <section class="content-empty">
         <div class="welcome">
-          <div class="welcome-art"><svg viewBox="0 0 24 24"><path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5H5l-2 2v-7.5A7.5 7.5 0 0 1 10.5 6h2A7.5 7.5 0 0 1 20 13.5z"/><path d="M8 12h.01M12 12h.01M16 12h.01"/></svg></div>
+          <div class="welcome-art"><svg viewBox="0 0 24 24"><path d="M7 7h10a4 4 0 0 1 0 8h-1"/><path d="M17 17H7a4 4 0 0 1 0-8h1"/><path d="m8 6-2 3 2 3M16 12l2 3-2 3"/></svg></div>
           <h2>Your conversations live here.</h2>
           <p>Choose someone to message and your conversation will appear here. Nothing here yet, just a clean slate.</p>
           <button class="primary" id="mainNewMessage">New message</button>
@@ -138,7 +138,7 @@
         <div class="avatar-edit-row"><div class="large-avatar" id="largeAvatar">You</div><div><strong style="font-size:.83rem">Your profile</strong><div style="font-size:.72rem;color:var(--muted);margin-top:4px">Make it yours.</div></div></div>
         <div class="field"><label for="bannerFile">Profile banner</label><div class="file-control"><span>Choose a banner</span><input id="bannerFile" type="file" accept="image/*"></div><small>Animated GIF and WebP banners are supported. Preview stays in this browser; nothing is uploaded to a server.</small></div>
         <div class="field"><label for="avatarFile">Profile picture</label><div class="file-control"><span>Choose a picture</span><input id="avatarFile" type="file" accept="image/*"></div><small>Animated GIF and WebP profile pictures are supported and remain animated when the selected file is animated.</small></div>
-        <div class="field"><label for="nameInput">Display name</label><input id="nameInput" type="text" maxlength="40" placeholder="Your display name" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#222428;color:var(--text);padding:11px 12px;font-size:.8rem"></div>
+        <div class="field"><label for="nameInput">Username</label><input id="nameInput" type="text" maxlength="40" placeholder="Your display name" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#222428;color:var(--text);padding:11px 12px;font-size:.8rem"></div>
         <div class="dialog-actions"><button class="small-button" id="cancelEditor">Cancel</button><button class="primary" id="saveProfile">Save changes</button></div>
       </div>
     </section>
@@ -158,7 +158,7 @@
         const saved = JSON.parse(localStorage.getItem('poko-profile') || '{}');
         avatarUrl = saved.avatar || '';
         bannerUrl = saved.banner || '';
-        const name = saved.name || 'Your profile';
+        const name = saved.name || 'your_username';
         $('displayName').textContent = name;
         setAvatar($('sideAvatar'), avatarUrl, name.slice(0,2).toUpperCase());
         setAvatar($('railAvatar'), avatarUrl, name.slice(0,2).toUpperCase());
@@ -173,7 +173,7 @@
     }
     function openEditor() {
       pendingAvatar = avatarUrl; pendingBanner = bannerUrl;
-      $('nameInput').value = $('displayName').textContent === 'Your profile' ? '' : $('displayName').textContent;
+      $('nameInput').value = $('displayName').textContent === 'your_username' ? '' : $('displayName').textContent;
       setAvatar($('largeAvatar'), pendingAvatar);
       $('bannerPreview').style.backgroundImage = pendingBanner ? 'url("' + pendingBanner + '")' : '';
       editor.classList.add('open');
@@ -202,7 +202,7 @@
     $('bannerFile').addEventListener('change', () => loadImageFile($('bannerFile'), 'banner'));
     $('saveProfile').addEventListener('click', () => {
       avatarUrl = pendingAvatar; bannerUrl = pendingBanner;
-      const name = $('nameInput').value.trim() || 'Your profile';
+      const name = $('nameInput').value.trim().replace(/^@+/, '') || 'your_username';
       try { localStorage.setItem('poko-profile', JSON.stringify({name, avatar: avatarUrl, banner: bannerUrl})); } catch (_) { showToast('Could not save profile in this browser.'); }
       $('displayName').textContent = name;
       setAvatar($('sideAvatar'), avatarUrl, name.slice(0,2).toUpperCase());
@@ -210,7 +210,7 @@
       setAvatar($('largeAvatar'), avatarUrl, name.slice(0,2).toUpperCase());
       $('profileBanner').style.backgroundColor = DEFAULT_BANNER;
       $('profileBanner').style.backgroundImage = bannerUrl ? 'url(\"' + bannerUrl + '\")' : 'none';
-      closeEditor(); showToast('Profile saved on this device.');
+      closeEditor(); showToast('Username saved on this device.');
     });
     ['newMessage','startChat','topNewMessage','mainNewMessage'].forEach(id => $(id).addEventListener('click', () => {
       if (window.matchMedia('(max-width: 760px)').matches) app.classList.add('show-main');
