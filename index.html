@@ -146,8 +146,8 @@
       <div class="dialog-body">
         <div class="banner-preview" id="bannerPreview"></div>
         <div class="avatar-edit-row"><div class="large-avatar" id="largeAvatar">You</div><div><strong style="font-size:.83rem">Your profile</strong><div style="font-size:.72rem;color:var(--muted);margin-top:4px">Make it yours.</div></div></div>
-        <div class="field"><label for="bannerFile">Profile banner</label><div class="file-control"><span>Choose a banner</span><input id="bannerFile" type="file" accept="image/*"></div><small>Animated GIF and WebP banners are supported. Preview stays in this browser; nothing is uploaded to a server.</small></div>
-        <div class="field"><label for="avatarFile">Profile picture</label><div class="file-control"><span>Choose a picture</span><input id="avatarFile" type="file" accept="image/*"></div><small>Animated GIF and WebP profile pictures are supported and remain animated when the selected file is animated.</small></div>
+        <div class="field"><label for="bannerFile">Profile banner</label><div class="file-control"><span>Choose a banner</span><input id="bannerFile" type="file" accept="image/*"></div><small>Images upload to Cloudinary when you save. Animated GIF and WebP are supported.</small></div>
+        <div class="field"><label for="avatarFile">Profile picture</label><div class="file-control"><span>Choose a picture</span><input id="avatarFile" type="file" accept="image/*"></div><small>Images upload to Cloudinary when you save. Animated GIF and WebP are supported.</small></div>
         <div class="field"><label for="nameInput">Username</label><input id="nameInput" type="text" maxlength="40" placeholder="Your username" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#222428;color:var(--text);padding:11px 12px;font-size:.8rem"></div>
         <div class="field"><label for="bioInput">About me</label><textarea id="bioInput" maxlength="190" rows="3" placeholder="A little about you..." style="width:100%;resize:vertical;border:1px solid var(--line);border-radius:10px;background:#222428;color:var(--text);padding:11px 12px;font:inherit;font-size:.8rem"></textarea><small>Up to 190 characters.</small></div>
         <section class="auth-section"><div class="auth-status" id="authStatus">Not signed in. Sign in to connect your Google account.</div><div class="auth-actions"><button class="auth-button" id="googleSignIn">Continue with Google</button><button class="auth-button" id="googleSignOut" hidden>Sign out</button></div></section>
@@ -158,10 +158,14 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script>
     const firebaseConfig = { apiKey: "AIzaSyBuFUV1v8AMqOa8voWN9P2FJdZssYTyzes", authDomain: "poko-sc.firebaseapp.com", projectId: "poko-sc", storageBucket: "poko-sc.firebasestorage.app", messagingSenderId: "797570563685", appId: "1:797570563685:web:cf6eb787f00c3bb0f6108c" };
+    const CLOUDINARY_CLOUD_NAME = "vmceqcad";
+    const CLOUDINARY_UPLOAD_PRESET = "PokoSocial";
     let firebaseAuth = null;
-    try { firebase.initializeApp(firebaseConfig); firebaseAuth = firebase.auth(); } catch (error) { console.error("Firebase initialization failed:", error); }
+    let profileDb = null;
+    try { firebase.initializeApp(firebaseConfig); firebaseAuth = firebase.auth(); profileDb = firebase.firestore(); } catch (error) { console.error("Firebase initialization failed:", error); }
     const $ = id => document.getElementById(id);
     const app = $('app');
     const editor = $('profileEditor');
@@ -172,17 +176,44 @@
     let pendingAvatar = '';
     let pendingBanner = '';
     let profileBio = '';
+    let pendingAvatarFile = null;
+    let pendingBannerFile = null;
+    let activeProfileLoad = 0;
+    function applyProfile(saved = {}) {
+      avatarUrl = saved.avatar || '';
+      bannerUrl = saved.banner || '';
+      profileBio = saved.bio || '';
+      const name = saved.name || 'your_username';
+      $('displayName').textContent = name;
+      setAvatar($('sideAvatar'), avatarUrl, name.slice(0,2).toUpperCase());
+      setAvatar($('largeAvatar'), avatarUrl, name.slice(0,2).toUpperCase());
+      $('profileViewName').textContent = name;
+      $('profileViewBio').textContent = profileBio;
+      $('profileViewBanner').style.backgroundImage = bannerUrl ? `url("${bannerUrl}")` : '';
+    }
     function restoreProfile() {
+      try { applyProfile(JSON.parse(localStorage.getItem('poko-profile') || '{}')); }
+      catch (error) { console.error('Could not restore local profile:', error); }
+    }
+    async function loadCloudProfile(user) {
+      const loadId = ++activeProfileLoad;
+      restoreProfile();
+      if (!user || !profileDb) return;
       try {
-        const saved = JSON.parse(localStorage.getItem('poko-profile') || '{}');
-        avatarUrl = saved.avatar || '';
-        bannerUrl = saved.banner || '';
-        const name = saved.name || 'your_username';
-        profileBio = saved.bio || '';
-        $('displayName').textContent = name;
-        setAvatar($('sideAvatar'), avatarUrl, name.slice(0,2).toUpperCase());
-        setAvatar($('largeAvatar'), avatarUrl, name.slice(0,2).toUpperCase());
-      } catch (_) {}
+        const snapshot = await profileDb.collection('profiles').doc(user.uid).get();
+        if (loadId !== activeProfileLoad || firebaseAuth.currentUser?.uid !== user.uid) return;
+        if (snapshot.exists) {
+          const data = snapshot.data() || {};
+          applyProfile(data);
+          localStorage.setItem('poko-profile', JSON.stringify(data));
+        } else {
+          const local = JSON.parse(localStorage.getItem('poko-profile') || '{}');
+          if (Object.keys(local).length) await profileDb.collection('profiles').doc(user.uid).set({...local, updatedAt: firebase.firestore.FieldValue.serverTimestamp()}, {merge:true});
+        }
+      } catch (error) {
+        console.error('Cloud profile load failed:', error);
+        showToast('Could not load cloud profile. Check Firestore rules.');
+      }
     }
     function setAvatar(el, url, fallback='You') {
       el.replaceChildren();
@@ -217,21 +248,35 @@
       finally { button.disabled = false; }
     });
     $('googleSignOut').addEventListener('click', async () => { try { await firebaseAuth.signOut(); showToast('Signed out.'); } catch (error) { console.error('Sign-out failed:', error); showToast('Could not sign out.'); } });
-    if (firebaseAuth) firebaseAuth.onAuthStateChanged(setAuthStatus); else setAuthStatus(null);
+    if (firebaseAuth) firebaseAuth.onAuthStateChanged(user => { setAuthStatus(user); loadCloudProfile(user); }); else setAuthStatus(null);
     function showToast(message) {
       const toast = $('toast'); toast.textContent = message; toast.classList.add('show');
       window.clearTimeout(showToast.timer); showToast.timer = window.setTimeout(() => toast.classList.remove('show'), 2600);
     }
     function loadImageFile(input, kind) {
-      const file = input.files && input.files[0]; if (!file) return;
+      const file = input.files && input.files[0];
+      if (!file) return;
       if (!file.type.startsWith('image/')) { showToast('Choose an image file.'); input.value = ''; return; }
       if (file.size > 12 * 1024 * 1024) { showToast('Please choose an image under 12 MB.'); input.value = ''; return; }
-      const reader = new FileReader();
-      reader.onload = () => {
-        if (kind === 'avatar') { pendingAvatar = reader.result; setAvatar($('largeAvatar'), pendingAvatar); }
-        else { pendingBanner = reader.result; $('bannerPreview').style.backgroundImage = 'url("' + pendingBanner + '")'; }
-      };
-      reader.readAsDataURL(file);
+      const previewUrl = URL.createObjectURL(file);
+      if (kind === 'avatar') {
+        pendingAvatarFile = file;
+        pendingAvatar = previewUrl;
+        setAvatar($('largeAvatar'), pendingAvatar);
+      } else {
+        pendingBannerFile = file;
+        pendingBanner = previewUrl;
+        $('bannerPreview').style.backgroundImage = `url("${previewUrl}")`;
+      }
+    }
+    async function uploadToCloudinary(file) {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+      const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {method:'POST', body:formData});
+      const result = await response.json();
+      if (!response.ok || !result.secure_url) throw new Error(result.error?.message || 'Cloudinary upload failed.');
+      return result.secure_url;
     }
     $('profileRow').addEventListener('click', e => { if (!e.target.closest('#editProfile')) openProfile(); });
     $('profileRow').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openProfile(); } });
@@ -246,14 +291,40 @@
     $('avatarFile').addEventListener('change', () => loadImageFile($('avatarFile'), 'avatar'));
     $('bannerFile').addEventListener('change', () => loadImageFile($('bannerFile'), 'banner'));
     window.addEventListener('resize', () => { if (editor.classList.contains('open')) closeEditor(); });
-    $('saveProfile').addEventListener('click', () => {
-      avatarUrl = pendingAvatar; bannerUrl = pendingBanner; profileBio = $('bioInput').value.trim();
-      const name = $('nameInput').value.trim().replace(/^@+/, '') || 'your_username';
-      try { localStorage.setItem('poko-profile', JSON.stringify({name, avatar: avatarUrl, banner: bannerUrl, bio: $('bioInput').value.trim()})); } catch (_) { showToast('Could not save profile in this browser.'); }
-      $('displayName').textContent = name;
-      setAvatar($('sideAvatar'), avatarUrl, name.slice(0,2).toUpperCase());
-      setAvatar($('largeAvatar'), avatarUrl, name.slice(0,2).toUpperCase());
-      closeEditor(); showToast('Profile saved on this device.');
+    $('saveProfile').addEventListener('click', async () => {
+      const button = $('saveProfile');
+      button.disabled = true;
+      const oldLabel = button.textContent;
+      button.textContent = 'Saving…';
+      try {
+        let nextAvatar = avatarUrl;
+        let nextBanner = bannerUrl;
+        if (pendingAvatarFile) nextAvatar = await uploadToCloudinary(pendingAvatarFile);
+        if (pendingBannerFile) nextBanner = await uploadToCloudinary(pendingBannerFile);
+        const name = $('nameInput').value.trim().replace(/^@+/, '') || 'your_username';
+        const bio = $('bioInput').value.trim();
+        const profile = {name, avatar:nextAvatar, banner:nextBanner, bio};
+        const user = firebaseAuth?.currentUser;
+        if (user && profileDb) await profileDb.collection('profiles').doc(user.uid).set({...profile, updatedAt:firebase.firestore.FieldValue.serverTimestamp()}, {merge:true});
+        try { localStorage.setItem('poko-profile', JSON.stringify(profile)); }
+        catch (error) {
+          if (!user) throw new Error('Images uploaded, but browser storage is unavailable. Sign in with Google to save your profile to your account.');
+          console.warn('Local profile cache unavailable:', error);
+        }
+        applyProfile(profile);
+        pendingAvatarFile = null;
+        pendingBannerFile = null;
+        $('avatarFile').value = '';
+        $('bannerFile').value = '';
+        closeEditor();
+        showToast(user ? 'Profile saved to your account.' : 'Profile saved on this device. Sign in to sync it across devices.');
+      } catch (error) {
+        console.error('Profile save failed:', error);
+        showToast(error.message || 'Could not save profile. Check Cloudinary and Firebase settings.');
+      } finally {
+        button.disabled = false;
+        button.textContent = oldLabel;
+      }
     });
     ['newMessage','startChat','topNewMessage','mainNewMessage'].forEach(id => $(id).addEventListener('click', () => {
       if (window.matchMedia('(max-width: 760px)').matches) app.classList.add('show-main');
