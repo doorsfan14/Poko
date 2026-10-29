@@ -342,7 +342,7 @@
     .login-google{width:100%;min-height:50px;display:flex;align-items:center;justify-content:center;gap:12px;border:1px solid #dadce0;border-radius:6px;background:#fff;color:#3c4043;font-family:Arial,sans-serif;font-size:14px;font-weight:600;letter-spacing:.1px;transition:background .15s,border-color .15s}
     .login-google:hover{background:#f8faff;border-color:#d2e3fc}
     .login-google:disabled{opacity:.6;cursor:wait;transform:none}
-    .google-logo{width:20px;height:20px;flex:none}
+    .google-logo{width:20px;height:20px;flex:none;object-fit:contain}
     .login-note{font-size:.7rem;line-height:1.6;color:var(--soft);margin:16px 0 0}
     html[data-theme="light"] .login-card{box-shadow:none}
     html[data-theme="light"] .login-google{background:#fff;color:#3c4043}
@@ -375,7 +375,7 @@
     <div class="login-card">
       <h1 id="loginTitle">Messages, without the noise.</h1>
       <p class="login-copy">Sign in to find people, keep your conversations, and make Poko yours.</p>
-      <button class="login-google" id="loginGoogle" type="button"><svg class="google-logo" viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="googleGradient" x1="7%" y1="10%" x2="91%" y2="90%"><stop offset="0%" stop-color="#4285F4"/><stop offset="28%" stop-color="#34A853"/><stop offset="53%" stop-color="#FBBC05"/><stop offset="72%" stop-color="#EA4335"/><stop offset="100%" stop-color="#4285F4"/></linearGradient></defs><path fill="url(#googleGradient)" d="M43.6 24.5c0-1.4-.1-2.8-.4-4.1H24v7.8h11a9.4 9.4 0 0 1-4.1 6.2v5.1h6.6c3.9-3.6 6.1-8.9 6.1-15z"/><path fill="url(#googleGradient)" d="M24 44c5.5 0 10.1-1.8 13.5-4.9l-6.6-5.1c-1.8 1.2-4.1 2-6.9 2-5.3 0-9.8-3.6-11.4-8.4H5.8v5.3A20 20 0 0 0 24 44z"/><path fill="url(#googleGradient)" d="M12.6 27.6a12 12 0 0 1 0-7.2v-5.3H5.8a20 20 0 0 0 0 17.8z"/><path fill="url(#googleGradient)" d="M24 8.1c3 0 5.7 1 7.8 3.1l5.8-5.8A19.5 19.5 0 0 0 24 0 20 20 0 0 0 5.8 15.1l6.8 5.3C14.2 13.5 18.7 8.1 24 8.1z"/></svg><span>Continue with Google</span></button>
+      <button class="login-google" id="loginGoogle" type="button"><img class="google-logo" src="https://storage.googleapis.com/pe-portal-consumer-prod-wagtail-static/original_images/GoogleG_FullColor_RGB.png?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=wagtail%40pe-portal-consumer-prod.iam.gserviceaccount.com%2F20261029%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20261029T032841Z&X-Goog-Expires=86400&X-Goog-Signature=104e59159f1971b43dc017cb8a16b0cba4432197ea6bf20e8b93433ea3bdff7a741ce2e13d4cbb6fc376a386fef24bfa1eed08f4b45c79e71d99fa5642eb3096cb991fb52e476a8d3f8258d089f6cacb273ec0976fdadee4e6685d95aa3376454e17f4a9887144cac322ea43ea56174204efc9bdb5733c25aade2a0493416a669a67db36b61abc9a77b55c8bf579e285f2fdeb30c01e36fd0186ef685342220154816a864bc0adc18ff39511e67a21f10ea879d3615e906434e64ec51dbd0c5f65ae15cca57ddf2b3877a272d66dddd6ac7647da974c891108db31f4e8af3a8a9d75afb74e3c66f1953f563ca8c136f2f5983bcbaf4b95877b7f609841a066af&X-Goog-SignedHeaders=host&response-content-disposition=attachment%3B+filename%3DGoogleG_FullColor_RGB.png" alt="" referrerpolicy="no-referrer"><span>Continue with Google</span></button>
       <p class="login-note" id="loginNote">Your account keeps your profile and conversations synced.</p>
     </div>
   </section>
@@ -506,6 +506,7 @@
     let knownConversations = [];
     const profileCache = new Map();
     const profileStatusUnsubscribers = new Map();
+    let ownProfileUnsubscribe = null;
 
     function applyProfile(saved = {}) {
       myActivityStatus = ['online','idle','dnd','invisible'].includes(saved.status) ? saved.status : 'online';
@@ -531,38 +532,42 @@
     }
     async function loadCloudProfile(user) {
       const loadId = ++activeProfileLoad;
-      window.addEventListener('pagehide', () => {
-      const user = firebaseAuth?.currentUser;
-      if (user && profileDb) {
-        try {
-          profileDb.collection('profiles').doc(user.uid).set({
-            status:'offline',
-            presenceUpdatedAt:firebase.firestore.FieldValue.serverTimestamp()
-          }, {merge:true});
-        } catch (error) { console.warn('Could not mark offline on page exit:', error); }
-      }
-    });
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible' && firebaseAuth?.currentUser) updatePresence(myActivityStatus === 'invisible' ? 'invisible' : myActivityStatus);
-    });
-
-    restoreProfile();
+      if (ownProfileUnsubscribe) { ownProfileUnsubscribe(); ownProfileUnsubscribe = null; }
+      restoreProfile();
       if (!user || !profileDb) return;
-      try {
-        const snapshot = await profileDb.collection('profiles').doc(user.uid).get();
+      ownProfileUnsubscribe = profileDb.collection('profiles').doc(user.uid).onSnapshot(async snapshot => {
         if (loadId !== activeProfileLoad || firebaseAuth.currentUser?.uid !== user.uid) return;
         if (snapshot.exists) {
           const data = snapshot.data() || {};
           applyProfile(data);
-          localStorage.setItem('poko-profile', JSON.stringify(data));
-        } else {
-          const local = JSON.parse(localStorage.getItem('poko-profile') || '{}');
-          if (Object.keys(local).length) await profileDb.collection('profiles').doc(user.uid).set({...local, updatedAt: firebase.firestore.FieldValue.serverTimestamp()}, {merge:true});
+          try { localStorage.setItem('poko-profile', JSON.stringify(data)); } catch (error) { console.warn('Could not cache profile:', error); }
+          return;
         }
-      } catch (error) {
-        console.error('Cloud profile load failed:', error);
+        const local = (() => { try { return JSON.parse(localStorage.getItem('poko-profile') || '{}'); } catch { return {}; } })();
+        const profile = {
+          ...local,
+          name: local.name && local.name !== 'your_username' ? local.name : (user.displayName || user.email?.split('@')[0] || 'your_username'),
+          avatar: local.avatar || user.photoURL || '',
+          banner: local.banner || '',
+          bio: local.bio || '',
+          status: ['online','idle','dnd','invisible'].includes(local.status) ? local.status : 'online'
+        };
+        applyProfile(profile);
+        try {
+          await profileDb.collection('profiles').doc(user.uid).set({
+            ...profile,
+            email: user.email || '',
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+          }, {merge:true});
+          localStorage.setItem('poko-profile', JSON.stringify(profile));
+        } catch (error) {
+          console.error('Could not initialize cloud profile:', error);
+          showToast('Your profile could not sync. Check Firestore rules.');
+        }
+      }, error => {
+        console.error('Cloud profile listener failed:', error);
         showToast('Could not load cloud profile. Check Firestore rules.');
-      }
+      });
     }
     function setAvatar(el, url, fallback='You') {
       el.replaceChildren();
