@@ -572,7 +572,8 @@
     let callInitiator = false;
     let seenRemoteCandidates = 0;
     let seenLocalCandidates = 0;
-    let micMuted = false;\n    let cameraDisabled = false;
+    let micMuted = false;
+    let cameraDisabled = false;
     let knownConversations = [];
     const profileCache = new Map();
     const profileStatusUnsubscribers = new Map();
@@ -1133,7 +1134,8 @@
     async function prepareLocalMedia() {
       localStream = new MediaStream();
       if (navigator.mediaDevices?.getUserMedia) {
-        for (const constraints of [{audio:true,video:false},{audio:false,video:true}]) {
+        const requests=[];if(preCallMedia.audio)requests.push({audio:true,video:false});if(preCallMedia.video)requests.push({audio:false,video:true});
+        for (const constraints of requests) {
           try {
             const captured = await navigator.mediaDevices.getUserMedia(constraints);
             captured.getTracks().forEach(track => { localStream.addTrack(track); peerConnection.addTrack(track,localStream); });
@@ -1209,10 +1211,12 @@
       const count=groupPeers.size+1;
       updateCallStatus('Group call · '+count+' participant'+(count===1?'':'s'));
     }
+    let preCallMedia={audio:true,video:true};
     async function getGroupLocalMedia() {
       if(groupLocalStream)return groupLocalStream;
       groupLocalStream=new MediaStream();
-      for(const constraints of [{audio:true,video:false},{audio:false,video:true}]) {
+      const requests=[];if(preCallMedia.audio)requests.push({audio:true,video:false});if(preCallMedia.video)requests.push({audio:false,video:true});
+      for(const constraints of requests) {
         try { const stream=await navigator.mediaDevices.getUserMedia(constraints);stream.getTracks().forEach(track=>groupLocalStream.addTrack(track)); }
         catch(error){console.info('Group call media unavailable:',error.name);}
       }
@@ -1288,13 +1292,14 @@
       groupCallActive=false;groupCallId=null;groupCallConversationId=null;$('localVideo').srcObject=null;
       $('callOverlay').querySelectorAll('.group-remote-tile').forEach(el=>el.remove());$('callOverlay').hidden=true;
     }
-    async function refreshJoinableGroupCall(conversationId){try{const snap=await groupCallCollection(conversationId).where('calleeId','==',currentUser.uid).where('state','in',['ringing','active']).get();$('joinOngoingCall').hidden=!snap.docs.some(d=>d.data().state==='ringing');}catch(e){console.warn('Could not check active group calls',e);}}\n    function watchGroupCalls(conversationId) {
+    async function refreshJoinableGroupCall(conversationId){try{const snap=await groupCallCollection(conversationId).where('calleeId','==',currentUser.uid).where('state','in',['ringing','active']).get();$('joinOngoingCall').hidden=!snap.docs.some(d=>d.data().state==='ringing');}catch(e){console.warn('Could not check active group calls',e);}}\n    async function refreshJoinableGroupCall(conversationId){try{const snap=await groupCallCollection(conversationId).where('calleeId','==',currentUser.uid).where('state','==','ringing').get();$('joinOngoingCall').hidden=!snap.docs.length;}catch(e){console.warn('Could not check active group calls',e);}}
+    function watchGroupCalls(conversationId) {
       if(!currentUser||!profileDb)return;
       const key='watch_'+conversationId;if(groupUnsubscribers.has(key))groupUnsubscribers.get(key)();
       const unsub=groupCallCollection(conversationId).onSnapshot(snapshot=>{
         snapshot.docChanges().forEach(change=>{
           const data=change.doc.data()||{};
-          if(data.calleeId===currentUser.uid&&data.state==='ringing'&&!groupPeers.has(data.callerId)&&!groupCallActive){$('joinOngoingCall').hidden=false;
+          if(data.calleeId===currentUser.uid&&data.state==='ringing'&&!groupPeers.has(data.callerId)&&!groupCallActive){$('joinOngoingCall').hidden=false;$('joinOngoingCall').hidden=false;
             $('callOverlay').hidden=false;updateCallStatus((profileCache.get(data.callerId)?.name||'A group member')+' invited you to a group call');
             let accept=$('acceptGroupCall');if(!accept){accept=document.createElement('button');accept.id='acceptGroupCall';accept.className='call-control';accept.textContent='Join group call';accept.addEventListener('click',()=>{const id=accept.dataset.doc;const d=accept._callData;if(id&&d)acceptGroupCall(id,d);});$('callOverlay').querySelector('.call-controls').prepend(accept);}
             accept.dataset.doc=change.doc.id;accept._callData=data;accept.hidden=false;
@@ -1304,8 +1309,11 @@
       },err=>console.error('Group call listener failed:',err));
       groupUnsubscribers.set(key,unsub);
     }
-    async function startCall() {
-      if(activeConversation?.group){await startGroupCall();return;}
+    function openCallSetup(){ $('preCallMic').checked=true; $('preCallCamera').checked=true; $('callSetup').hidden=false; }
+    function closeCallSetup(){ $('callSetup').hidden=true; }
+    async function beginCallWithOptions(){ preCallMedia={audio:$('preCallMic').checked,video:$('preCallCamera').checked};cameraDisabled=!preCallMedia.video;closeCallSetup();if(activeConversation?.group){await startGroupCall();return;}await startDirectCall(); }
+    async function startCall(){if(!currentUser||!activeConversationId||!profileDb){showToast('Open a conversation and sign in before calling.');return;}if(!window.RTCPeerConnection){showToast('Calls need a modern browser and HTTPS.');return;}openCallSetup();}
+    async function startDirectCall() {
       if (!currentUser || !activeConversationId || !profileDb) { showToast('Open a conversation and sign in before calling.'); return; }
       if (!window.RTCPeerConnection) { showToast('Calls need a modern browser and HTTPS.'); return; }
       try {
@@ -1367,14 +1375,19 @@
       $('callOverlay').hidden = true; $('shareScreen').textContent = 'Share screen'; updateCallStatus('Call ended');
       callConversationId = null; seenRemoteCandidates = seenLocalCandidates = 0;
     }
-    $('startVoiceCall').addEventListener('click', startCall);\n    $('cancelCallSetup').addEventListener('click',closeCallSetup);\n    $('confirmCallSetup').addEventListener('click',beginCallWithOptions);\n    $('callSetup').addEventListener('click',e=>{if(e.target===$('callSetup'))closeCallSetup();});\n    $('joinOngoingCall').addEventListener('click',async()=>{if(!activeConversationId||!currentUser)return;try{const snap=await groupCallCollection(activeConversationId).where('calleeId','==',currentUser.uid).where('state','in',['ringing','active']).get();const match=snap.docs.find(d=>d.data().state==='ringing');if(match)await acceptGroupCall(match.id,match.data());else showToast('No joinable call invitation was found.');}catch(e){console.error(e);showToast('Could not check ongoing calls.');}});
-    $('toggleCamera').addEventListener('click',()=>{const stream=groupCallActive?groupLocalStream:localStream;const tracks=stream?.getVideoTracks()||[];if(!tracks.length){showToast('Camera is off or unavailable.');return;}cameraDisabled=!cameraDisabled;tracks.forEach(t=>t.enabled=!cameraDisabled);$('toggleCamera').textContent=cameraDisabled?'Turn camera on':'Turn camera off';});\n    $('toggleMic').addEventListener('click', () => {
+    $('startVoiceCall').addEventListener('click', startCall);
+    $('cancelCallSetup').addEventListener('click',closeCallSetup);
+    $('confirmCallSetup').addEventListener('click',beginCallWithOptions);
+    $('callSetup').addEventListener('click',e=>{if(e.target===$('callSetup'))closeCallSetup();});\n    $('cancelCallSetup').addEventListener('click',closeCallSetup);\n    $('confirmCallSetup').addEventListener('click',beginCallWithOptions);\n    $('callSetup').addEventListener('click',e=>{if(e.target===$('callSetup'))closeCallSetup();});\n    $('joinOngoingCall').addEventListener('click',async()=>{if(!activeConversationId||!currentUser)return;try{const snap=await groupCallCollection(activeConversationId).where('calleeId','==',currentUser.uid).where('state','in',['ringing','active']).get();const match=snap.docs.find(d=>d.data().state==='ringing');if(match)await acceptGroupCall(match.id,match.data());else showToast('No joinable call invitation was found.');}catch(e){console.error(e);showToast('Could not check ongoing calls.');}});
+    $('toggleCamera').addEventListener('click',()=>{const stream=groupCallActive?groupLocalStream:localStream;const tracks=stream?.getVideoTracks()||[];if(!tracks.length){showToast('Camera is off or unavailable.');return;}cameraDisabled=!cameraDisabled;tracks.forEach(t=>t.enabled=!cameraDisabled);$('toggleCamera').textContent=cameraDisabled?'Turn camera on':'Turn camera off';});\n    $('toggleCamera').addEventListener('click',()=>{const stream=groupCallActive?groupLocalStream:localStream;const tracks=stream?.getVideoTracks()||[];if(!tracks.length){showToast('Camera is off or unavailable.');return;}cameraDisabled=!cameraDisabled;tracks.forEach(t=>t.enabled=!cameraDisabled);$('toggleCamera').textContent=cameraDisabled?'Turn camera on':'Turn camera off';});
+    $('toggleMic').addEventListener('click', () => {
       if(groupCallActive){if(!groupLocalStream?.getAudioTracks().length){showToast('No microphone available. You can still listen.');return;}micMuted=!micMuted;groupLocalStream.getAudioTracks().forEach(t=>t.enabled=!micMuted);$('toggleMic').textContent=micMuted?'Unmute mic':'Mute mic';return;}
       if (!localStream?.getAudioTracks().length) { showToast('No microphone is available on this device. You can still listen.'); return; }
       micMuted = !micMuted; localStream.getAudioTracks().forEach(track => track.enabled = !micMuted);
       $('toggleMic').textContent = micMuted ? 'Unmute mic' : 'Mute mic';
     });
     $('shareScreen').addEventListener('click', shareScreen);
+    $('joinOngoingCall').addEventListener('click',async()=>{if(!activeConversationId||!currentUser)return;try{const snap=await groupCallCollection(activeConversationId).where('calleeId','==',currentUser.uid).where('state','==','ringing').get();const match=snap.docs[0];if(match)await acceptGroupCall(match.id,match.data());else showToast('No joinable call invitation was found.');}catch(e){console.error(e);showToast('Could not check ongoing calls.');}});
     $('endCall').addEventListener('click', () => groupCallActive ? endGroupCall(true) : endCall(true));
     $('callOverlay').addEventListener('click', e => { if (e.target === $('callOverlay')) return; });
     
