@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:FILL,opsz,wght@0..1,20..48,100..700&icon_names=add,arrow_back,chat,close,edit,person,search,swap_horiz&display=block" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:FILL,opsz,wght@0..1,20..48,100..700&icon_names=add,arrow_back,chat,close,edit,person,search,swap_horiz,call,call_end,mic,screen_share,stop_screen_share,video_call&display=block" rel="stylesheet">
   <style>
     :root{color-scheme:dark;--bg:#222428;--panel:#292b30;--panel-2:#303238;--hover:#373a42;--line:rgba(255,255,255,.075);--text:#f1f2f4;--muted:#a4a7b0;--soft:#777b85;--accent:#b5ceff;--accent-ink:#20242b;--radius:16px}
     *{box-sizing:border-box}
@@ -169,7 +169,7 @@
         </div>
       </section>
       <section class="chat-panel" id="chatPanel" hidden>
-        <header class="chat-head"><button class="icon-button back-mobile" id="chatBack" aria-label="Back to messages"><span class="material-symbol">arrow_back</span></button><div class="mini-avatar" id="chatAvatar"></div><div class="profile-label"><strong id="chatName"></strong><span id="chatBio"></span></div><button class="small-button" id="viewChatProfile">Profile</button></header>
+        <header class="chat-head"><button class="icon-button back-mobile" id="chatBack" aria-label="Back to messages"><span class="material-symbol">arrow_back</span></button><div class="mini-avatar" id="chatAvatar"></div><div class="profile-label"><strong id="chatName"></strong><span id="chatBio"></span></div><button class="icon-button" id="startVoiceCall" title="Start voice/video call" aria-label="Start call"><span class="material-symbol">call</span></button><button class="small-button" id="viewChatProfile">Profile</button></header>
         <div class="chat-messages" id="chatMessages" aria-live="polite"><div class="chat-empty">Loading messages…</div></div>
         <form class="chat-composer" id="chatComposer"><textarea id="messageInput" rows="1" maxlength="4000" placeholder="Write a message…" aria-label="Write a message" required></textarea><button class="primary" id="sendMessage" type="submit">Send</button></form>
       </section>
@@ -192,7 +192,7 @@
       </div>
     </section>
   </div>
-  <div class="new-chat-overlay" id="newChatOverlay" role="dialog" aria-modal="true" aria-labelledby="newChatTitle"><section class="new-chat-dialog"><div class="dialog-header"><h2 id="newChatTitle">New message</h2><button class="icon-button" id="closeNewChat" aria-label="Close"><span class="material-symbol">close</span></button></div><form class="new-chat-search" id="userSearchForm"><input id="userSearchInput" type="search" maxlength="40" placeholder="Enter an exact username" aria-label="Username to find" required><button class="primary" type="submit">Find</button></form><div class="user-results" id="userResults"><div class="result-message">Search for someone's exact profile name to start a conversation.</div></div></section></div>
+  <div class="call-overlay" id="callOverlay" hidden><section class="call-window"><div class="call-stage"><video id="remoteVideo" autoplay playsinline></video><video id="localVideo" autoplay muted playsinline></video><div class="call-status" id="callStatus">Connecting…</div></div><div class="call-controls"><button class="call-control" id="toggleMic">Mute mic</button><button class="call-control" id="shareScreen">Share screen</button><button class="call-control end" id="endCall">End call</button></div></section></div>\n  <div class="new-chat-overlay" id="newChatOverlay" role="dialog" aria-modal="true" aria-labelledby="newChatTitle"><section class="new-chat-dialog"><div class="dialog-header"><h2 id="newChatTitle">New message</h2><button class="icon-button" id="closeNewChat" aria-label="Close"><span class="material-symbol">close</span></button></div><form class="new-chat-search" id="userSearchForm"><input id="userSearchInput" type="search" maxlength="40" placeholder="Enter an exact username" aria-label="Username to find" required><button class="primary" type="submit">Find</button></form><div class="user-results" id="userResults"><div class="result-message">Search for someone's exact profile name to start a conversation.</div></div></section></div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
@@ -222,7 +222,7 @@
     let activeConversation = null;
     let conversationUnsubscribe = null;
     let messagesUnsubscribe = null;
-    let conversationListUnsubscribe = null;
+    let conversationListUnsubscribe = null;\n    let callDocUnsubscribe = null;\n    let peerConnection = null;\n    let localStream = null;\n    let screenStream = null;\n    let callConversationId = null;\n    let callInitiator = false;\n    let seenRemoteCandidates = 0;\n    let seenLocalCandidates = 0;\n    let micMuted = false;
     let knownConversations = [];
     const profileCache = new Map();
 
@@ -536,10 +536,33 @@
         }
         snapshot.docs.forEach(doc => {
           const message = doc.data() || {};
-          const wrap = document.createElement('div'); wrap.className = 'message' + (message.senderId === currentUser.uid ? ' mine' : '');
-          const bubble = document.createElement('div'); bubble.className = 'message-bubble'; bubble.textContent = message.text || '';
-          const meta = document.createElement('div'); meta.className = 'message-meta'; meta.textContent = message.senderId === currentUser.uid ? 'You' : item.otherProfile.name;
-          wrap.append(bubble,meta); container.append(wrap);
+          const mine = message.senderId === currentUser.uid;
+          const wrap = document.createElement('article'); wrap.className = 'message';
+          const avatar = document.createElement('div'); avatar.className = 'mini-avatar';
+          const author = mine ? ($('displayName').textContent || 'You') : item.otherProfile.name;
+          setAvatar(avatar, mine ? avatarUrl : item.otherProfile.avatar, author.slice(0,2).toUpperCase());
+          const content = document.createElement('div'); content.className = 'message-content';
+          const head = document.createElement('div'); head.className = 'message-head';
+          const authorEl = document.createElement('span'); authorEl.className = 'message-author'; authorEl.textContent = author;
+          const meta = document.createElement('span'); meta.className = 'message-meta'; meta.textContent = message.createdAt?.toDate ? message.createdAt.toDate().toLocaleTimeString([], {hour:'numeric',minute:'2-digit'}) : '';
+          head.append(authorEl,meta);
+          const body = document.createElement('div'); body.className = 'message-text'; body.textContent = message.text || '';
+          content.append(head,body);
+          const reactions = document.createElement('div'); reactions.className = 'message-reactions';
+          const reactionMap = message.reactions || {};
+          Object.entries(reactionMap).forEach(([emoji, users]) => {
+            if (!Array.isArray(users) || !users.length) return;
+            const button = document.createElement('button'); button.className = 'reaction' + (users.includes(currentUser.uid) ? ' selected' : '');
+            button.type = 'button'; button.textContent = emoji + ' ' + users.length; button.title = 'React with ' + emoji;
+            button.addEventListener('click', () => toggleReaction(doc.id, emoji, users));
+            reactions.append(button);
+          });
+          const tools = document.createElement('div'); tools.className = 'message-tools';
+          ['👍','❤️','😂','😮','🎉'].forEach(emoji => {
+            const button = document.createElement('button'); button.className = 'reaction-add'; button.type = 'button'; button.textContent = emoji; button.title = 'React ' + emoji;
+            button.addEventListener('click', () => toggleReaction(doc.id, emoji, reactionMap[emoji] || [])); tools.append(button);
+          });
+          content.append(reactions,tools); wrap.append(avatar,content); container.append(wrap);
         });
         container.scrollTop = container.scrollHeight;
       }, error => {
@@ -553,6 +576,143 @@
       activeConversationId = null; activeConversation = null;
       $('chatPanel').hidden = true; $('welcomePanel').hidden = false;
     }
+    async function toggleReaction(messageId, emoji, users) {
+      if (!currentUser || !activeConversationId || !profileDb) return;
+      const path = 'reactions.' + emoji;
+      try {
+        const ref = profileDb.collection('conversations').doc(activeConversationId).collection('messages').doc(messageId);
+        await ref.update(path, (users || []).includes(currentUser.uid)
+          ? firebase.firestore.FieldValue.arrayRemove(currentUser.uid)
+          : firebase.firestore.FieldValue.arrayUnion(currentUser.uid));
+      } catch (error) {
+        console.error('Reaction update failed:', error);
+        showToast('Reaction could not save. Update the Firestore message rules.');
+      }
+    }
+    const rtcConfig = {iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'}]};
+    function updateCallStatus(text) { $('callStatus').textContent = text; }
+    function createPeerConnection() {
+      peerConnection = new RTCPeerConnection(rtcConfig);
+      peerConnection.ontrack = event => {
+        const stream = event.streams[0];
+        if (stream && $('remoteVideo').srcObject !== stream) $('remoteVideo').srcObject = stream;
+      };
+      peerConnection.onconnectionstatechange = () => {
+        if (peerConnection && peerConnection.connectionState === 'connected') updateCallStatus('Connected');
+        else if (peerConnection && ['failed','disconnected'].includes(peerConnection.connectionState)) updateCallStatus('Connection ' + peerConnection.connectionState);
+      };
+      peerConnection.onicecandidate = async event => {
+        if (!event.candidate || !callConversationId || !profileDb) return;
+        const field = callInitiator ? 'callerCandidates' : 'calleeCandidates';
+        try { await profileDb.collection('conversations').doc(callConversationId).update({[field]:firebase.firestore.FieldValue.arrayUnion(event.candidate.toJSON())}); }
+        catch (error) { console.error('ICE candidate write failed:', error); }
+      };
+      return peerConnection;
+    }
+    async function prepareLocalMedia() {
+      localStream = await navigator.mediaDevices.getUserMedia({audio:true,video:true});
+      $('localVideo').srcObject = localStream;
+      localStream.getTracks().forEach(track => peerConnection.addTrack(track,localStream));
+    }
+    function watchCallDocument(conversationId, initiator) {
+      if (callDocUnsubscribe) callDocUnsubscribe();
+      seenRemoteCandidates = 0;
+      callDocUnsubscribe = profileDb.collection('conversations').doc(conversationId).onSnapshot(async snapshot => {
+        if (!snapshot.exists || !peerConnection) return;
+        const data = snapshot.data() || {};
+        try {
+          if (!initiator && data.callState === 'ringing' && data.callerId !== currentUser.uid && !data.answer && !peerConnection.remoteDescription) {
+            $('callOverlay').hidden = false;
+            updateCallStatus((activeConversation?.otherProfile?.name || 'Someone') + ' is calling');
+          }
+          if (initiator && data.answer && !peerConnection.currentRemoteDescription) {
+            await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
+          }
+          if (!initiator && data.offer && !peerConnection.currentRemoteDescription && data.callState === 'accepted') {
+            await peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
+            const answer = await peerConnection.createAnswer();
+            await peerConnection.setLocalDescription(answer);
+            await profileDb.collection('conversations').doc(conversationId).update({answer:{type:answer.type,sdp:answer.sdp},callState:'active'});
+            updateCallStatus('Connecting…');
+          }
+          const candidates = initiator ? (data.calleeCandidates || []) : (data.callerCandidates || []);
+          while (seenRemoteCandidates < candidates.length) {
+            const candidate = candidates[seenRemoteCandidates++];
+            try { await peerConnection.addIceCandidate(new RTCIceCandidate(candidate)); } catch (error) { console.warn('ICE candidate skipped:',error); }
+          }
+          if (data.callState === 'ended') endCall(false);\n          if (data.callState === 'active' && $('acceptCall')) $('acceptCall').hidden = true;
+        } catch (error) { console.error('Call signaling failed:',error); showToast('Call setup failed: ' + (error.code || error.message || 'unknown error')); }
+      }, error => { console.error('Call listener failed:',error); showToast('Call signaling blocked. Update Firestore rules.'); });
+    }
+    async function startCall() {
+      if (!currentUser || !activeConversationId || !profileDb) { showToast('Open a conversation and sign in before calling.'); return; }
+      if (!navigator.mediaDevices?.getUserMedia || !window.RTCPeerConnection) { showToast('Calls need a modern browser and HTTPS.'); return; }
+      try {
+        callConversationId = activeConversationId; callInitiator = true;
+        createPeerConnection(); await prepareLocalMedia();
+        const offer = await peerConnection.createOffer(); await peerConnection.setLocalDescription(offer);
+        await profileDb.collection('conversations').doc(callConversationId).update({
+          callState:'ringing',callerId:currentUser.uid,offer:{type:offer.type,sdp:offer.sdp},answer:null,callerCandidates:[],calleeCandidates:[],callStartedAt:firebase.firestore.FieldValue.serverTimestamp()
+        });
+        $('callOverlay').hidden = false; updateCallStatus('Calling ' + (activeConversation?.otherProfile?.name || 'user') + '…');
+        watchCallDocument(callConversationId,true);
+      } catch (error) { console.error('Could not start call:',error); showToast('Could not start call: ' + (error.message || error.name)); await endCall(false); }
+    }
+    async function acceptCall() {
+      if (!currentUser || !activeConversationId || !profileDb) return;
+      try {
+        callConversationId = activeConversationId; callInitiator = false;
+        createPeerConnection(); await prepareLocalMedia();
+        await profileDb.collection('conversations').doc(callConversationId).update({callState:'accepted',calleeId:currentUser.uid,calleeCandidates:[]});
+        $('callOverlay').hidden = false; updateCallStatus('Connecting…');
+        watchCallDocument(callConversationId,false);
+      } catch (error) { console.error('Could not accept call:',error); showToast('Could not accept call: ' + (error.message || error.name)); await endCall(false); }
+    }
+    async function shareScreen() {
+      if (!peerConnection) return;
+      try {
+        if (screenStream) {
+          screenStream.getTracks().forEach(track => track.stop()); screenStream = null;
+          const cameraTrack = localStream?.getVideoTracks()[0];
+          const sender = peerConnection.getSenders().find(item => item.track?.kind === 'video');
+          if (sender && cameraTrack) await sender.replaceTrack(cameraTrack);
+          $('localVideo').srcObject = localStream;
+          $('shareScreen').textContent = 'Share screen';
+          return;
+        }
+        if (!navigator.mediaDevices.getDisplayMedia) { showToast('Screen sharing is not supported by this browser.'); return; }
+        screenStream = await navigator.mediaDevices.getDisplayMedia({video:true,audio:false});
+        const screenTrack = screenStream.getVideoTracks()[0];
+        const sender = peerConnection.getSenders().find(item => item.track?.kind === 'video');
+        if (sender) await sender.replaceTrack(screenTrack);
+        $('localVideo').srcObject = screenStream;
+        $('shareScreen').textContent = 'Stop sharing';
+        screenTrack.onended = () => { if (screenStream) shareScreen(); };
+      } catch (error) { console.error('Screen share failed:',error); showToast('Screen sharing cancelled or unavailable.'); }
+    }
+    async function endCall(signal = true) {
+      const id = callConversationId;
+      if (signal && id && profileDb) {
+        try { await profileDb.collection('conversations').doc(id).update({callState:'ended',offer:null,answer:null,callerCandidates:[],calleeCandidates:[]}); } catch (error) { console.warn('Could not signal call end:',error); }
+      }
+      if (callDocUnsubscribe) callDocUnsubscribe(); callDocUnsubscribe = null;
+      if (peerConnection) peerConnection.close(); peerConnection = null;
+      if (localStream) localStream.getTracks().forEach(track => track.stop()); localStream = null;
+      if (screenStream) screenStream.getTracks().forEach(track => track.stop()); screenStream = null;
+      $('localVideo').srcObject = null; $('remoteVideo').srcObject = null;
+      $('callOverlay').hidden = true; $('shareScreen').textContent = 'Share screen'; updateCallStatus('Call ended');
+      callConversationId = null; seenRemoteCandidates = seenLocalCandidates = 0;
+    }
+    $('startVoiceCall').addEventListener('click', startCall);
+    $('toggleMic').addEventListener('click', () => {
+      if (!localStream) return;
+      micMuted = !micMuted; localStream.getAudioTracks().forEach(track => track.enabled = !micMuted);
+      $('toggleMic').textContent = micMuted ? 'Unmute mic' : 'Mute mic';
+    });
+    $('shareScreen').addEventListener('click', shareScreen);
+    $('endCall').addEventListener('click', () => endCall(true));
+    $('callOverlay').addEventListener('click', e => { if (e.target === $('callOverlay')) return; });
+    
     $('chatComposer').addEventListener('submit', async e => {
       e.preventDefault();
       const input = $('messageInput'), text = input.value.trim();
