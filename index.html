@@ -1132,8 +1132,15 @@
     function createPeerConnection() {
       peerConnection = new RTCPeerConnection(rtcConfig);
       peerConnection.ontrack = event => {
-        const stream = event.streams[0];
-        if (stream && $('remoteVideo').srcObject !== stream) $('remoteVideo').srcObject = stream;
+        const stream = event.streams?.[0];
+        if (stream) {
+          $('remoteVideo').srcObject = stream;
+        } else {
+          const current = $('remoteVideo').srcObject || new MediaStream();
+          if (!current.getTracks().some(track => track.id === event.track.id)) current.addTrack(event.track);
+          $('remoteVideo').srcObject = current;
+        }
+        $('remoteVideo').play?.().catch(() => {});
       };
       peerConnection.onconnectionstatechange = () => {
         if (peerConnection && peerConnection.connectionState === 'connected') updateCallStatus('Connected');
@@ -1355,8 +1362,31 @@
         watchCallDocument(callConversationId,false);
       } catch (error) { console.error('Could not accept call:',error); showToast('Could not accept call: ' + (error.message || error.name)); await endCall(false); }
     }
+    function getVideoSender(pc) {
+      return pc.getSenders().find(sender => sender.track?.kind === 'video')
+        || pc.getTransceivers().find(transceiver => transceiver.receiver?.track?.kind === 'video')?.sender
+        || null;
+    }
     async function shareScreen() {
-      if(groupCallActive){try{if(groupScreenStream){groupScreenStream.getTracks().forEach(t=>t.stop());groupScreenStream=null;const track=groupLocalStream?.getVideoTracks()[0]||null;for(const state of groupPeers.values()){const sender=state.pc.getSenders().find(x=>x.track?.kind==='video');if(sender)await sender.replaceTrack(track);} $('shareScreen').textContent='Share screen';return;}if(!navigator.mediaDevices?.getDisplayMedia){showToast('Screen sharing is not supported.');return;}groupScreenStream=await navigator.mediaDevices.getDisplayMedia({video:true,audio:false});const track=groupScreenStream.getVideoTracks()[0];for(const state of groupPeers.values()){const sender=state.pc.getSenders().find(x=>x.track?.kind==='video');if(sender)await sender.replaceTrack(track);else state.pc.addTrack(track,groupScreenStream);} $('localVideo').srcObject=groupScreenStream;$('shareScreen').textContent='Stop sharing';track.onended=()=>{if(groupScreenStream)shareScreen();};}catch(e){showToast('Screen sharing cancelled or unavailable.');}return;}
+      if(groupCallActive){try{
+        if(groupScreenStream){
+          groupScreenStream.getTracks().forEach(t=>t.stop());groupScreenStream=null;
+          const track=groupLocalStream?.getVideoTracks()[0]||null;
+          for(const state of groupPeers.values()){const sender=getVideoSender(state.pc);if(sender)await sender.replaceTrack(track);}
+          $('localVideo').srcObject=groupLocalStream?.getTracks().length?groupLocalStream:null;
+          $('shareScreen').textContent='Share screen';return;
+        }
+        if(!navigator.mediaDevices?.getDisplayMedia){showToast('Screen sharing is not supported.');return;}
+        groupScreenStream=await navigator.mediaDevices.getDisplayMedia({video:true,audio:false});
+        const track=groupScreenStream.getVideoTracks()[0];
+        for(const state of groupPeers.values()){
+          let sender=getVideoSender(state.pc);
+          if(!sender){sender=state.pc.addTransceiver('video',{direction:'sendrecv'}).sender;}
+          await sender.replaceTrack(track);
+        }
+        $('localVideo').srcObject=groupScreenStream;$('shareScreen').textContent='Stop sharing';
+        track.onended=()=>{if(groupScreenStream)shareScreen();};
+      }catch(e){console.error('Group screen share failed:',e);showToast('Screen sharing failed: '+(e.message||e.name));}return;}
       if (!peerConnection) return;
       try {
         if (screenStream) {
@@ -1371,9 +1401,9 @@
         if (!navigator.mediaDevices.getDisplayMedia) { showToast('Screen sharing is not supported by this browser.'); return; }
         screenStream = await navigator.mediaDevices.getDisplayMedia({video:true,audio:false});
         const screenTrack = screenStream.getVideoTracks()[0];
-        let sender = peerConnection.getSenders().find(item => item.track?.kind === 'video' || item.getParameters?.().encodings?.length);
-        if (!sender) sender = peerConnection.addTrack(screenTrack,screenStream);
-        else await sender.replaceTrack(screenTrack);
+        let sender = getVideoSender(peerConnection);
+        if (!sender) sender = peerConnection.addTransceiver('video',{direction:'sendrecv'}).sender;
+        await sender.replaceTrack(screenTrack);
         $('localVideo').srcObject = screenStream;
         $('shareScreen').textContent = 'Stop sharing';
         screenTrack.onended = () => { if (screenStream) shareScreen(); };
