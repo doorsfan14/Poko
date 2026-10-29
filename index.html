@@ -1425,7 +1425,7 @@
       if(groupCallActive){try{
         if(groupScreenStream){
           groupScreenStream.getTracks().forEach(t=>t.stop());groupScreenStream=null;
-          const track=groupLocalStream?.getVideoTracks()[0]||null;
+          const cameraTrack=groupLocalStream?.getVideoTracks()[0]||null;const track=cameraTrack&&!cameraDisabled?cameraTrack:null;
           for(const state of groupPeers.values()){const sender=getVideoSender(state.pc);if(sender){const transceiver=state.pc.getTransceivers().find(t=>t.sender===sender);if(transceiver&&transceiver.direction==='recvonly')transceiver.direction='sendrecv';await sender.replaceTrack(track);}}
           $('localVideo').srcObject=groupLocalStream?.getTracks().length?groupLocalStream:null;
           $('shareScreen').textContent='Share screen';return;
@@ -1447,7 +1447,7 @@
           screenStream.getTracks().forEach(track => track.stop()); screenStream = null;
           const cameraTrack = localStream?.getVideoTracks()[0];
           const sender = getVideoSender(peerConnection);
-          if (sender) await sender.replaceTrack(cameraTrack || null);
+          if (sender) await sender.replaceTrack(cameraTrack&&!cameraDisabled?cameraTrack:null);
           $('localVideo').srcObject = localStream;
           $('shareScreen').textContent = 'Share screen';
           return;
@@ -1482,7 +1482,7 @@
     $('confirmCallSetup').addEventListener('click',beginCallWithOptions);
     $('callSetup').addEventListener('click',e=>{if(e.target===$('callSetup'))closeCallSetup();});
     $('joinOngoingCall').addEventListener('click',async()=>{if(!activeConversationId||!currentUser)return;try{const snap=await groupCallCollection(activeConversationId).where('calleeId','==',currentUser.uid).where('state','in',['ringing','active']).get();const match=snap.docs.find(d=>d.data().state==='ringing');if(match)await acceptGroupCall(match.id,match.data());else showToast('No joinable call invitation was found.');}catch(e){console.error(e);showToast('Could not check ongoing calls.');}});
-    $('toggleCamera').addEventListener('click',()=>{const stream=groupCallActive?groupLocalStream:localStream;const tracks=stream?.getVideoTracks()||[];if(!tracks.length){showToast('Camera is off or unavailable.');return;}cameraDisabled=!cameraDisabled;tracks.forEach(t=>t.enabled=!cameraDisabled);$('toggleCamera').textContent=cameraDisabled?'Turn camera on':'Turn camera off';});
+    $('toggleCamera').addEventListener('click',async()=>{const stream=groupCallActive?groupLocalStream:localStream;const tracks=stream?.getVideoTracks()||[];if(!tracks.length){showToast('Camera is off or unavailable.');return;}cameraDisabled=!cameraDisabled;tracks.forEach(t=>t.enabled=!cameraDisabled);$('toggleCamera').textContent=cameraDisabled?'Turn camera on':'Turn camera off';if(groupCallActive&&!groupScreenStream){await Promise.all([...groupPeers.values()].map(async state=>{const sender=getVideoSender(state.pc);if(sender)await sender.replaceTrack(cameraDisabled?null:tracks[0]).catch(e=>console.warn('Camera sender update failed',e));}));}else if(!groupCallActive&&!screenStream&&peerConnection){const sender=getVideoSender(peerConnection);if(sender)await sender.replaceTrack(cameraDisabled?null:tracks[0]).catch(e=>console.warn('Camera sender update failed',e));}});
 
     $('toggleMic').addEventListener('click', () => {
       if(groupCallActive){if(!groupLocalStream?.getAudioTracks().length){showToast('No microphone available. You can still listen.');return;}micMuted=!micMuted;groupLocalStream.getAudioTracks().forEach(t=>t.enabled=!micMuted);$('toggleMic').textContent=micMuted?'Unmute mic':'Mute mic';return;}
