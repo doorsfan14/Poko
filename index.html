@@ -334,20 +334,18 @@
     html[data-theme="light"] .call-overlay{background:rgba(32,38,56,.58)}
     @media(prefers-reduced-motion:reduce){.status-trigger{transition:none!important}}
 
-    .login-screen{position:fixed;inset:0;z-index:2000;display:none;align-items:center;justify-content:center;padding:24px;background:radial-gradient(ellipse at 50% 0%,rgba(91,140,255,.15),transparent 55%),var(--bg)}
+    .login-screen{position:fixed;inset:0;z-index:2000;display:none;align-items:center;justify-content:center;padding:24px;background:var(--bg);overflow-y:auto}
     .login-screen.visible{display:flex}
-    .login-card{width:min(420px,100%);padding:clamp(28px,6vw,48px);border:1px solid var(--line);border-radius:24px;background:var(--panel);box-shadow:0 28px 90px rgba(0,0,0,.28);text-align:center}
-    .login-mark{width:54px;height:54px;margin:0 auto 27px;display:grid;place-items:center;border-radius:17px;background:var(--accent);color:white;font-size:1.7rem;font-weight:800;letter-spacing:-.08em}
-    .login-eyebrow{font-size:.67rem;letter-spacing:.17em;font-weight:800;color:var(--accent);margin:0 0 13px}
+    .login-card{width:min(440px,100%);padding:clamp(20px,5vw,40px) 0;text-align:center;background:transparent;border:0;border-radius:0;box-shadow:none}
     .login-card h1{font-size:clamp(1.8rem,6vw,2.3rem);line-height:1.12;letter-spacing:-.065em;margin:0}
     .login-copy{font-size:.88rem;line-height:1.75;color:var(--muted);margin:16px auto 27px;max-width:310px}
-    .login-google{width:100%;min-height:49px;display:flex;align-items:center;justify-content:center;gap:12px;border:1px solid var(--line);border-radius:12px;background:var(--text);color:var(--bg);font-size:.84rem;font-weight:800;transition:transform .15s,opacity .15s}
-    .login-google:hover{transform:translateY(-1px);opacity:.94}
+    .login-google{width:100%;min-height:50px;display:flex;align-items:center;justify-content:center;gap:12px;border:1px solid #dadce0;border-radius:6px;background:#fff;color:#3c4043;font-family:Arial,sans-serif;font-size:14px;font-weight:600;letter-spacing:.1px;transition:background .15s,border-color .15s}
+    .login-google:hover{background:#f8faff;border-color:#d2e3fc}
     .login-google:disabled{opacity:.6;cursor:wait;transform:none}
-    .google-g{font-family:Arial,sans-serif;font-size:1.1rem;font-weight:800;color:#4285f4}
+    .google-logo{width:20px;height:20px;flex:none}
     .login-note{font-size:.7rem;line-height:1.6;color:var(--soft);margin:16px 0 0}
-    html[data-theme="light"] .login-card{box-shadow:0 28px 90px rgba(32,38,56,.12)}
-    html[data-theme="light"] .login-google{background:#202638;color:#fff}
+    html[data-theme="light"] .login-card{box-shadow:none}
+    html[data-theme="light"] .login-google{background:#fff;color:#3c4043}
     @media(max-width:760px){
       .app{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) 64px}
       .rail{grid-column:1;grid-row:2;flex-direction:row;justify-content:center;gap:14px;padding:8px 16px calc(8px + env(safe-area-inset-bottom));border-right:0;border-top:1px solid var(--line);background:var(--panel)}
@@ -366,7 +364,7 @@
       .message>.mini-avatar{width:34px;height:34px;flex-basis:34px}
       .chat-head{padding:0 12px}
       .topbar{padding:0 12px}
-      .login-card{border-radius:20px;padding:30px 24px}
+      .login-card{padding:24px 0}
     }
 
   </style>
@@ -375,11 +373,9 @@
 
   <section class="login-screen" id="loginScreen" aria-labelledby="loginTitle">
     <div class="login-card">
-      <div class="login-mark">P</div>
-      <p class="login-eyebrow">YOUR SPACE, YOUR PEOPLE</p>
       <h1 id="loginTitle">Messages, without the noise.</h1>
       <p class="login-copy">Sign in to find people, keep your conversations, and make Poko yours.</p>
-      <button class="login-google" id="loginGoogle" type="button"><span class="google-g">G</span> Continue with Google</button>
+      <button class="login-google" id="loginGoogle" type="button"><svg class="google-logo" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" transform="translate(0 5)"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.74 7.18l7.72 5.99c4.51-4.16 7.06-10.29 7.06-17.64z" transform="translate(0 0)"/><path fill="#FBBC05" d="M10.53 28.59A14.4 14.4 0 0 1 9.75 24c0-1.59.27-3.13.76-4.59l-7.98-6.19A23.9 23.9 0 0 0 0 24c0 3.87.93 7.53 2.56 10.78l7.97-6.19z" transform="translate(0 0)"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.91-5.81l-7.72-5.99c-2.14 1.45-4.89 2.3-8.19 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" transform="translate(0 -1)"/></svg><span>Continue with Google</span></button>
       <p class="login-note" id="loginNote">Your account keeps your profile and conversations synced.</p>
     </div>
   </section>
