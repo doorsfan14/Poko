@@ -56,7 +56,7 @@
     .profile-view-avatar img{width:100%;height:100%;object-fit:cover}
     .profile-view-name{font-size:1rem;font-weight:800;margin:12px 0 0;overflow-wrap:anywhere}.profile-view-bio{font-size:.8rem;line-height:1.65;color:var(--muted);margin-top:8px;white-space:pre-wrap;overflow-wrap:anywhere}.profile-view-bio:empty{display:none}
     .profile-view-actions{display:flex;justify-content:flex-end;margin-top:18px}
-    .mini-avatar{width:36px;height:36px;flex:0 0 36px;border-radius:50%;background:#41454d;display:grid;place-items:center;overflow:hidden;color:#d9dce3;font-size:.7rem}
+    .mini-avatar{width:36px;height:36px;flex:0 0 36px;border-radius:50%;background:#41454d;display:grid;place-items:center;overflow:visible;color:#d9dce3;font-size:.7rem}
     .mini-avatar img{width:100%;height:100%;object-fit:cover}
     .profile-label{min-width:0;flex:1}
     .profile-label strong{display:block;font-size:.78rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -278,15 +278,21 @@
     .profile-open.open,.new-chat-overlay.open{animation:poko-overlay-in .16s ease-out both}
     .profile-open.open .profile-card,.new-chat-overlay.open .new-chat-dialog{transform-origin:center;animation:poko-modal-grow .2s cubic-bezier(.2,.75,.25,1) both}
     .profile-editor.open .dialog{transform-origin:center;animation:poko-modal-grow .2s cubic-bezier(.2,.75,.25,1) both}
+    .profile-open.closing,.new-chat-overlay.closing{display:flex;animation:poko-overlay-out .15s ease-in both;pointer-events:none}
+    .profile-open.closing .profile-card,.new-chat-overlay.closing .new-chat-dialog{transform-origin:center;animation:poko-modal-shrink .15s ease-in both}
+    .profile-editor.closing{display:block;pointer-events:none}
+    .profile-editor.closing .dialog{transform-origin:center;animation:poko-modal-shrink .15s ease-in both}
     .call-overlay:not([hidden]) .call-window{transform-origin:center;animation:poko-modal-grow .22s cubic-bezier(.2,.75,.25,1) both}
-    @media(prefers-reduced-motion:reduce){.profile-open.open,.new-chat-overlay.open,.profile-open.open .profile-card,.new-chat-overlay.open .new-chat-dialog,.profile-editor.open .dialog,.call-overlay:not([hidden]) .call-window{animation:none!important}}
+    @keyframes poko-overlay-out{from{opacity:1}to{opacity:0}}
+    @keyframes poko-modal-shrink{from{opacity:1;transform:scale(1)}to{opacity:.7;transform:scale(.96)}}
+    @media(prefers-reduced-motion:reduce){.profile-open.open,.new-chat-overlay.open,.profile-open.open .profile-card,.new-chat-overlay.open .new-chat-dialog,.profile-editor.open .dialog,.profile-open.closing,.new-chat-overlay.closing,.profile-open.closing .profile-card,.new-chat-overlay.closing .new-chat-dialog,.profile-editor.closing,.profile-editor.closing .dialog,.call-overlay:not([hidden]) .call-window{animation:none!important}}
     .mini-avatar,.profile-view-avatar,.large-avatar{position:relative}
     .avatar-status-badge{position:absolute;right:-1px;bottom:-1px;width:12px;height:12px;border:2px solid var(--panel);border-radius:50%;z-index:2;background:#4ac985;pointer-events:none}
     .avatar-status-badge.online{background:#4ac985}.avatar-status-badge.idle{background:#f2bd4b}.avatar-status-badge.dnd{background:#f05261}.avatar-status-badge.invisible{background:#858995}
     .mini-avatar .avatar-status-badge{width:11px;height:11px}
     .profile-view-avatar .avatar-status-badge,.large-avatar .avatar-status-badge{width:17px;height:17px;border-width:3px}
     #myStatusLabel,#myStatusDot{display:none!important}
-    .status-trigger{position:absolute;left:0;top:0;width:58px;height:100%;opacity:0;cursor:pointer;z-index:3}
+    .status-trigger{position:absolute;left:auto;right:42px;top:0;width:28px;height:100%;opacity:0;cursor:pointer;z-index:3}
     .profile-row{position:relative}
   </style>
 </head>
@@ -457,6 +463,7 @@
       const badge=document.createElement('span');badge.className='avatar-status-badge '+(['online','idle','dnd','invisible'].includes(status)?status:'online');badge.title=({online:'Online',idle:'Idle',dnd:'Do not disturb',invisible:'Invisible'}[status]||'Online');badge.setAttribute('aria-label',badge.title);el.append(badge);
     }
     function openEditor() {
+      editor.classList.remove('closing');
       pendingAvatar = avatarUrl; pendingBanner = bannerUrl;
       $('nameInput').value = $('displayName').textContent === 'your_username' ? '' : $('displayName').textContent;
       $('bioInput').value = profileBio;
@@ -469,7 +476,7 @@
       editor.style.top = Math.max(12, rect.top - Math.min(560, window.innerHeight * .78) - 10) + 'px';
       editor.classList.add('open');
     }
-    function closeEditor() { editor.classList.remove('open'); }
+    function closeEditor() { if (!editor.classList.contains('open') || editor.classList.contains('closing')) return; editor.classList.add('closing'); setTimeout(() => { editor.classList.remove('open','closing'); }, 160); }
     function setAuthStatus(user) {
       const status = $('authStatus');
       const signIn = $('googleSignIn');
@@ -530,8 +537,8 @@
     $('profileRow').addEventListener('click', e => { if (!e.target.closest('#editProfile') && !e.target.closest('#statusTrigger')) openProfile(); });
     $('profileRow').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openProfile(); } });
     $('editProfile').addEventListener('click', e => { e.stopPropagation(); openEditor(); });
-    function openProfile() { const name = $('displayName').textContent; $('profileViewName').textContent = name; $('profileViewBio').textContent = profileBio; setAvatar($('profileViewAvatar'), avatarUrl, name.slice(0,2).toUpperCase()); setAvatarStatus($('profileViewAvatar'),myActivityStatus); $('profileViewBanner').style.backgroundImage = bannerUrl ? `url("${bannerUrl}")` : ''; profileOpen.classList.add('open'); }
-    function closeProfile() { profileOpen.classList.remove('open'); }
+    function openProfile() { profileOpen.classList.remove('closing'); const name = $('displayName').textContent; $('profileViewName').textContent = name; $('profileViewBio').textContent = profileBio; setAvatar($('profileViewAvatar'), avatarUrl, name.slice(0,2).toUpperCase()); setAvatarStatus($('profileViewAvatar'),myActivityStatus); $('profileViewBanner').style.backgroundImage = bannerUrl ? `url("${bannerUrl}")` : ''; profileOpen.classList.add('open'); }
+    function closeProfile() { if (!profileOpen.classList.contains('open') || profileOpen.classList.contains('closing')) return; profileOpen.classList.add('closing'); setTimeout(() => { profileOpen.classList.remove('open','closing'); }, 160); }
     $('closeProfileView').addEventListener('click', closeProfile);
     profileOpen.addEventListener('click', e => { if (e.target === profileOpen) closeProfile(); });
     $('closeEditor').addEventListener('click', closeEditor);
@@ -592,10 +599,11 @@
     function conversationKey(uidA, uidB) { return [uidA, uidB].sort().join('__'); }
     function showNewChat() {
       if (!currentUser) { showToast('Sign in with Google before starting a conversation.'); openEditor(); return; }
+      $('newChatOverlay').classList.remove('closing');
       $('newChatOverlay').classList.add('open');
       $('userSearchInput').focus();
     }
-    function closeNewChat() { $('newChatOverlay').classList.remove('open'); }
+    function closeNewChat() { const overlay=$('newChatOverlay'); if (!overlay.classList.contains('open') || overlay.classList.contains('closing')) return; overlay.classList.add('closing'); setTimeout(() => overlay.classList.remove('open','closing'),160); }
     $('closeNewChat').addEventListener('click', closeNewChat);
     $('newChatOverlay').addEventListener('click', e => { if (e.target === $('newChatOverlay')) closeNewChat(); });
     function subscribeConversations(user) {
