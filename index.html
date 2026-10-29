@@ -334,6 +334,13 @@
     html[data-theme="light"] .message-author{color:#365fae}
     html[data-theme="light"] .message:hover{background:rgba(91,140,255,.07)}
     html[data-theme="light"] .message-reactions .reaction{color:#34405b}
+    html[data-theme="light"] .message-more{background:#fff;color:#667085;border:1px solid var(--line)}
+    html[data-theme="light"] .message-more:hover,html[data-theme="light"] .message-actions.open .message-more{background:#edf1fb;color:#202638}
+    html[data-theme="light"] .message-action-menu,html[data-theme="light"] .message-reaction-menu{background:#fff;color:#202638;border-color:var(--line);box-shadow:0 8px 24px rgba(32,38,56,.16)}
+    html[data-theme="light"] .message-action-item{color:#202638}
+    html[data-theme="light"] .message-action-item:hover,html[data-theme="light"] .message-reaction-menu .reaction-add{background:#edf1fb;color:#34405b}
+    html[data-theme="light"] .message-reaction-menu .reaction-add:hover{background:#e1e8f7}
+    @media(hover:none){.message-actions{display:block;opacity:.72}.message-more{background:transparent}.message-actions.open{opacity:1}}
     html[data-theme="light"] .profile-open,html[data-theme="light"] .new-chat-overlay{background:rgba(32,38,56,.24);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px)}
     html[data-theme="light"] .profile-card,html[data-theme="light"] .new-chat-dialog,html[data-theme="light"] .dialog{background:#fff;color:var(--text);border-color:var(--line)}
     html[data-theme="light"] .profile-view-avatar,html[data-theme="light"] .large-avatar{background:#e4e9f5}
@@ -966,7 +973,7 @@
             reactions.append(button);
           });
           const actions = document.createElement('div'); actions.className = 'message-actions';
-          const more = document.createElement('button'); more.className = 'message-more'; more.type = 'button'; more.innerHTML = '<span class="material-symbol">more_vert</span>'; more.title = 'More message actions'; more.setAttribute('aria-label','More message actions');
+          const more = document.createElement('button'); more.className = 'message-more'; more.type = 'button'; more.textContent = '⋮'; more.style.fontSize = '22px'; more.style.lineHeight = '1'; more.title = 'More message actions'; more.setAttribute('aria-label','More message actions');
           const actionMenu = document.createElement('div'); actionMenu.className = 'message-action-menu'; actionMenu.hidden = true;
           const reactOption = document.createElement('button'); reactOption.className = 'message-action-item'; reactOption.type = 'button'; reactOption.innerHTML = '<span class="material-symbol">add_reaction</span> Reactions';
           const reactionMenu = document.createElement('div'); reactionMenu.className = 'message-reaction-menu'; reactionMenu.hidden = true;
