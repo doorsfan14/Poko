@@ -203,7 +203,7 @@
     const CLOUDINARY_UPLOAD_PRESET = "PokoSocial";
     let firebaseAuth = null;
     let profileDb = null;
-    try { firebase.initializeApp(firebaseConfig); firebaseAuth = firebase.auth(); profileDb = firebase.firestore(); } catch (error) { console.error("Firebase initialization failed:", error); }
+    try { firebase.initializeApp(firebaseConfig); firebaseAuth = firebase.auth(); profileDb = firebase.firestore(); firebaseAuth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(error => console.error("Could not enable persistent sign-in:", error)); } catch (error) { console.error("Firebase initialization failed:", error); }
     const $ = id => document.getElementById(id);
     const app = $('app');
     const editor = $('profileEditor');
