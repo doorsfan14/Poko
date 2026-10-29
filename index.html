@@ -1243,7 +1243,7 @@
           $('remoteVideo').srcObject = current;
         }
         $('remoteVideo').play?.().catch(() => {});
-        if(event.track.kind==='video'){const trackSaysOff=event.track.muted||!event.track.enabled;showDirectCameraCard(typeof remoteCameraEnabled==='boolean'?!remoteCameraEnabled&&!remoteSharingScreen:trackSaysOff);event.track.onmute=()=>{if(typeof remoteCameraEnabled!=='boolean')showDirectCameraCard(true);};event.track.onunmute=()=>{if(typeof remoteCameraEnabled!=='boolean')showDirectCameraCard(false);};}
+        if(event.track.kind==='video'){const trackSaysOff=event.track.muted||!event.track.enabled;showDirectCameraCard((remoteCameraEnabled===false&&!remoteSharingScreen)||(!remoteSharingScreen&&trackSaysOff));event.track.onmute=()=>{if(!remoteSharingScreen)showDirectCameraCard(true);};event.track.onunmute=()=>{if(remoteCameraEnabled!==false&&!remoteSharingScreen)showDirectCameraCard(false);};}
         if(event.track.kind==='audio')monitorSpeaking('direct',$('remoteVideo').srcObject,$('callOverlay').querySelector('.call-stage'));
       };
       peerConnection.onconnectionstatechange = () => {
