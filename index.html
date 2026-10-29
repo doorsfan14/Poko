@@ -44,7 +44,7 @@
     .empty-list p{max-width:210px;margin:8px 0 17px;font-size:.77rem;line-height:1.65;color:var(--muted)}
     .small-button{border:1px solid var(--line);background:var(--panel-2);color:var(--text);border-radius:10px;padding:9px 12px;font-size:.75rem;font-weight:700}
     .small-button:hover{background:var(--hover)}
-    .profile-row{display:flex;align-items:center;gap:10px;padding:13px;border-top:1px solid var(--line);background:rgba(0,0,0,.08)}
+    .profile-row{display:flex;align-items:center;gap:10px;margin:8px;padding:10px 9px;border:1px solid transparent;border-radius:12px;background:var(--panel);cursor:pointer;transition:background .16s,border-color .16s}\n    .profile-row:hover{background:var(--bg);border-color:var(--line)}\n    .profile-open{display:none;position:fixed;inset:0;z-index:6;background:rgba(0,0,0,.45);align-items:center;justify-content:center;padding:18px}\n    .profile-open.open{display:flex}\n    .profile-card{width:min(420px,100%);overflow:hidden;border:1px solid var(--line);border-radius:16px;background:var(--panel);box-shadow:0 18px 55px rgba(0,0,0,.48)}\n    .profile-view-banner{height:130px;background:#5865f2 center/cover no-repeat}\n    .profile-view-body{padding:0 20px 20px}\n    .profile-view-avatar{width:86px;height:86px;margin-top:-32px;border:5px solid var(--panel);border-radius:50%;overflow:hidden;background:#41454d;display:grid;place-items:center;color:#dce2f0;font-size:1.1rem}\n    .profile-view-avatar img{width:100%;height:100%;object-fit:cover}\n    .profile-view-name{font-size:1rem;font-weight:800;margin:12px 0 0;overflow-wrap:anywhere}\n    .profile-view-actions{display:flex;justify-content:flex-end;margin-top:18px}
     .mini-avatar{width:36px;height:36px;flex:0 0 36px;border-radius:50%;background:#41454d;display:grid;place-items:center;overflow:hidden;color:#d9dce3;font-size:.7rem}
     .mini-avatar img{width:100%;height:100%;object-fit:cover}
     .profile-label{min-width:0;flex:1}
@@ -94,9 +94,6 @@
       </button>
       <div class="rail-spacer"></div>
       <div class="rail-divider"></div>
-      <button class="rail-button" id="profileButton" aria-label="Edit profile" title="Edit profile">
-        <span class="material-symbol">person</span>
-      </button>
     </aside>
     <aside class="sidebar" aria-label="Direct messages list">
       <div class="side-header">
@@ -113,11 +110,7 @@
         <p>Your direct messages will show up here when you start talking to someone.</p>
         <button class="small-button" id="startChat">Start a conversation</button>
       </div>
-      <div class="profile-row">
-        <div class="mini-avatar" id="sideAvatar">You</div>
-        <div class="profile-label"><strong id="displayName">your_username</strong></div>
-        <button class="icon-button" id="editProfile" aria-label="Edit profile" title="Edit profile"><span class="material-symbol">edit</span></button>
-      </div>
+      <div class="profile-row" id="profileRow" role="button" tabindex="0" aria-label="View profile">\n        <div class="mini-avatar" id="sideAvatar">You</div>\n        <div class="profile-label"><strong id="displayName">your_username</strong></div>\n        <button class="icon-button" id="editProfile" aria-label="Edit profile" title="Edit profile"><span class="material-symbol">edit</span></button>\n      </div>
     </aside>
     <main class="main">
       <div class="topbar"><button class="icon-button back-mobile" id="backToList" aria-label="Back to messages" title="Back to messages"><span class="material-symbol">arrow_back</span></button><span class="topbar-title">Direct messages</span><div class="topbar-tools"><button class="icon-button" id="topNewMessage" aria-label="New message" title="New message"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></div></div>
@@ -132,7 +125,7 @@
     </main>
   </div>
 
-  <div class="profile-editor" id="profileEditor" role="dialog" aria-modal="true" aria-labelledby="profileTitle">
+  <div class="profile-open" id="profileOpen" role="dialog" aria-modal="true" aria-labelledby="profileViewName"><section class="profile-card"><div class="profile-view-banner" id="profileViewBanner"></div><div class="profile-view-body"><div class="profile-view-avatar" id="profileViewAvatar">You</div><div class="profile-view-name" id="profileViewName">your_username</div><div class="profile-view-actions"><button class="small-button" id="closeProfileView">Close</button></div></div></section></div>\n  <div class="profile-editor" id="profileEditor" role="dialog" aria-modal="true" aria-labelledby="profileTitle">
     <section class="dialog">
       <div class="dialog-header"><h2 id="profileTitle">Personalize your profile</h2><button class="icon-button" id="closeEditor" aria-label="Close profile editor"><span class="material-symbol">close</span></button></div>
       <div class="dialog-body">
@@ -149,7 +142,7 @@
   <script>
     const $ = id => document.getElementById(id);
     const app = $('app');
-    const editor = $('profileEditor');
+    const editor = $('profileEditor');\n    const profileOpen = $('profileOpen');
     const DEFAULT_BANNER = '#5865f2';
     let avatarUrl = '';
     let bannerUrl = '';
@@ -177,7 +170,7 @@
       setAvatar($('largeAvatar'), pendingAvatar);
       $('bannerPreview').style.backgroundImage = pendingBanner ? 'url("' + pendingBanner + '")' : '';
       const trigger = document.activeElement;
-      const rect = trigger && trigger.getBoundingClientRect ? trigger.getBoundingClientRect() : $('profileButton').getBoundingClientRect();
+      const rect = trigger && trigger.getBoundingClientRect ? trigger.getBoundingClientRect() : $('profileRow').getBoundingClientRect();
       editor.style.left = Math.max(12, Math.min(rect.left, window.innerWidth - Math.min(360, window.innerWidth - 24) - 12)) + 'px';
       editor.style.top = Math.max(12, rect.top - Math.min(560, window.innerHeight * .78) - 10) + 'px';
       editor.classList.add('open');
@@ -198,7 +191,7 @@
       };
       reader.readAsDataURL(file);
     }
-    ['profileButton','editProfile'].forEach(id => $(id).addEventListener('click', openEditor));
+    $('profileRow').addEventListener('click', e => { if (!e.target.closest('#editProfile')) openProfile(); });\n    $('profileRow').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openProfile(); } });\n    $('editProfile').addEventListener('click', e => { e.stopPropagation(); openEditor(); });\n    function openProfile() { const name = $('displayName').textContent; $('profileViewName').textContent = name; setAvatar($('profileViewAvatar'), avatarUrl, name.slice(0,2).toUpperCase()); $('profileViewBanner').style.backgroundImage = bannerUrl ? 'url(\"' + bannerUrl + '\")' : ''; profileOpen.classList.add('open'); }\n    function closeProfile() { profileOpen.classList.remove('open'); }\n    $('closeProfileView').addEventListener('click', closeProfile);\n    profileOpen.addEventListener('click', e => { if (e.target === profileOpen) closeProfile(); });
     $('closeEditor').addEventListener('click', closeEditor);
     $('cancelEditor').addEventListener('click', closeEditor);
     editor.addEventListener('click', e => { if (e.target === editor) closeEditor(); });
@@ -225,7 +218,7 @@
       if (q) showToast('There are no conversations to search yet.');
     });
     restoreProfile();
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeEditor(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeEditor(); closeProfile(); } });
   </script>
 </body>
 </html>
