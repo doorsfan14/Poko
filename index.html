@@ -88,7 +88,7 @@
     .field small{display:block;font-size:.7rem;color:var(--muted);line-height:1.6;margin-top:6px}
     .file-control{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid var(--line);background:#222428;border-radius:11px;padding:11px 12px;font-size:.75rem;color:var(--muted)}
     .file-control input{max-width:185px;font-size:.7rem;color:var(--muted)}
-    .dialog-actions{display:flex;justify-content:flex-end;gap:9px;padding-top:5px}
+    .auth-section{border:1px solid var(--line);border-radius:12px;padding:13px;margin:0 0 18px;background:#222428}.auth-status{font-size:.75rem;color:var(--muted);line-height:1.5;margin-bottom:10px;overflow-wrap:anywhere}.auth-actions{display:flex;gap:8px;flex-wrap:wrap}.auth-button{border:1px solid var(--line);background:#303238;color:var(--text);border-radius:10px;padding:10px 12px;font-size:.75rem;font-weight:700}.auth-button:hover{background:var(--hover)}.auth-button:disabled{opacity:.6;cursor:wait}.dialog-actions{display:flex;justify-content:flex-end;gap:9px;padding-top:5px}
     .toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,12px);opacity:0;pointer-events:none;background:#393c43;color:var(--text);border:1px solid var(--line);padding:10px 15px;border-radius:11px;font-size:.76rem;transition:opacity .18s,transform .18s;z-index:10}
     .toast.show{opacity:1;transform:translate(-50%,0)}
     @media(max-width:760px){.app{grid-template-columns:62px minmax(0,1fr)}.rail{grid-column:1;grid-row:1}.sidebar{grid-column:2;grid-row:1;display:flex;height:100dvh;border-right:0}.main{display:none}.side-header{padding:21px 14px 15px}.side-section{padding-left:14px;padding-right:14px}.profile-row{margin-top:auto}.app.show-main{grid-template-columns:62px minmax(0,1fr)}.app.show-main .sidebar{display:none}.app.show-main .main{display:flex;grid-column:2}.topbar{padding:0 15px;height:62px;flex-basis:62px}.content-empty{padding:20px}.back-mobile{display:grid!important}}
@@ -150,12 +150,18 @@
         <div class="field"><label for="avatarFile">Profile picture</label><div class="file-control"><span>Choose a picture</span><input id="avatarFile" type="file" accept="image/*"></div><small>Animated GIF and WebP profile pictures are supported and remain animated when the selected file is animated.</small></div>
         <div class="field"><label for="nameInput">Username</label><input id="nameInput" type="text" maxlength="40" placeholder="Your username" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#222428;color:var(--text);padding:11px 12px;font-size:.8rem"></div>
         <div class="field"><label for="bioInput">About me</label><textarea id="bioInput" maxlength="190" rows="3" placeholder="A little about you..." style="width:100%;resize:vertical;border:1px solid var(--line);border-radius:10px;background:#222428;color:var(--text);padding:11px 12px;font:inherit;font-size:.8rem"></textarea><small>Up to 190 characters.</small></div>
+        <section class="auth-section"><div class="auth-status" id="authStatus">Not signed in. Sign in to connect your Google account.</div><div class="auth-actions"><button class="auth-button" id="googleSignIn">Continue with Google</button><button class="auth-button" id="googleSignOut" hidden>Sign out</button></div></section>
         <div class="dialog-actions"><button class="small-button" id="cancelEditor">Cancel</button><button class="primary" id="saveProfile">Save changes</button></div>
       </div>
     </section>
   </div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script>
+    const firebaseConfig = { apiKey: "AIzaSyBuFUV1v8AMqOa8voWN9P2FJdZssYTyzes", authDomain: "poko-sc.firebaseapp.com", projectId: "poko-sc", storageBucket: "poko-sc.firebasestorage.app", messagingSenderId: "797570563685", appId: "1:797570563685:web:cf6eb787f00c3bb0f6108c" };
+    let firebaseAuth = null;
+    try { firebase.initializeApp(firebaseConfig); firebaseAuth = firebase.auth(); } catch (error) { console.error("Firebase initialization failed:", error); }
     const $ = id => document.getElementById(id);
     const app = $('app');
     const editor = $('profileEditor');
@@ -196,6 +202,22 @@
       editor.classList.add('open');
     }
     function closeEditor() { editor.classList.remove('open'); }
+    function setAuthStatus(user) {
+      const status = $('authStatus');
+      const signIn = $('googleSignIn');
+      const signOut = $('googleSignOut');
+      if (user) { status.textContent = 'Signed in as ' + (user.email || user.displayName || 'Google user') + '.'; signIn.hidden = true; signOut.hidden = false; }
+      else { status.textContent = 'Not signed in. Sign in to connect your Google account.'; signIn.hidden = false; signOut.hidden = true; }
+    }
+    $('googleSignIn').addEventListener('click', async () => {
+      if (!firebaseAuth) { showToast('Firebase could not initialize. Check the configuration.'); return; }
+      const button = $('googleSignIn'); button.disabled = true;
+      try { const provider = new firebase.auth.GoogleAuthProvider(); await firebaseAuth.signInWithPopup(provider); showToast('Google sign-in successful.'); }
+      catch (error) { console.error('Google sign-in failed:', error); showToast(error.code === 'auth/unauthorized-domain' ? 'Add this site to Firebase Authorized domains.' : error.code === 'auth/operation-not-allowed' ? 'Enable Google in Firebase Authentication.' : error.code === 'auth/popup-closed-by-user' ? 'Sign-in window closed.' : 'Google sign-in failed. Check Firebase settings.'); }
+      finally { button.disabled = false; }
+    });
+    $('googleSignOut').addEventListener('click', async () => { try { await firebaseAuth.signOut(); showToast('Signed out.'); } catch (error) { console.error('Sign-out failed:', error); showToast('Could not sign out.'); } });
+    if (firebaseAuth) firebaseAuth.onAuthStateChanged(setAuthStatus); else setAuthStatus(null);
     function showToast(message) {
       const toast = $('toast'); toast.textContent = message; toast.classList.add('show');
       window.clearTimeout(showToast.timer); showToast.timer = window.setTimeout(() => toast.classList.remove('show'), 2600);
