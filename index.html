@@ -569,6 +569,7 @@
         console.error('Message stream failed:',error);
         showToast('Could not load conversation. Check Firestore rules.');
       });
+      watchCallDocument(item.id, false);
     }
     function closeConversation() {
       if (messagesUnsubscribe) messagesUnsubscribe();
@@ -618,8 +619,17 @@
       if (callDocUnsubscribe) callDocUnsubscribe();
       seenRemoteCandidates = 0;
       callDocUnsubscribe = profileDb.collection('conversations').doc(conversationId).onSnapshot(async snapshot => {
-        if (!snapshot.exists || !peerConnection) return;
+        if (!snapshot.exists) return;
         const data = snapshot.data() || {};
+        if (!peerConnection) {
+          if (!initiator && data.callState === 'ringing' && data.callerId !== currentUser?.uid) {
+            $('callOverlay').hidden = false;
+            updateCallStatus((activeConversation?.otherProfile?.name || 'Someone') + ' is calling');
+            if (!$('acceptCall')) { const accept = document.createElement('button'); accept.id = 'acceptCall'; accept.className = 'call-control'; accept.textContent = 'Accept call'; accept.addEventListener('click', acceptCall); $('callOverlay').querySelector('.call-controls').prepend(accept); }
+            $('acceptCall').hidden = false;
+          }
+          return;
+        }
         try {
           if (!initiator && data.callState === 'ringing' && data.callerId !== currentUser.uid && !data.answer && !peerConnection.remoteDescription) {
             $('callOverlay').hidden = false;
@@ -650,10 +660,11 @@
       try {
         callConversationId = activeConversationId; callInitiator = true;
         createPeerConnection(); await prepareLocalMedia();
-        const offer = await peerConnection.createOffer(); await peerConnection.setLocalDescription(offer);
+        const offer = await peerConnection.createOffer();
         await profileDb.collection('conversations').doc(callConversationId).update({
           callState:'ringing',callerId:currentUser.uid,offer:{type:offer.type,sdp:offer.sdp},answer:null,callerCandidates:[],calleeCandidates:[],callStartedAt:firebase.firestore.FieldValue.serverTimestamp()
         });
+        await peerConnection.setLocalDescription(offer);
         $('callOverlay').hidden = false; updateCallStatus('Calling ' + (activeConversation?.otherProfile?.name || 'user') + '…');
         watchCallDocument(callConversationId,true);
       } catch (error) { console.error('Could not start call:',error); showToast('Could not start call: ' + (error.message || error.name)); await endCall(false); }
