@@ -946,7 +946,7 @@
           const authorEl = document.createElement('span'); authorEl.className = 'message-author'; authorEl.textContent = author;
           const meta = document.createElement('span'); meta.className = 'message-meta'; meta.textContent = message.createdAt?.toDate ? message.createdAt.toDate().toLocaleTimeString([], {hour:'numeric',minute:'2-digit'}) : '';
           head.append(authorEl,meta);
-          const body = document.createElement('div'); body.className = 'message-text'; body.textContent = message.text || '';
+          const body = document.createElement('div'); body.className = 'message-text'; body.textContent = replaceEmojiShortcodes(message.text || '');
           content.append(head); if(message.text) content.append(body);
           if(message.gifUrl){const gif=document.createElement('img');gif.className='message-gif';gif.src=message.gifUrl;gif.alt='GIF';gif.loading='lazy';content.append(gif);}
           const reactions = document.createElement('div'); reactions.className = 'message-reactions';
@@ -1126,6 +1126,18 @@
     $('endCall').addEventListener('click', () => endCall(true));
     $('callOverlay').addEventListener('click', e => { if (e.target === $('callOverlay')) return; });
     
+    const shortcodeEmoji = {
+      sob:'😭',cry:'😢',joy:'😂',laughing:'😆',rofl:'🤣',skull:'💀',heart:'❤️',heart_eyes:'😍',
+      smile:'😄',grin:'😁',blush:'😊',sweat_smile:'😅',thinking:'🤔',thinking_face:'🤔',eyes:'👀',
+      fire:'🔥',thumbsup:'👍',thumbs_up:'👍',+1:'👍',thumbsdown:'👎',-1:'👎',pray:'🙏',clap:'👏',
+      tada:'🎉',100:'💯',rage:'😡',scream:'😱',sob_cry:'😭',wave:'👋',wink:'😉',sparkles:'✨',
+      crying:'😢',pleading_face:'🥺',melting_face:'🫠',sunglasses:'😎',heartbreak:'💔',white_check_mark:'✅',
+      x:'❌',rocket:'🚀',cat:'🐱',dog:'🐶',pizza:'🍕'
+    };
+    function replaceEmojiShortcodes(value) {
+      return String(value || '').replace(/:([a-z0-9_+.-]+):/gi, (match, name) => shortcodeEmoji[name.toLowerCase()] || match);
+    }
+
     const pickerPanel=$('pickerPanel');
     const emojiList=['😀','😃','😄','😁','😆','😅','😂','🤣','🥹','😊','😍','🥰','😘','😎','🤔','🫡','🙃','😴','😭','💀','🤯','😮','😡','🥳','😇','🤗','🫠','😬','😔','😌','🤨','😏','🙄','😤','🥺','😱','🤝','🙏','👏','👍','👎','🫶','❤️','🩷','🧡','💛','💚','💙','💜','🤍','🖤','✨','🔥','🎉','💯','✅','❌','⭐','🌙','☀️','🍀','🐈','🐱','🐶','🍕','🎮','💻','🚀'];
     emojiList.forEach(emoji=>{const b=document.createElement('button');b.type='button';b.className='emoji-choice';b.textContent=emoji;b.title=emoji;b.addEventListener('click',()=>{const input=$('messageInput');const start=input.selectionStart??input.value.length;const end=input.selectionEnd??start;input.setRangeText(emoji,start,end,'end');input.focus();});$('emojiPanel').append(b);});
@@ -1146,7 +1158,7 @@
     });
     $('chatComposer').addEventListener('submit', async e => {
       e.preventDefault();
-      const input = $('messageInput'), text = input.value.trim();
+      const input = $('messageInput'), text = replaceEmojiShortcodes(input.value.trim());
       if (!text || !currentUser || !activeConversationId || !profileDb) return;
       const button = $('sendMessage'); button.disabled = true;
       try {
