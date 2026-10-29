@@ -172,6 +172,8 @@
     .message{position:relative;display:flex;flex-direction:row;align-self:stretch;align-items:flex-start;gap:14px;max-width:none;padding:5px 22px 5px 18px;border-radius:0}
     .message:hover{background:rgba(91,140,255,.055)}
     .message>.mini-avatar{width:40px;height:40px;flex:0 0 40px;margin-top:2px}
+    .message.grouped>.mini-avatar{visibility:hidden}
+    .message.grouped .message-head{display:none}
     .message-content{min-width:0;flex:1}
     .message-head{display:flex;align-items:baseline;gap:8px;min-height:24px;flex-wrap:wrap}
     .message-author{font-size:.9rem;font-weight:600;color:#a7c6ff}
@@ -926,10 +928,14 @@
         if (snapshot.empty) {
           const empty = document.createElement('div'); empty.className = 'chat-empty'; empty.textContent = 'This is the beginning of your conversation.'; container.append(empty); return;
         }
-        snapshot.docs.forEach(doc => {
+        snapshot.docs.forEach((doc, index) => {
           const message = doc.data() || {};
+          const previousMessage = index > 0 ? (snapshot.docs[index - 1].data() || {}) : null;
+          const currentTime = message.createdAt?.toDate ? message.createdAt.toDate().getTime() : null;
+          const previousTime = previousMessage?.createdAt?.toDate ? previousMessage.createdAt.toDate().getTime() : null;
+          const grouped = !!previousMessage && message.senderId === previousMessage.senderId && currentTime !== null && previousTime !== null && currentTime >= previousTime && currentTime - previousTime <= 5 * 60 * 1000;
           const mine = message.senderId === currentUser.uid;
-          const wrap = document.createElement('article'); wrap.className = 'message';
+          const wrap = document.createElement('article'); wrap.className = 'message' + (grouped ? ' grouped' : '');
           const avatar = document.createElement('div'); avatar.className = 'mini-avatar';
           const author = mine ? ($('displayName').textContent || 'You') : item.otherProfile.name;
           setAvatar(avatar, mine ? avatarUrl : item.otherProfile.avatar, author.slice(0,2).toUpperCase());
