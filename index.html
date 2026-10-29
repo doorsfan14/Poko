@@ -174,6 +174,8 @@
     .message>.mini-avatar{width:40px;height:40px;flex:0 0 40px;margin-top:2px}
     .message.grouped>.mini-avatar{visibility:hidden}
     .message.grouped .message-head{display:none}
+    .message.grouped{padding-top:1px;padding-bottom:1px}
+    .message.grouped .message-content{padding-top:0}
     .message-content{min-width:0;flex:1}
     .message-head{display:flex;align-items:baseline;gap:8px;min-height:24px;flex-wrap:wrap}
     .message-author{font-size:.9rem;font-weight:600;color:#a7c6ff}
@@ -1137,6 +1139,11 @@
     $('statusTrigger').addEventListener('click',e=>{e.stopPropagation();$('statusMenu').hidden=!$('statusMenu').hidden;});
     $('statusMenu').querySelectorAll('[data-status]').forEach(button=>button.addEventListener('click',async()=>{const status=button.dataset.status;myActivityStatus=status;const labels={online:'Online',idle:'Idle',dnd:'Do not disturb',invisible:'Invisible'};const profile=(()=>{try{return JSON.parse(localStorage.getItem('poko-profile')||'{}')}catch{return {}}})();profile.status=status;try{localStorage.setItem('poko-profile',JSON.stringify(profile));}catch(error){console.warn('Could not save local activity status:',error);}if($('myStatusLabel'))$('myStatusLabel').textContent=labels[status];if($('myStatusDot'))$('myStatusDot').className='status-dot '+status;$('statusTriggerDot').className='status-dot '+status;setAvatarStatus($('sideAvatar'),status);setAvatarStatus($('largeAvatar'),status);if($('profileViewAvatar'))setAvatarStatus($('profileViewAvatar'),status);$('statusMenu').hidden=true;const user=firebaseAuth?.currentUser;if(user&&profileDb){try{await profileDb.collection('profiles').doc(user.uid).set({status,updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});showToast('Activity status updated.');}catch(error){console.error('Status update failed:',error);showToast('Status saved on this device, but cloud sync failed. Check Firestore rules.');}}else{showToast('Activity status saved on this device. Sign in to sync it with friends.');}}));
     document.addEventListener('click',e=>{if(!pickerPanel.contains(e.target)&&!['openEmoji','openGif'].includes(e.target.id))closePicker();if(!$('statusMenu').contains(e.target)&&e.target.id!=='statusTrigger')$('statusMenu').hidden=true;});
+    $('messageInput').addEventListener('keydown', e => {
+      if (e.key !== 'Enter' || e.shiftKey || e.isComposing) return;
+      e.preventDefault();
+      $('chatComposer').requestSubmit();
+    });
     $('chatComposer').addEventListener('submit', async e => {
       e.preventDefault();
       const input = $('messageInput'), text = input.value.trim();
