@@ -286,7 +286,7 @@
     .mini-avatar .avatar-status-badge{width:11px;height:11px}
     .profile-view-avatar .avatar-status-badge,.large-avatar .avatar-status-badge{width:17px;height:17px;border-width:3px}
     #myStatusLabel,#myStatusDot{display:none!important}
-    .status-trigger{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:3}
+    .status-trigger{position:absolute;left:0;top:0;width:58px;height:100%;opacity:0;cursor:pointer;z-index:3}
     .profile-row{position:relative}
   </style>
 </head>
@@ -618,7 +618,7 @@
             const profile={uid:item.otherUid,name:data.name||'Poko user',avatar:data.avatar||'',banner:data.banner||'',bio:data.bio||'',status:['online','idle','dnd','invisible'].includes(data.status)?data.status:'online'};
             profileCache.set(item.otherUid,profile);
             knownConversations=knownConversations.map(existing=>existing.otherUid===item.otherUid?{...existing,otherProfile:profile}:existing);
-            if(activeConversationId){const active=knownConversations.find(existing=>existing.id===activeConversationId);if(active){activeConversation=active;if($('chatName'))$('chatName').textContent=profile.name;const dot=$('chatStatusDot');if(dot){dot.className='status-dot '+profile.status;dot.title=({online:'Online',idle:'Idle',dnd:'Do not disturb',invisible:'Offline'}[profile.status]);}setAvatarStatus($('chatAvatar'),profile.status);}}
+            if(activeConversation?.otherUid===item.otherUid){activeConversation={...activeConversation,otherProfile:profile};setAvatarStatus($('chatAvatar'),profile.status);}
             renderConversationList();
           },error=>console.error('Friend activity status listener failed:',error));
           profileStatusUnsubscribers.set(item.otherUid,unsubscribe);
@@ -676,8 +676,7 @@
         const label = document.createElement('div'); label.className = 'profile-label';
         const name = document.createElement('strong'); name.textContent = item.otherProfile.name;
         const last = document.createElement('span'); last.textContent = item.lastMessage || 'Start a conversation';
-        const status = document.createElement('span'); status.className='conversation-status'; const dot=document.createElement('i'); dot.className='status-dot '+(item.otherProfile.status||'online'); status.append(dot,document.createTextNode(' '+({online:'Online',idle:'Idle',dnd:'Do not disturb',invisible:'Offline'}[item.otherProfile.status||'online'])));
-        label.append(name,last,status); button.append(avatar,label);
+        label.append(name,last); button.append(avatar,label);
         button.addEventListener('click', () => openConversation(item));
         list.append(button);
       });
@@ -740,7 +739,7 @@
       $('chatName').textContent = item.otherProfile.name;
       $('chatBio').textContent = item.otherProfile.bio || '';
       $('chatBio').hidden = !item.otherProfile.bio;
-      $('chatStatusDot')?.remove(); const statusDot=document.createElement('span'); statusDot.id='chatStatusDot'; statusDot.className='status-dot '+(item.otherProfile.status||'online'); statusDot.title=({online:'Online',idle:'Idle',dnd:'Do not disturb',invisible:'Offline'}[item.otherProfile.status||'online']); $('chatName').parentElement.append(statusDot);
+      $('chatStatusDot')?.remove();
       setAvatar($('chatAvatar'),item.otherProfile.avatar,item.otherProfile.name.slice(0,2).toUpperCase()); setAvatarStatus($('chatAvatar'),item.otherProfile.status);
       setAvatar($('chatAvatar'),item.otherProfile.avatar,item.otherProfile.name.slice(0,2).toUpperCase());
       $('chatMessages').replaceChildren();
