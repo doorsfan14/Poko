@@ -913,7 +913,7 @@
         return {uid, name:'Poko user', avatar:'', banner:'', bio:'', status:'online'};
       }
     }
-    function setGroupAvatar(el,item){el.classList.add('group-avatar-collage');el.replaceChildren();const members=(item.memberProfiles||[]).slice(0,4);members.forEach(profile=>{const cell=document.createElement('div');cell.className='collage-empty';if(profile.avatar){const img=document.createElement('img');img.src=profile.avatar;img.alt='';img.loading='lazy';img.referrerPolicy='no-referrer';cell.append(img);}el.append(cell);});while(el.children.length<4){const cell=document.createElement('div');cell.className='collage-empty';el.append(cell);}}
+    function setGroupAvatar(el,item){el.classList.add('group-avatar-collage');el.replaceChildren();const members=[{uid:currentUser?.uid,avatar:avatarUrl},...(item.memberProfiles||[])].slice(0,4);members.forEach(profile=>{const cell=document.createElement('div');cell.className='collage-empty';if(profile.avatar){const img=document.createElement('img');img.src=profile.avatar;img.alt='';img.loading='lazy';img.referrerPolicy='no-referrer';cell.append(img);}el.append(cell);});while(el.children.length<4){const cell=document.createElement('div');cell.className='collage-empty';el.append(cell);}}
     function renderConversationList() {
       const list = $('conversationList'), empty = $('emptyConversationList');
       const q = $('search').value.trim().toLowerCase();
