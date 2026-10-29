@@ -246,7 +246,7 @@
     .profile-row .profile-label span{font-size:.66rem;margin-top:2px}
     .status-trigger{width:22px;height:28px;border:0;background:transparent;display:grid;place-items:center;padding:0}
     .status-dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex:0 0 9px;background:#4ac985}
-    .status-dot.online{background:#4ac985}.status-dot.idle{background:#f2bd4b}.status-dot.dnd{background:#f05261}.status-dot.invisible{background:#858995}
+    .status-dot.online{background:#4ac985}.status-dot.idle{background:#f2bd4b}.status-dot.dnd{background:#f05261}.status-dot.offline{background:#777b85}.avatar-status-badge.offline{background:#777b85}.status-dot.invisible{background:#858995}
     .status-menu{position:fixed;left:78px;bottom:74px;z-index:1100;width:210px;padding:6px;border:1px solid var(--line);border-radius:12px;background:#292b30;box-shadow:0 14px 40px rgba(0,0,0,.4)}
     .chat-head .profile-label #chatStatusDot{display:inline-block;vertical-align:middle;margin-left:5px}
     .status-menu button{width:100%;display:flex;align-items:center;gap:10px;padding:10px;border:0;border-radius:8px;background:transparent;color:var(--text);text-align:left;font-size:.78rem}
@@ -333,9 +333,57 @@
     html[data-theme="light"] .toast{background:#fff;color:var(--text);border-color:var(--line)}
     html[data-theme="light"] .call-overlay{background:rgba(32,38,56,.58)}
     @media(prefers-reduced-motion:reduce){.status-trigger{transition:none!important}}
+
+    .login-screen{position:fixed;inset:0;z-index:2000;display:none;align-items:center;justify-content:center;padding:24px;background:radial-gradient(ellipse at 50% 0%,rgba(91,140,255,.15),transparent 55%),var(--bg)}
+    .login-screen.visible{display:flex}
+    .login-card{width:min(420px,100%);padding:clamp(28px,6vw,48px);border:1px solid var(--line);border-radius:24px;background:var(--panel);box-shadow:0 28px 90px rgba(0,0,0,.28);text-align:center}
+    .login-mark{width:54px;height:54px;margin:0 auto 27px;display:grid;place-items:center;border-radius:17px;background:var(--accent);color:white;font-size:1.7rem;font-weight:800;letter-spacing:-.08em}
+    .login-eyebrow{font-size:.67rem;letter-spacing:.17em;font-weight:800;color:var(--accent);margin:0 0 13px}
+    .login-card h1{font-size:clamp(1.8rem,6vw,2.3rem);line-height:1.12;letter-spacing:-.065em;margin:0}
+    .login-copy{font-size:.88rem;line-height:1.75;color:var(--muted);margin:16px auto 27px;max-width:310px}
+    .login-google{width:100%;min-height:49px;display:flex;align-items:center;justify-content:center;gap:12px;border:1px solid var(--line);border-radius:12px;background:var(--text);color:var(--bg);font-size:.84rem;font-weight:800;transition:transform .15s,opacity .15s}
+    .login-google:hover{transform:translateY(-1px);opacity:.94}
+    .login-google:disabled{opacity:.6;cursor:wait;transform:none}
+    .google-g{font-family:Arial,sans-serif;font-size:1.1rem;font-weight:800;color:#4285f4}
+    .login-note{font-size:.7rem;line-height:1.6;color:var(--soft);margin:16px 0 0}
+    html[data-theme="light"] .login-card{box-shadow:0 28px 90px rgba(32,38,56,.12)}
+    html[data-theme="light"] .login-google{background:#202638;color:#fff}
+    @media(max-width:760px){
+      .app{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) 64px}
+      .rail{grid-column:1;grid-row:2;flex-direction:row;justify-content:center;gap:14px;padding:8px 16px calc(8px + env(safe-area-inset-bottom));border-right:0;border-top:1px solid var(--line);background:var(--panel)}
+      .rail-button{width:46px;height:44px}
+      .rail-button.active:before{left:50%;top:-9px;transform:translateX(-50%);width:22px;height:3px;border-radius:0 0 4px 4px}
+      .rail-spacer,.rail-divider{display:none}
+      .sidebar{grid-column:1;grid-row:1;height:100%;padding-bottom:0}
+      .main{grid-column:1;grid-row:1;min-height:0}
+      .app.show-main{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) 64px}
+      .app.show-main .sidebar{display:none}
+      .app.show-main .main{display:flex;grid-column:1;grid-row:1}
+      .profile-row{margin:8px;margin-top:auto}
+      .chat-composer{margin:0 10px calc(8px + env(safe-area-inset-bottom));padding-top:8px}
+      .chat-messages{padding:12px 0 18px}
+      .message{padding-left:12px;padding-right:12px;gap:10px}
+      .message>.mini-avatar{width:34px;height:34px;flex-basis:34px}
+      .chat-head{padding:0 12px}
+      .topbar{padding:0 12px}
+      .login-card{border-radius:20px;padding:30px 24px}
+    }
+
   </style>
 </head>
 <body>
+
+  <section class="login-screen" id="loginScreen" aria-labelledby="loginTitle">
+    <div class="login-card">
+      <div class="login-mark">P</div>
+      <p class="login-eyebrow">YOUR SPACE, YOUR PEOPLE</p>
+      <h1 id="loginTitle">Messages, without the noise.</h1>
+      <p class="login-copy">Sign in to find people, keep your conversations, and make Poko yours.</p>
+      <button class="login-google" id="loginGoogle" type="button"><span class="google-g">G</span> Continue with Google</button>
+      <p class="login-note" id="loginNote">Your account keeps your profile and conversations synced.</p>
+    </div>
+  </section>
+
   <div class="app" id="app">
     <aside class="rail" aria-label="Navigation">
       <button class="rail-button active" aria-label="Direct messages" title="Direct messages" id="dmNav">
@@ -487,7 +535,22 @@
     }
     async function loadCloudProfile(user) {
       const loadId = ++activeProfileLoad;
-      restoreProfile();
+      window.addEventListener('pagehide', () => {
+      const user = firebaseAuth?.currentUser;
+      if (user && profileDb) {
+        try {
+          profileDb.collection('profiles').doc(user.uid).set({
+            status:'offline',
+            presenceUpdatedAt:firebase.firestore.FieldValue.serverTimestamp()
+          }, {merge:true});
+        } catch (error) { console.warn('Could not mark offline on page exit:', error); }
+      }
+    });
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && firebaseAuth?.currentUser) updatePresence('online');
+    });
+
+    restoreProfile();
       if (!user || !profileDb) return;
       try {
         const snapshot = await profileDb.collection('profiles').doc(user.uid).get();
@@ -545,19 +608,58 @@
       finally { button.disabled = false; }
     });
     $('googleSignOut').addEventListener('click', async () => { try { await firebaseAuth.signOut(); showToast('Signed out.'); } catch (error) { console.error('Sign-out failed:', error); showToast('Could not sign out.'); } });
+    function setLoginScreen(visible) {
+      $('loginScreen').classList.toggle('visible', !!visible);
+      $('app').setAttribute('aria-hidden', visible ? 'true' : 'false');
+      if ($('loginGoogle')) $('loginGoogle').disabled = false;
+    }
+    async function updatePresence(status) {
+      const user = firebaseAuth?.currentUser;
+      if (!user || !profileDb) return;
+      try {
+        await profileDb.collection('profiles').doc(user.uid).set({
+          status,
+          presenceUpdatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, {merge:true});
+      } catch (error) {
+        console.warn('Presence update failed:', error);
+      }
+    }
+    async function signInFromLogin() {
+      if (!firebaseAuth) { $('loginNote').textContent = 'Sign-in is unavailable. Check the Firebase configuration.'; return; }
+      const button = $('loginGoogle');
+      button.disabled = true;
+      $('loginNote').textContent = 'Opening Google sign-in…';
+      try {
+        await firebaseAuth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+      } catch (error) {
+        console.error('Login failed:', error);
+        $('loginNote').textContent = error.code === 'auth/unauthorized-domain'
+          ? 'This website needs to be added to Firebase Authorized domains.'
+          : error.code === 'auth/operation-not-allowed'
+          ? 'Google sign-in must be enabled in Firebase Authentication.'
+          : error.code === 'auth/popup-closed-by-user'
+          ? 'Sign-in window closed. You can try again.'
+          : 'Could not sign in. Check the Firebase configuration and try again.';
+        button.disabled = false;
+      }
+    }
+    $('loginGoogle').addEventListener('click', signInFromLogin);
     if (firebaseAuth) firebaseAuth.onAuthStateChanged(user => {
       setAuthStatus(user);
       currentUser = user || null;
+      setLoginScreen(!user);
       stopMessagingListeners();
       loadCloudProfile(user);
       if (user) {
+        updatePresence('online');
         subscribeConversations(user);
       } else {
         knownConversations = [];
         renderConversationList();
         closeConversation();
       }
-    }); else setAuthStatus(null);
+    }); else { setAuthStatus(null); setLoginScreen(true); }
     function showToast(message) {
       const toast = $('toast'); toast.textContent = message; toast.classList.add('show');
       window.clearTimeout(showToast.timer); showToast.timer = window.setTimeout(() => toast.classList.remove('show'), 2600);
