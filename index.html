@@ -53,7 +53,7 @@
     .profile-view-body{padding:0 20px 20px}
     .profile-view-avatar{width:86px;height:86px;margin-top:-32px;border:5px solid var(--panel);border-radius:50%;overflow:hidden;background:#41454d;display:grid;place-items:center;color:#dce2f0;font-size:1.1rem}
     .profile-view-avatar img{width:100%;height:100%;object-fit:cover}
-    .profile-view-name{font-size:1rem;font-weight:800;margin:12px 0 0;overflow-wrap:anywhere}
+    .profile-view-name{font-size:1rem;font-weight:800;margin:12px 0 0;overflow-wrap:anywhere}.profile-view-bio{font-size:.8rem;line-height:1.65;color:var(--muted);margin-top:8px;white-space:pre-wrap;overflow-wrap:anywhere}.profile-view-bio:empty{display:none}
     .profile-view-actions{display:flex;justify-content:flex-end;margin-top:18px}
     .mini-avatar{width:36px;height:36px;flex:0 0 36px;border-radius:50%;background:#41454d;display:grid;place-items:center;overflow:hidden;color:#d9dce3;font-size:.7rem}
     .mini-avatar img{width:100%;height:100%;object-fit:cover}
@@ -139,7 +139,7 @@
     </main>
   </div>
 
-  <div class="profile-open" id="profileOpen" role="dialog" aria-modal="true" aria-labelledby="profileViewName"><section class="profile-card"><div class="profile-view-banner" id="profileViewBanner"></div><div class="profile-view-body"><div class="profile-view-avatar" id="profileViewAvatar">You</div><div class="profile-view-name" id="profileViewName">your_username</div><div class="profile-view-actions"><button class="small-button" id="closeProfileView">Close</button></div></div></section></div>
+  <div class="profile-open" id="profileOpen" role="dialog" aria-modal="true" aria-labelledby="profileViewName"><section class="profile-card"><div class="profile-view-banner" id="profileViewBanner"></div><div class="profile-view-body"><div class="profile-view-avatar" id="profileViewAvatar">You</div><div class="profile-view-name" id="profileViewName">your_username</div><div class="profile-view-bio" id="profileViewBio"></div><div class="profile-view-actions"><button class="small-button" id="closeProfileView">Close</button></div></div></section></div>
   <div class="profile-editor" id="profileEditor" role="dialog" aria-modal="true" aria-labelledby="profileTitle">
     <section class="dialog">
       <div class="dialog-header"><h2 id="profileTitle">Personalize your profile</h2><button class="icon-button" id="closeEditor" aria-label="Close profile editor"><span class="material-symbol">close</span></button></div>
@@ -148,7 +148,8 @@
         <div class="avatar-edit-row"><div class="large-avatar" id="largeAvatar">You</div><div><strong style="font-size:.83rem">Your profile</strong><div style="font-size:.72rem;color:var(--muted);margin-top:4px">Make it yours.</div></div></div>
         <div class="field"><label for="bannerFile">Profile banner</label><div class="file-control"><span>Choose a banner</span><input id="bannerFile" type="file" accept="image/*"></div><small>Animated GIF and WebP banners are supported. Preview stays in this browser; nothing is uploaded to a server.</small></div>
         <div class="field"><label for="avatarFile">Profile picture</label><div class="file-control"><span>Choose a picture</span><input id="avatarFile" type="file" accept="image/*"></div><small>Animated GIF and WebP profile pictures are supported and remain animated when the selected file is animated.</small></div>
-        <div class="field"><label for="nameInput">Username</label><input id="nameInput" type="text" maxlength="40" placeholder="Your display name" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#222428;color:var(--text);padding:11px 12px;font-size:.8rem"></div>
+        <div class="field"><label for="nameInput">Username</label><input id="nameInput" type="text" maxlength="40" placeholder="Your username" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#222428;color:var(--text);padding:11px 12px;font-size:.8rem"></div>
+        <div class="field"><label for="bioInput">About me</label><textarea id="bioInput" maxlength="190" rows="3" placeholder="A little about you..." style="width:100%;resize:vertical;border:1px solid var(--line);border-radius:10px;background:#222428;color:var(--text);padding:11px 12px;font:inherit;font-size:.8rem"></textarea><small>Up to 190 characters.</small></div>
         <div class="dialog-actions"><button class="small-button" id="cancelEditor">Cancel</button><button class="primary" id="saveProfile">Save changes</button></div>
       </div>
     </section>
@@ -164,12 +165,14 @@
     let bannerUrl = '';
     let pendingAvatar = '';
     let pendingBanner = '';
+    let profileBio = '';
     function restoreProfile() {
       try {
         const saved = JSON.parse(localStorage.getItem('poko-profile') || '{}');
         avatarUrl = saved.avatar || '';
         bannerUrl = saved.banner || '';
         const name = saved.name || 'your_username';
+        profileBio = saved.bio || '';
         $('displayName').textContent = name;
         setAvatar($('sideAvatar'), avatarUrl, name.slice(0,2).toUpperCase());
         setAvatar($('largeAvatar'), avatarUrl, name.slice(0,2).toUpperCase());
@@ -183,6 +186,7 @@
     function openEditor() {
       pendingAvatar = avatarUrl; pendingBanner = bannerUrl;
       $('nameInput').value = $('displayName').textContent === 'your_username' ? '' : $('displayName').textContent;
+      $('bioInput').value = profileBio;
       setAvatar($('largeAvatar'), pendingAvatar);
       $('bannerPreview').style.backgroundImage = pendingBanner ? 'url("' + pendingBanner + '")' : '';
       const trigger = document.activeElement;
@@ -210,7 +214,7 @@
     $('profileRow').addEventListener('click', e => { if (!e.target.closest('#editProfile')) openProfile(); });
     $('profileRow').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openProfile(); } });
     $('editProfile').addEventListener('click', e => { e.stopPropagation(); openEditor(); });
-    function openProfile() { const name = $('displayName').textContent; $('profileViewName').textContent = name; setAvatar($('profileViewAvatar'), avatarUrl, name.slice(0,2).toUpperCase()); $('profileViewBanner').style.backgroundImage = bannerUrl ? 'url(\"' + bannerUrl + '\")' : ''; profileOpen.classList.add('open'); }
+    function openProfile() { const name = $('displayName').textContent; $('profileViewName').textContent = name; $('profileViewBio').textContent = profileBio; setAvatar($('profileViewAvatar'), avatarUrl, name.slice(0,2).toUpperCase()); $('profileViewBanner').style.backgroundImage = bannerUrl ? 'url(\\"' + bannerUrl + '\\")' : ''; profileOpen.classList.add('open'); }
     function closeProfile() { profileOpen.classList.remove('open'); }
     $('closeProfileView').addEventListener('click', closeProfile);
     profileOpen.addEventListener('click', e => { if (e.target === profileOpen) closeProfile(); });
@@ -221,13 +225,13 @@
     $('bannerFile').addEventListener('change', () => loadImageFile($('bannerFile'), 'banner'));
     window.addEventListener('resize', () => { if (editor.classList.contains('open')) closeEditor(); });
     $('saveProfile').addEventListener('click', () => {
-      avatarUrl = pendingAvatar; bannerUrl = pendingBanner;
+      avatarUrl = pendingAvatar; bannerUrl = pendingBanner; profileBio = $('bioInput').value.trim();
       const name = $('nameInput').value.trim().replace(/^@+/, '') || 'your_username';
-      try { localStorage.setItem('poko-profile', JSON.stringify({name, avatar: avatarUrl, banner: bannerUrl})); } catch (_) { showToast('Could not save profile in this browser.'); }
+      try { localStorage.setItem('poko-profile', JSON.stringify({name, avatar: avatarUrl, banner: bannerUrl, bio: $('bioInput').value.trim()})); } catch (_) { showToast('Could not save profile in this browser.'); }
       $('displayName').textContent = name;
       setAvatar($('sideAvatar'), avatarUrl, name.slice(0,2).toUpperCase());
       setAvatar($('largeAvatar'), avatarUrl, name.slice(0,2).toUpperCase());
-      closeEditor(); showToast('Username saved on this device.');
+      closeEditor(); showToast('Profile saved on this device.');
     });
     ['newMessage','startChat','topNewMessage','mainNewMessage'].forEach(id => $(id).addEventListener('click', () => {
       if (window.matchMedia('(max-width: 760px)').matches) app.classList.add('show-main');
