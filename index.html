@@ -547,7 +547,7 @@
       }
     });
     document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible' && firebaseAuth?.currentUser) updatePresence('online');
+      if (document.visibilityState === 'visible' && firebaseAuth?.currentUser) updatePresence(myActivityStatus === 'invisible' ? 'invisible' : myActivityStatus);
     });
 
     restoreProfile();
@@ -576,7 +576,7 @@
     function setAvatarStatus(el,status='online') {
       if(!el)return;
       el.querySelectorAll(':scope > .avatar-status-badge').forEach(node=>node.remove());
-      const badge=document.createElement('span');badge.className='avatar-status-badge '+(['online','idle','dnd','invisible'].includes(status)?status:'online');badge.title=({online:'Online',idle:'Idle',dnd:'Do not disturb',invisible:'Invisible'}[status]||'Online');badge.setAttribute('aria-label',badge.title);el.append(badge);
+      const badge=document.createElement('span');badge.className='avatar-status-badge '+(['online','idle','dnd','invisible','offline'].includes(status)?status:'online');badge.title=({online:'Online',idle:'Idle',dnd:'Do not disturb',invisible:'Invisible',offline:'Offline'}[status]||'Online');badge.setAttribute('aria-label',badge.title);el.append(badge);
     }
     function openEditor() {
       editor.classList.remove('closing');
