@@ -481,7 +481,7 @@
     </section>
   </div>
   <div class="call-overlay" id="callOverlay" hidden><section class="call-window"><div class="call-stage"><video id="remoteVideo" autoplay playsinline></video><video id="localVideo" autoplay muted playsinline></video><div class="call-status" id="callStatus">Connecting…</div></div><div class="call-controls"><button class="call-control" id="toggleMic">Mute mic</button><button class="call-control" id="shareScreen">Share screen</button><button class="call-control end" id="endCall">End call</button></div></section></div>
-  <div class="new-chat-overlay" id="newChatOverlay" role="dialog" aria-modal="true" aria-labelledby="newChatTitle"><section class="new-chat-dialog"><div class="dialog-header"><h2 id="newChatTitle">New message</h2><button class="icon-button" id="closeNewChat" aria-label="Close"><span class="material-symbol">close</span></button></div><form class="new-chat-search" id="userSearchForm"><input id="userSearchInput" type="search" maxlength="40" placeholder="Enter an exact username" aria-label="Username to find" required><button class="primary" type="submit">Find</button></form><div class="group-selection" id="groupSelection"></div><button class="small-button group-create" id="createGroupChat" type="button">Create group from selected people</button><div class="user-results" id="userResults"><div class="result-message">Search for someone's exact profile name to start a conversation, or select people for a group.</div></div></section></div>
+  <div class="new-chat-overlay" id="newChatOverlay" role="dialog" aria-modal="true" aria-labelledby="newChatTitle"><section class="new-chat-dialog"><div class="dialog-header"><h2 id="newChatTitle">New message</h2><button class="icon-button" id="closeNewChat" aria-label="Close"><span class="material-symbol">close</span></button></div><form class="new-chat-search" id="userSearchForm"><input id="userSearchInput" type="search" maxlength="40" placeholder="Enter an exact username" aria-label="Username to find" required><button class="primary" type="submit">Find</button></form><div class="group-selection" id="groupSelection"></div><button class="small-button group-create" id="toggleGroupSelection" type="button">Select people for a group</button><button class="small-button group-create" id="createGroupChat" type="button" hidden>Create group chat</button><div class="user-results" id="userResults"><div class="result-message">Search for someone's exact profile name to start a conversation, or select people for a group.</div></div></section></div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
@@ -912,6 +912,7 @@
       });
     }
     const selectedGroupMembers = new Map();
+    let groupSelectionMode = false;
     function renderGroupSelection() {
       let panel = $('groupSelection');
       if (!panel) return;
@@ -933,7 +934,7 @@
         await ref.set({type:'group',name:name.slice(0,48),participants,createdBy:currentUser.uid,createdAt:firebase.firestore.FieldValue.serverTimestamp(),updatedAt:firebase.firestore.FieldValue.serverTimestamp(),lastMessage:''});
         const profiles=await Promise.all([...selectedGroupMembers.values()].map(p=>getPublicProfile(p.uid)));
         const item={id:ref.id,type:'group',name,participants,group:true,memberProfiles:profiles,otherUid:profiles[0].uid,otherProfile:profiles[0],displayName:name,lastMessage:''};
-        closeNewChat(); selectedGroupMembers.clear(); renderGroupSelection(); openConversation(item);
+        closeNewChat(); selectedGroupMembers.clear(); groupSelectionMode=false; $('createGroupChat').hidden=true; $('toggleGroupSelection').textContent='Select people for a group'; renderGroupSelection(); openConversation(item);
       } catch(error) { console.error('Group creation failed:',error); showToast('Could not create group. Check Firestore rules.'); }
     }
     async function findUsers(name) {
@@ -956,8 +957,7 @@
           const bioEl = document.createElement('span'); bioEl.textContent = user.bio || 'No bio yet';
           label.append(nameEl,bioEl); button.append(avatar,label);
           button.addEventListener('click', async () => {
-            if (selectedGroupMembers.has(user.uid)) { selectedGroupMembers.delete(user.uid); button.classList.remove('selected'); renderGroupSelection(); return; }
-            if (selectedGroupMembers.size) { selectedGroupMembers.set(user.uid,user); button.classList.add('selected'); renderGroupSelection(); return; }
+            if (groupSelectionMode) { if(selectedGroupMembers.has(user.uid)){selectedGroupMembers.delete(user.uid);button.classList.remove('selected');}else{selectedGroupMembers.set(user.uid,user);button.classList.add('selected');}renderGroupSelection();return; }
             try {
               const id = conversationKey(currentUser.uid,user.uid);
               const ref = profileDb.collection('conversations').doc(id);
@@ -984,6 +984,7 @@
       }
     }
     $('userSearchForm').addEventListener('submit', e => { e.preventDefault(); findUsers($('userSearchInput').value.trim()); });
+    $('toggleGroupSelection').addEventListener('click',()=>{groupSelectionMode=!groupSelectionMode;$('createGroupChat').hidden=!groupSelectionMode;$('toggleGroupSelection').textContent=groupSelectionMode?'Cancel group selection':'Select people for a group';selectedGroupMembers.clear();renderGroupSelection();});
     $('createGroupChat').addEventListener('click', createGroupChat);
     async function openConversation(item) {
       if (!currentUser) return;
