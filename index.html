@@ -40,19 +40,20 @@
     .empty-list p{max-width:210px;margin:8px 0 17px;font-size:.77rem;line-height:1.65;color:var(--muted)}
     .small-button{border:1px solid var(--line);background:var(--panel-2);color:var(--text);border-radius:10px;padding:9px 12px;font-size:.75rem;font-weight:700}
     .small-button:hover{background:var(--hover)}
+    .profile-banner-card{height:48px;background:#5865f2;background-size:cover;background-position:center;flex:0 0 48px;border-top:1px solid var(--line)}
     .profile-row{display:flex;align-items:center;gap:10px;padding:13px;border-top:1px solid var(--line);background:rgba(0,0,0,.08)}
     .mini-avatar{width:36px;height:36px;flex:0 0 36px;border-radius:50%;background:#41454d;display:grid;place-items:center;overflow:hidden;color:#d9dce3;font-size:.7rem}
     .mini-avatar img{width:100%;height:100%;object-fit:cover}
     .profile-label{min-width:0;flex:1}
     .profile-label strong{display:block;font-size:.78rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .profile-label span{display:block;font-size:.68rem;color:var(--muted);margin-top:3px}
-    .main{min-width:0;display:flex;flex-direction:column;min-height:100dvh;background:radial-gradient(ellipse at 50% 35%,rgba(155,179,224,.035),transparent 48%),var(--bg)}
+    .main{min-width:0;display:flex;flex-direction:column;min-height:100dvh;background:var(--bg)}
     .topbar{height:70px;flex:0 0 70px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 26px}
     .topbar-title{font-size:.88rem;font-weight:700;letter-spacing:-.02em}
     .topbar-tools{display:flex;align-items:center;gap:8px}
     .content-empty{flex:1;display:flex;align-items:center;justify-content:center;text-align:center;padding:32px}
     .welcome{max-width:400px}
-    .welcome-art{width:76px;height:76px;margin:0 auto 24px;border-radius:25px;background:linear-gradient(145deg,#373b44,#2a2d33);border:1px solid rgba(255,255,255,.09);display:grid;place-items:center;color:#c7d8ff;box-shadow:0 20px 60px rgba(0,0,0,.12)}
+    .welcome-art{width:64px;height:64px;margin:0 auto 24px;border-radius:18px;background:#303238;border:1px solid var(--line);display:grid;place-items:center;color:#c7d8ff}
     .welcome-art svg{width:31px;height:31px;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
     .welcome h2{font-size:1.5rem;letter-spacing:-.055em;margin:0 0 11px}
     .welcome p{font-size:.87rem;line-height:1.8;color:var(--muted);margin:0 auto 23px;max-width:350px}
@@ -64,8 +65,8 @@
     .dialog-header{display:flex;align-items:center;justify-content:space-between;padding:20px 22px;border-bottom:1px solid var(--line)}
     .dialog-header h2{font-size:1rem;margin:0}
     .dialog-body{padding:22px}
-    .banner-preview{height:130px;border-radius:13px;background:linear-gradient(125deg,#343942,#4a5261 55%,#333740);background-size:cover;background-position:center;position:relative;overflow:hidden;border:1px solid var(--line)}
-    .banner-preview:after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(0,0,0,.18),transparent 55%);pointer-events:none}
+    .banner-preview{height:130px;border-radius:10px;background:#5865f2;background-size:cover;background-position:center;position:relative;overflow:hidden;border:1px solid var(--line)}
+    .banner-preview:after{content:none}
     .avatar-edit-row{display:flex;align-items:center;gap:15px;margin-top:-27px;padding:0 16px 22px;position:relative}
     .large-avatar{width:82px;height:82px;flex:0 0 82px;border:5px solid #292b30;border-radius:50%;overflow:hidden;background:#41454d;display:grid;place-items:center;color:#dce2f0;font-size:1.2rem}
     .large-avatar img{width:100%;height:100%;object-fit:cover}
@@ -109,6 +110,7 @@
         <p>Your direct messages will show up here when you start talking to someone.</p>
         <button class="small-button" id="startChat">Start a conversation</button>
       </div>
+      <div class="profile-banner-card" id="profileBanner" aria-label="Profile banner"></div>
       <div class="profile-row">
         <div class="mini-avatar" id="sideAvatar">You</div>
         <div class="profile-label"><strong id="displayName">Your profile</strong><span>Personal account</span></div>
@@ -146,10 +148,24 @@
     const $ = id => document.getElementById(id);
     const app = $('app');
     const editor = $('profileEditor');
+    const DEFAULT_BANNER = '#5865f2';
     let avatarUrl = '';
     let bannerUrl = '';
     let pendingAvatar = '';
     let pendingBanner = '';
+    function restoreProfile() {
+      try {
+        const saved = JSON.parse(localStorage.getItem('poko-profile') || '{}');
+        avatarUrl = saved.avatar || '';
+        bannerUrl = saved.banner || '';
+        const name = saved.name || 'Your profile';
+        $('displayName').textContent = name;
+        setAvatar($('sideAvatar'), avatarUrl, name.slice(0,2).toUpperCase());
+        setAvatar($('railAvatar'), avatarUrl, name.slice(0,2).toUpperCase());
+        $('profileBanner').style.backgroundColor = DEFAULT_BANNER;
+        $('profileBanner').style.backgroundImage = bannerUrl ? 'url(\"' + bannerUrl + '\")' : 'none';
+      } catch (_) {}
+    }
     function setAvatar(el, url, fallback='You') {
       el.replaceChildren();
       if (url) { const img = document.createElement('img'); img.src = url; img.alt = 'Profile picture'; el.append(img); }
@@ -187,11 +203,14 @@
     $('saveProfile').addEventListener('click', () => {
       avatarUrl = pendingAvatar; bannerUrl = pendingBanner;
       const name = $('nameInput').value.trim() || 'Your profile';
+      try { localStorage.setItem('poko-profile', JSON.stringify({name, avatar: avatarUrl, banner: bannerUrl})); } catch (_) { showToast('Could not save profile in this browser.'); }
       $('displayName').textContent = name;
       setAvatar($('sideAvatar'), avatarUrl, name.slice(0,2).toUpperCase());
       setAvatar($('railAvatar'), avatarUrl, name.slice(0,2).toUpperCase());
       setAvatar($('largeAvatar'), avatarUrl, name.slice(0,2).toUpperCase());
-      closeEditor(); showToast('Profile preview updated in this browser.');
+      $('profileBanner').style.backgroundColor = DEFAULT_BANNER;
+      $('profileBanner').style.backgroundImage = bannerUrl ? 'url(\"' + bannerUrl + '\")' : 'none';
+      closeEditor(); showToast('Profile saved on this device.');
     });
     ['newMessage','startChat','topNewMessage','mainNewMessage'].forEach(id => $(id).addEventListener('click', () => {
       if (window.matchMedia('(max-width: 760px)').matches) app.classList.add('show-main');
@@ -203,6 +222,7 @@
       const q = $('search').value.trim();
       if (q) showToast('There are no conversations to search yet.');
     });
+    restoreProfile();
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeEditor(); });
   </script>
 </body>
