@@ -375,7 +375,7 @@
     <div class="login-card">
       <h1 id="loginTitle">Messages, without the noise.</h1>
       <p class="login-copy">Sign in to find people, keep your conversations, and make Poko yours.</p>
-      <button class="login-google" id="loginGoogle" type="button"><svg class="google-logo" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" transform="translate(0 5)"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.74 7.18l7.72 5.99c4.51-4.16 7.06-10.29 7.06-17.64z" transform="translate(0 0)"/><path fill="#FBBC05" d="M10.53 28.59A14.4 14.4 0 0 1 9.75 24c0-1.59.27-3.13.76-4.59l-7.98-6.19A23.9 23.9 0 0 0 0 24c0 3.87.93 7.53 2.56 10.78l7.97-6.19z" transform="translate(0 0)"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.91-5.81l-7.72-5.99c-2.14 1.45-4.89 2.3-8.19 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" transform="translate(0 -1)"/></svg><span>Continue with Google</span></button>
+      <button class="login-google" id="loginGoogle" type="button"><svg class="google-logo" viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="googleGradient" x1="7%" y1="10%" x2="91%" y2="90%"><stop offset="0%" stop-color="#4285F4"/><stop offset="28%" stop-color="#34A853"/><stop offset="53%" stop-color="#FBBC05"/><stop offset="72%" stop-color="#EA4335"/><stop offset="100%" stop-color="#4285F4"/></linearGradient></defs><path fill="url(#googleGradient)" d="M43.6 24.5c0-1.4-.1-2.8-.4-4.1H24v7.8h11a9.4 9.4 0 0 1-4.1 6.2v5.1h6.6c3.9-3.6 6.1-8.9 6.1-15z"/><path fill="url(#googleGradient)" d="M24 44c5.5 0 10.1-1.8 13.5-4.9l-6.6-5.1c-1.8 1.2-4.1 2-6.9 2-5.3 0-9.8-3.6-11.4-8.4H5.8v5.3A20 20 0 0 0 24 44z"/><path fill="url(#googleGradient)" d="M12.6 27.6a12 12 0 0 1 0-7.2v-5.3H5.8a20 20 0 0 0 0 17.8z"/><path fill="url(#googleGradient)" d="M24 8.1c3 0 5.7 1 7.8 3.1l5.8-5.8A19.5 19.5 0 0 0 24 0 20 20 0 0 0 5.8 15.1l6.8 5.3C14.2 13.5 18.7 8.1 24 8.1z"/></svg><span>Continue with Google</span></button>
       <p class="login-note" id="loginNote">Your account keeps your profile and conversations synced.</p>
     </div>
   </section>
@@ -777,7 +777,21 @@
             const profile={uid:item.otherUid,name:data.name||'Poko user',avatar:data.avatar||'',banner:data.banner||'',bio:data.bio||'',status:['online','idle','dnd','invisible'].includes(data.status)?data.status:'online'};
             profileCache.set(item.otherUid,profile);
             knownConversations=knownConversations.map(existing=>existing.otherUid===item.otherUid?{...existing,otherProfile:profile}:existing);
-            if(activeConversation?.otherUid===item.otherUid){activeConversation={...activeConversation,otherProfile:profile};setAvatarStatus($('chatAvatar'),profile.status);}
+            if(activeConversation?.otherUid===item.otherUid){
+              activeConversation={...activeConversation,otherProfile:profile};
+              $('chatName').textContent=profile.name;
+              $('chatBio').textContent=profile.bio||'';
+              $('chatBio').hidden=!profile.bio;
+              setAvatar($('chatAvatar'),profile.avatar,profile.name.slice(0,2).toUpperCase());
+              setAvatarStatus($('chatAvatar'),profile.status);
+            }
+            if(profileOpen.classList.contains('open')&&$('profileViewName').dataset.uid===item.otherUid){
+              $('profileViewName').textContent=profile.name;
+              $('profileViewBio').textContent=profile.bio||'';
+              setAvatar($('profileViewAvatar'),profile.avatar,profile.name.slice(0,2).toUpperCase());
+              setAvatarStatus($('profileViewAvatar'),profile.status);
+              $('profileViewBanner').style.backgroundImage=profile.banner?('url("'+profile.banner+'")'):'';
+            }
             renderConversationList();
           },error=>console.error('Friend activity status listener failed:',error));
           profileStatusUnsubscribers.set(item.otherUid,unsubscribe);
@@ -898,9 +912,8 @@
       $('chatName').textContent = item.otherProfile.name;
       $('chatBio').textContent = item.otherProfile.bio || '';
       $('chatBio').hidden = !item.otherProfile.bio;
-      $('chatStatusDot')?.remove();
-      setAvatar($('chatAvatar'),item.otherProfile.avatar,item.otherProfile.name.slice(0,2).toUpperCase()); setAvatarStatus($('chatAvatar'),item.otherProfile.status);
       setAvatar($('chatAvatar'),item.otherProfile.avatar,item.otherProfile.name.slice(0,2).toUpperCase());
+      setAvatarStatus($('chatAvatar'),item.otherProfile.status);
       $('chatMessages').replaceChildren();
       const loading = document.createElement('div'); loading.className = 'chat-empty'; loading.textContent = 'Loading messages…'; $('chatMessages').append(loading);
       messagesUnsubscribe = profileDb.collection('conversations').doc(item.id).collection('messages').orderBy('createdAt','asc').onSnapshot(snapshot => {
@@ -1131,6 +1144,7 @@
     $('viewChatProfile').addEventListener('click', () => {
       if (!activeConversation?.otherProfile) return;
       const p = activeConversation.otherProfile;
+      $('profileViewName').dataset.uid = p.uid || activeConversation.otherUid || '';
       $('profileViewName').textContent = p.name;
       $('profileViewBio').textContent = p.bio || '';
       setAvatar($('profileViewAvatar'),p.avatar,p.name.slice(0,2).toUpperCase());
