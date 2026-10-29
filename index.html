@@ -225,17 +225,18 @@
     .dialog-header{border-color:var(--line)}
     .file-control,.auth-section{background:#222428;border-color:var(--line)}
     .auth-button{background:#303238;border-color:var(--line)}
-    .call-overlay{position:fixed;inset:0;z-index:1200;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(0,0,0,.78);backdrop-filter:blur(7px)}
+.group-selection{display:flex;flex-wrap:wrap;gap:6px;padding:0 18px}.group-chip{display:inline-flex;align-items:center;gap:7px;padding:6px 9px;border-radius:20px;background:rgba(91,140,255,.16);color:#dbe5ff;font-size:.72rem}.group-chip button{border:0;background:transparent;color:inherit;font-size:1rem}.group-create{margin:8px 18px 4px}.user-result.selected{background:rgba(91,140,255,.16);border-color:var(--accent)}
+    .call-overlay{position:fixed;inset:0;z-index:1200;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(12,14,20,.92);backdrop-filter:blur(12px)}
     .call-overlay[hidden]{display:none!important}
-    .call-window{width:min(900px,100%);max-height:calc(100dvh - 40px);display:flex;flex-direction:column;overflow:hidden;background:var(--panel);border:1px solid rgba(91,140,255,.24);border-radius:16px;box-shadow:0 28px 80px rgba(0,0,0,.5)}
-    .call-stage{position:relative;min-height:220px;height:min(65dvh,560px);background:#191a1e;display:grid;place-items:center;overflow:hidden}
+    .call-window{width:min(1100px,100%);max-height:calc(100dvh - 40px);display:flex;flex-direction:column;overflow:hidden;background:#202127;border:1px solid rgba(167,198,255,.16);border-radius:18px;box-shadow:0 28px 90px rgba(0,0,0,.58)}
+    .call-stage{position:relative;min-height:260px;height:min(68dvh,680px);background:radial-gradient(ellipse at center,#303541 0%,#191a1e 72%);display:grid;place-items:center;overflow:hidden}
     #remoteVideo{width:100%;height:100%;object-fit:contain;background:#191a1e}
     #localVideo{position:absolute;right:18px;bottom:18px;width:clamp(110px,22%,220px);aspect-ratio:16/10;height:auto;object-fit:cover;background:#303238;border:1px solid rgba(167,198,255,.5);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.35)}
     .call-status{position:absolute;left:16px;bottom:16px;max-width:calc(100% - 260px);padding:9px 12px;background:rgba(34,36,40,.94);border:1px solid var(--line);border-radius:9px;color:var(--text);font-size:.82rem;backdrop-filter:blur(6px)}
-    .call-controls{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;padding:16px;background:var(--panel)}
-    .call-control{border:1px solid rgba(91,140,255,.22);border-radius:9px;background:#303238;color:var(--text);padding:11px 16px;font-size:.82rem;font-weight:700}
+    .call-controls{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;padding:18px;background:#202127;border-top:1px solid rgba(255,255,255,.06)}
+    .call-control{min-width:104px;border:1px solid rgba(167,198,255,.16);border-radius:12px;background:#343741;color:var(--text);padding:13px 17px;font-size:.82rem;font-weight:700;transition:background .16s,transform .16s}
     .call-control:hover{background:#373a42}
-    .call-control.end{background:#c83e58;border-color:#c83e58;color:white}
+    .call-control.end{background:#d84359;border-color:#d84359;color:white;border-radius:14px}
     .call-control.end:hover{background:#e04b65}
     .toast{z-index:1300;background:#303238;border-color:rgba(91,140,255,.22)}
     .main:has(#chatPanel:not([hidden]))>.topbar{display:none}
@@ -480,7 +481,7 @@
     </section>
   </div>
   <div class="call-overlay" id="callOverlay" hidden><section class="call-window"><div class="call-stage"><video id="remoteVideo" autoplay playsinline></video><video id="localVideo" autoplay muted playsinline></video><div class="call-status" id="callStatus">Connecting…</div></div><div class="call-controls"><button class="call-control" id="toggleMic">Mute mic</button><button class="call-control" id="shareScreen">Share screen</button><button class="call-control end" id="endCall">End call</button></div></section></div>
-  <div class="new-chat-overlay" id="newChatOverlay" role="dialog" aria-modal="true" aria-labelledby="newChatTitle"><section class="new-chat-dialog"><div class="dialog-header"><h2 id="newChatTitle">New message</h2><button class="icon-button" id="closeNewChat" aria-label="Close"><span class="material-symbol">close</span></button></div><form class="new-chat-search" id="userSearchForm"><input id="userSearchInput" type="search" maxlength="40" placeholder="Enter an exact username" aria-label="Username to find" required><button class="primary" type="submit">Find</button></form><div class="user-results" id="userResults"><div class="result-message">Search for someone's exact profile name to start a conversation.</div></div></section></div>
+  <div class="new-chat-overlay" id="newChatOverlay" role="dialog" aria-modal="true" aria-labelledby="newChatTitle"><section class="new-chat-dialog"><div class="dialog-header"><h2 id="newChatTitle">New message</h2><button class="icon-button" id="closeNewChat" aria-label="Close"><span class="material-symbol">close</span></button></div><form class="new-chat-search" id="userSearchForm"><input id="userSearchInput" type="search" maxlength="40" placeholder="Enter an exact username" aria-label="Username to find" required><button class="primary" type="submit">Find</button></form><div class="group-selection" id="groupSelection"></div><button class="small-button group-create" id="createGroupChat" type="button">Create group from selected people</button><div class="user-results" id="userResults"><div class="result-message">Search for someone's exact profile name to start a conversation, or select people for a group.</div></div></section></div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
@@ -813,10 +814,14 @@
       conversationListUnsubscribe = profileDb.collection('conversations').where('participants', 'array-contains', user.uid).onSnapshot(async snapshot => {
         const items = await Promise.all(snapshot.docs.map(async doc => {
           const data = doc.data() || {};
-          const otherUid = (data.participants || []).find(id => id !== user.uid);
-          if (!otherUid) return null;
-          const profile = await getPublicProfile(otherUid);
-          return {id:doc.id, ...data, otherUid, otherProfile:profile};
+          const memberUids = (data.participants || []).filter(id => id !== user.uid);
+          if (!memberUids.length) return null;
+          const memberProfiles = await Promise.all(memberUids.map(getPublicProfile));
+          const otherUid = memberUids[0];
+          const otherProfile = memberProfiles[0];
+          const group = data.type === 'group' || memberUids.length > 1;
+          return {id:doc.id, ...data, otherUid, otherProfile, memberProfiles, group,
+            displayName:group ? (data.name || memberProfiles.map(p=>p.name).join(', ')) : otherProfile.name};
         }));
         const validItems=items.filter(Boolean);
         const wantedUids=new Set(validItems.map(item=>item.otherUid));
@@ -879,7 +884,7 @@
       const list = $('conversationList'), empty = $('emptyConversationList');
       const q = $('search').value.trim().toLowerCase();
       const items = knownConversations.filter(item => {
-        const name = item.otherProfile.name.toLowerCase();
+        const name = (item.displayName || item.otherProfile.name).toLowerCase();
         const last = (item.lastMessage || '').toLowerCase();
         return !q || name.includes(q) || last.includes(q);
       });
@@ -897,14 +902,39 @@
       items.forEach(item => {
         const button = document.createElement('button');
         button.className = 'conversation-item' + (item.id === activeConversationId ? ' active' : '');
-        const avatar = document.createElement('div'); avatar.className = 'mini-avatar'; setAvatar(avatar,item.otherProfile.avatar,item.otherProfile.name.slice(0,2).toUpperCase()); setAvatarStatus(avatar,item.otherProfile.status);
+        const avatar = document.createElement('div'); avatar.className = 'mini-avatar'; setAvatar(avatar,item.group ? '' : item.otherProfile.avatar,(item.displayName || item.otherProfile.name).slice(0,2).toUpperCase()); if(!item.group)setAvatarStatus(avatar,item.otherProfile.status);
         const label = document.createElement('div'); label.className = 'profile-label';
-        const name = document.createElement('strong'); name.textContent = item.otherProfile.name;
+        const name = document.createElement('strong'); name.textContent = item.displayName || item.otherProfile.name;
         const last = document.createElement('span'); last.textContent = item.lastMessage || 'Start a conversation';
         label.append(name,last); button.append(avatar,label);
         button.addEventListener('click', () => openConversation(item));
         list.append(button);
       });
+    }
+    const selectedGroupMembers = new Map();
+    function renderGroupSelection() {
+      let panel = $('groupSelection');
+      if (!panel) return;
+      panel.replaceChildren();
+      selectedGroupMembers.forEach(user => {
+        const chip=document.createElement('span'); chip.className='group-chip'; chip.textContent=user.name;
+        const remove=document.createElement('button'); remove.type='button'; remove.textContent='×'; remove.setAttribute('aria-label','Remove '+user.name);
+        remove.addEventListener('click',()=>{selectedGroupMembers.delete(user.uid);renderGroupSelection();});
+        chip.append(remove); panel.append(chip);
+      });
+    }
+    async function createGroupChat() {
+      if (!currentUser || selectedGroupMembers.size < 2) { showToast('Select at least two people for a group.'); return; }
+      const name = prompt('Name this group chat:')?.trim();
+      if (!name) return;
+      const participants=[currentUser.uid,...selectedGroupMembers.keys()].sort();
+      try {
+        const ref=profileDb.collection('conversations').doc();
+        await ref.set({type:'group',name:name.slice(0,48),participants,createdBy:currentUser.uid,createdAt:firebase.firestore.FieldValue.serverTimestamp(),updatedAt:firebase.firestore.FieldValue.serverTimestamp(),lastMessage:''});
+        const profiles=await Promise.all([...selectedGroupMembers.values()].map(p=>getPublicProfile(p.uid)));
+        const item={id:ref.id,type:'group',name,participants,group:true,memberProfiles:profiles,otherUid:profiles[0].uid,otherProfile:profiles[0],displayName:name,lastMessage:''};
+        closeNewChat(); selectedGroupMembers.clear(); renderGroupSelection(); openConversation(item);
+      } catch(error) { console.error('Group creation failed:',error); showToast('Could not create group. Check Firestore rules.'); }
     }
     async function findUsers(name) {
       if (!currentUser || !profileDb) { showToast('Sign in before searching for users.'); return; }
@@ -926,6 +956,8 @@
           const bioEl = document.createElement('span'); bioEl.textContent = user.bio || 'No bio yet';
           label.append(nameEl,bioEl); button.append(avatar,label);
           button.addEventListener('click', async () => {
+            if (selectedGroupMembers.has(user.uid)) { selectedGroupMembers.delete(user.uid); button.classList.remove('selected'); renderGroupSelection(); return; }
+            if (selectedGroupMembers.size) { selectedGroupMembers.set(user.uid,user); button.classList.add('selected'); renderGroupSelection(); return; }
             try {
               const id = conversationKey(currentUser.uid,user.uid);
               const ref = profileDb.collection('conversations').doc(id);
@@ -952,6 +984,7 @@
       }
     }
     $('userSearchForm').addEventListener('submit', e => { e.preventDefault(); findUsers($('userSearchInput').value.trim()); });
+    $('createGroupChat').addEventListener('click', createGroupChat);
     async function openConversation(item) {
       if (!currentUser) return;
       if (messagesUnsubscribe) messagesUnsubscribe();
@@ -961,11 +994,11 @@
       $('welcomePanel').hidden = true;
       $('chatPanel').hidden = false;
       if (window.matchMedia('(max-width: 760px)').matches) app.classList.add('show-main');
-      $('chatName').textContent = item.otherProfile.name;
-      $('chatBio').textContent = item.otherProfile.bio || '';
-      $('chatBio').hidden = !item.otherProfile.bio;
-      setAvatar($('chatAvatar'),item.otherProfile.avatar,item.otherProfile.name.slice(0,2).toUpperCase());
-      setAvatarStatus($('chatAvatar'),item.otherProfile.status);
+      $('chatName').textContent = item.displayName || item.otherProfile.name;
+      $('chatBio').textContent = item.group ? ((item.participants || []).length + ' members') : (item.otherProfile.bio || '');
+      $('chatBio').hidden = !item.group && !item.otherProfile.bio;
+      setAvatar($('chatAvatar'),item.group ? '' : item.otherProfile.avatar,(item.displayName || item.otherProfile.name).slice(0,2).toUpperCase());
+      if(!item.group)setAvatarStatus($('chatAvatar'),item.otherProfile.status);
       $('chatMessages').replaceChildren();
       const loading = document.createElement('div'); loading.className = 'chat-empty'; loading.textContent = 'Loading messages…'; $('chatMessages').append(loading);
       messagesUnsubscribe = profileDb.collection('conversations').doc(item.id).collection('messages').orderBy('createdAt','asc').onSnapshot(snapshot => {
@@ -982,8 +1015,9 @@
           const mine = message.senderId === currentUser.uid;
           const wrap = document.createElement('article'); wrap.className = 'message' + (grouped ? ' grouped' : '');
           const avatar = document.createElement('div'); avatar.className = 'mini-avatar';
-          const author = mine ? ($('displayName').textContent || 'You') : item.otherProfile.name;
-          setAvatar(avatar, mine ? avatarUrl : item.otherProfile.avatar, author.slice(0,2).toUpperCase());
+          const senderProfile = mine ? null : (item.memberProfiles || []).find(p=>p.uid===message.senderId) || item.otherProfile;
+          const author = mine ? ($('displayName').textContent || 'You') : senderProfile.name;
+          setAvatar(avatar, mine ? avatarUrl : senderProfile.avatar, author.slice(0,2).toUpperCase());
           const content = document.createElement('div'); content.className = 'message-content';
           const head = document.createElement('div'); head.className = 'message-head';
           const authorEl = document.createElement('span'); authorEl.className = 'message-author'; authorEl.textContent = author;
@@ -1063,9 +1097,21 @@
       return peerConnection;
     }
     async function prepareLocalMedia() {
-      localStream = await navigator.mediaDevices.getUserMedia({audio:true,video:true});
-      $('localVideo').srcObject = localStream;
-      localStream.getTracks().forEach(track => peerConnection.addTrack(track,localStream));
+      localStream = new MediaStream();
+      if (navigator.mediaDevices?.getUserMedia) {
+        for (const constraints of [{audio:true,video:false},{audio:false,video:true}]) {
+          try {
+            const captured = await navigator.mediaDevices.getUserMedia(constraints);
+            captured.getTracks().forEach(track => { localStream.addTrack(track); peerConnection.addTrack(track,localStream); });
+          } catch (error) { console.info('Optional call media unavailable:', constraints.audio ? 'microphone' : 'camera', error.name); }
+        }
+      }
+      if (!localStream.getAudioTracks().length) peerConnection.addTransceiver('audio',{direction:'recvonly'});
+      if (!localStream.getVideoTracks().length) peerConnection.addTransceiver('video',{direction:'recvonly'});
+      $('localVideo').srcObject = localStream.getTracks().length ? localStream : null;
+      if (!localStream.getAudioTracks().length && !localStream.getVideoTracks().length) updateCallStatus('Joining without a microphone or camera…');
+      else if (!localStream.getAudioTracks().length) updateCallStatus('Listening mode · no microphone detected');
+      else if (!localStream.getVideoTracks().length) updateCallStatus('Voice call · camera unavailable');
     }
     function watchCallDocument(conversationId, initiator) {
       if (callDocUnsubscribe) callDocUnsubscribe();
@@ -1109,7 +1155,7 @@
     }
     async function startCall() {
       if (!currentUser || !activeConversationId || !profileDb) { showToast('Open a conversation and sign in before calling.'); return; }
-      if (!navigator.mediaDevices?.getUserMedia || !window.RTCPeerConnection) { showToast('Calls need a modern browser and HTTPS.'); return; }
+      if (!window.RTCPeerConnection) { showToast('Calls need a modern browser and HTTPS.'); return; }
       try {
         callConversationId = activeConversationId; callInitiator = true;
         createPeerConnection(); await prepareLocalMedia();
@@ -1139,7 +1185,7 @@
           screenStream.getTracks().forEach(track => track.stop()); screenStream = null;
           const cameraTrack = localStream?.getVideoTracks()[0];
           const sender = peerConnection.getSenders().find(item => item.track?.kind === 'video');
-          if (sender && cameraTrack) await sender.replaceTrack(cameraTrack);
+          if (sender) await sender.replaceTrack(cameraTrack || null);
           $('localVideo').srcObject = localStream;
           $('shareScreen').textContent = 'Share screen';
           return;
@@ -1147,8 +1193,9 @@
         if (!navigator.mediaDevices.getDisplayMedia) { showToast('Screen sharing is not supported by this browser.'); return; }
         screenStream = await navigator.mediaDevices.getDisplayMedia({video:true,audio:false});
         const screenTrack = screenStream.getVideoTracks()[0];
-        const sender = peerConnection.getSenders().find(item => item.track?.kind === 'video');
-        if (sender) await sender.replaceTrack(screenTrack);
+        let sender = peerConnection.getSenders().find(item => item.track?.kind === 'video' || item.getParameters?.().encodings?.length);
+        if (!sender) sender = peerConnection.addTrack(screenTrack,screenStream);
+        else await sender.replaceTrack(screenTrack);
         $('localVideo').srcObject = screenStream;
         $('shareScreen').textContent = 'Stop sharing';
         screenTrack.onended = () => { if (screenStream) shareScreen(); };
@@ -1169,7 +1216,7 @@
     }
     $('startVoiceCall').addEventListener('click', startCall);
     $('toggleMic').addEventListener('click', () => {
-      if (!localStream) return;
+      if (!localStream?.getAudioTracks().length) { showToast('No microphone is available on this device. You can still listen.'); return; }
       micMuted = !micMuted; localStream.getAudioTracks().forEach(track => track.enabled = !micMuted);
       $('toggleMic').textContent = micMuted ? 'Unmute mic' : 'Mute mic';
     });
