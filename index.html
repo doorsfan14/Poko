@@ -73,7 +73,7 @@
     .welcome p{font-size:.87rem;line-height:1.8;color:var(--muted);margin:0 auto 23px;max-width:350px}
     .primary{border:0;background:var(--accent);color:var(--accent-ink);padding:11px 16px;border-radius:11px;font-size:.8rem;font-weight:800}
     .primary:hover{filter:brightness(1.06)}
-    .profile-editor{display:none;position:fixed;z-index:5;padding:0;width:min(360px,calc(100vw - 24px));max-height:min(78dvh,680px)}
+    .profile-editor{display:none;position:fixed;z-index:9;padding:0;width:min(360px,calc(100vw - 24px));max-height:min(78dvh,680px)}
     .profile-editor.open{display:block}
     .dialog{width:100%;max-height:min(78dvh,680px);overflow:auto;border:1px solid var(--line);border-radius:16px;background:#292b30;box-shadow:0 18px 55px rgba(0,0,0,.48)}
     .dialog-header{display:flex;align-items:center;justify-content:space-between;padding:20px 22px;border-bottom:1px solid var(--line)}
@@ -192,7 +192,8 @@
       </div>
     </section>
   </div>
-  <div class="call-overlay" id="callOverlay" hidden><section class="call-window"><div class="call-stage"><video id="remoteVideo" autoplay playsinline></video><video id="localVideo" autoplay muted playsinline></video><div class="call-status" id="callStatus">Connecting…</div></div><div class="call-controls"><button class="call-control" id="toggleMic">Mute mic</button><button class="call-control" id="shareScreen">Share screen</button><button class="call-control end" id="endCall">End call</button></div></section></div>\n  <div class="new-chat-overlay" id="newChatOverlay" role="dialog" aria-modal="true" aria-labelledby="newChatTitle"><section class="new-chat-dialog"><div class="dialog-header"><h2 id="newChatTitle">New message</h2><button class="icon-button" id="closeNewChat" aria-label="Close"><span class="material-symbol">close</span></button></div><form class="new-chat-search" id="userSearchForm"><input id="userSearchInput" type="search" maxlength="40" placeholder="Enter an exact username" aria-label="Username to find" required><button class="primary" type="submit">Find</button></form><div class="user-results" id="userResults"><div class="result-message">Search for someone's exact profile name to start a conversation.</div></div></section></div>
+  <div class="call-overlay" id="callOverlay" hidden><section class="call-window"><div class="call-stage"><video id="remoteVideo" autoplay playsinline></video><video id="localVideo" autoplay muted playsinline></video><div class="call-status" id="callStatus">Connecting…</div></div><div class="call-controls"><button class="call-control" id="toggleMic">Mute mic</button><button class="call-control" id="shareScreen">Share screen</button><button class="call-control end" id="endCall">End call</button></div></section></div>
+  <div class="new-chat-overlay" id="newChatOverlay" role="dialog" aria-modal="true" aria-labelledby="newChatTitle"><section class="new-chat-dialog"><div class="dialog-header"><h2 id="newChatTitle">New message</h2><button class="icon-button" id="closeNewChat" aria-label="Close"><span class="material-symbol">close</span></button></div><form class="new-chat-search" id="userSearchForm"><input id="userSearchInput" type="search" maxlength="40" placeholder="Enter an exact username" aria-label="Username to find" required><button class="primary" type="submit">Find</button></form><div class="user-results" id="userResults"><div class="result-message">Search for someone's exact profile name to start a conversation.</div></div></section></div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
@@ -222,7 +223,16 @@
     let activeConversation = null;
     let conversationUnsubscribe = null;
     let messagesUnsubscribe = null;
-    let conversationListUnsubscribe = null;\n    let callDocUnsubscribe = null;\n    let peerConnection = null;\n    let localStream = null;\n    let screenStream = null;\n    let callConversationId = null;\n    let callInitiator = false;\n    let seenRemoteCandidates = 0;\n    let seenLocalCandidates = 0;\n    let micMuted = false;
+    let conversationListUnsubscribe = null;
+    let callDocUnsubscribe = null;
+    let peerConnection = null;
+    let localStream = null;
+    let screenStream = null;
+    let callConversationId = null;
+    let callInitiator = false;
+    let seenRemoteCandidates = 0;
+    let seenLocalCandidates = 0;
+    let micMuted = false;
     let knownConversations = [];
     const profileCache = new Map();
 
@@ -350,6 +360,12 @@
     $('avatarFile').addEventListener('change', () => loadImageFile($('avatarFile'), 'avatar'));
     $('bannerFile').addEventListener('change', () => loadImageFile($('bannerFile'), 'banner'));
     window.addEventListener('resize', () => { if (editor.classList.contains('open')) closeEditor(); });
+    document.addEventListener('keydown', e => {
+      if (e.key !== 'Escape') return;
+      if (editor.classList.contains('open')) closeEditor();
+      if (profileOpen.classList.contains('open')) closeProfile();
+      if ($('newChatOverlay').classList.contains('open')) closeNewChat();
+    });
     $('saveProfile').addEventListener('click', async () => {
       const button = $('saveProfile');
       button.disabled = true;
@@ -650,7 +666,8 @@
             const candidate = candidates[seenRemoteCandidates++];
             try { await peerConnection.addIceCandidate(new RTCIceCandidate(candidate)); } catch (error) { console.warn('ICE candidate skipped:',error); }
           }
-          if (data.callState === 'ended') endCall(false);\n          if (data.callState === 'active' && $('acceptCall')) $('acceptCall').hidden = true;
+          if (data.callState === 'ended') endCall(false);
+          if (data.callState === 'active' && $('acceptCall')) $('acceptCall').hidden = true;
         } catch (error) { console.error('Call signaling failed:',error); showToast('Call setup failed: ' + (error.code || error.message || 'unknown error')); }
       }, error => { console.error('Call listener failed:',error); showToast('Call signaling blocked. Update Firestore rules.'); });
     }
