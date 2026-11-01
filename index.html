@@ -23,6 +23,9 @@
     body.poko-ready #app,body.poko-ready .login-screen.visible{animation:poko-page-reveal .62s cubic-bezier(.16,1,.3,1) both;transform-origin:center center;will-change:opacity,transform}
     @keyframes poko-page-reveal{from{opacity:0;transform:scale(.75)}to{opacity:1;transform:scale(1)}}
     @media(prefers-reduced-motion:reduce){body.poko-ready #app,body.poko-ready .login-screen.visible{animation:none}.page-loader{transition:none}}
+    .friends-nav-button{padding:7px 14px;border:1px solid var(--line);background:var(--panel-2);color:var(--text);border-radius:9px;font-size:.75rem}
+    .request-nav-button{position:relative}.request-badge{position:absolute;right:-3px;top:-3px;min-width:16px;height:16px;padding:0 4px;border-radius:99px;background:#ed4245;color:white;font-size:10px;font-weight:800;display:grid;place-items:center;border:2px solid var(--bg)}.request-badge[hidden]{display:none}
+    .friends-panel{flex:1;min-height:0;overflow:auto;padding:30px clamp(20px,4vw,54px)}.friends-page-head{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-bottom:22px;border-bottom:1px solid var(--line)}.friends-page-head h2{font-size:1.35rem;margin:0;font-weight:800;letter-spacing:-.04em}.friends-page-head p{color:var(--muted);font-size:.78rem;margin:6px 0 0}.friends-tabs{display:flex;gap:7px;padding:16px 0;border-bottom:1px solid var(--line)}.friends-tab{border:0;background:transparent;color:var(--muted);padding:9px 14px;border-radius:8px;font-size:.78rem;font-weight:700}.friends-tab:hover{background:var(--hover);color:var(--text)}.friends-tab.active{background:var(--hover);color:var(--text)}.friends-list-view{padding-top:12px;max-width:900px}.friend-card{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:10px;border-bottom:1px solid var(--line)}.friend-card:hover{background:var(--hover)}.friend-card .profile-label{min-width:0;flex:1}.friend-card .profile-label strong{font-size:.8rem}.friend-card .profile-label span{font-size:.68rem}.friend-action{border:1px solid var(--line);border-radius:8px;padding:7px 11px;background:var(--panel-2);color:var(--text);font-size:.7rem;font-weight:700}.friend-action:hover{background:var(--hover)}.friend-actions{display:flex;gap:6px}.friend-section-empty{padding:24px 12px;color:var(--muted);font-size:.8rem}
     .app{min-height:100dvh;display:grid;grid-template-columns:76px 300px minmax(0,1fr)}
     .rail{background:#1d1f23;border-right:1px solid var(--line);display:flex;flex-direction:column;align-items:center;gap:12px;padding:20px 0}
     .rail-button{width:44px;height:44px;border:0;border-radius:15px;background:transparent;color:var(--muted);display:grid;place-items:center;position:relative;transition:background .16s,color .16s,border-radius .16s}
@@ -564,7 +567,7 @@
         <button class="small-button" id="startChat">Start a conversation</button>
       </div>
       <div class="conversation-list" id="conversationList" hidden></div>
-      <div class="side-section"><span>Friends</span><span id="friendCount">0</span></div><div class="conversation-list" id="friendsList"><div class="result-message">Your friends will appear here.</div></div><div class="side-section"><span>Friend requests</span><span id="requestCount">0</span></div><div class="conversation-list" id="friendRequestsList"><div class="result-message">No pending requests.</div></div>
+      
       <div class="profile-row" id="profileRow" role="button" tabindex="0" aria-label="View profile">
         <div class="mini-avatar" id="sideAvatar">You</div>
         <div class="profile-label"><strong id="displayName">your_username</strong><span id="myStatusLabel">Online</span></div>
@@ -574,7 +577,7 @@
       <div class="status-menu" id="statusMenu" hidden><button type="button" data-status="online"><span class="status-dot online"></span>Online</button><button type="button" data-status="idle"><span class="status-dot idle"></span>Idle</button><button type="button" data-status="dnd"><span class="status-dot dnd"></span>Do not disturb</button><button type="button" data-status="invisible"><span class="status-dot invisible"></span>Invisible</button></div>
     </aside>
     <main class="main">
-      <div class="topbar"><button class="icon-button back-mobile" id="backToList" aria-label="Back to messages" title="Back to messages"><span class="material-symbol">arrow_back</span></button><span class="topbar-title" aria-hidden="true"></span><div class="topbar-tools"><button class="icon-button" id="topNewMessage" aria-label="New message" title="New message"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></div></div>
+      <div class="topbar"><button class="icon-button back-mobile" id="backToList" aria-label="Back to messages" title="Back to messages"><span class="material-symbol">arrow_back</span></button><span class="topbar-title" id="topbarTitle">Messages</span><div class="topbar-tools"><button class="small-button friends-nav-button" id="friendsNav" type="button">Friends</button><button class="icon-button request-nav-button" id="requestsNav" aria-label="Friend requests" title="Friend requests"><span class="material-symbol">person_add</span><span class="request-badge" id="requestCount" hidden>0</span></button><button class="icon-button" id="topNewMessage" aria-label="New message" title="New message"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></div></div>
       <section class="content-empty" id="welcomePanel">
         <div class="welcome">
           <div class="welcome-art"><span class="material-symbol">swap_horiz</span></div>
@@ -582,6 +585,12 @@
           <p>Choose someone to message and your conversation will appear here. Nothing here yet, just a clean slate.</p>
           <button class="primary" id="mainNewMessage">New message</button>
         </div>
+      </section>
+      <section class="friends-panel" id="friendsPanel" hidden>
+        <div class="friends-page-head"><div><h2>Friends</h2><p id="friendsSubtitle">Your Poko friends, all in one place.</p></div><button class="primary" id="addFriendButton" type="button">Add friend</button></div>
+        <nav class="friends-tabs" aria-label="Friends filters"><button class="friends-tab active" data-friend-tab="all" type="button">All</button><button class="friends-tab" data-friend-tab="online" type="button">Online</button><button class="friends-tab" data-friend-tab="pending" type="button">Pending <span id="pendingTabCount"></span></button></nav>
+        <div class="friends-list-view" id="friendsList"><div class="friend-section-empty">Your friends will appear here.</div></div>
+        <div class="friends-list-view" id="friendRequestsList" hidden><div class="friend-section-empty">No pending requests.</div></div>
       </section>
       <section class="chat-panel" id="chatPanel" hidden>
         <header class="chat-head"><button class="icon-button back-mobile" id="chatBack" aria-label="Back to messages"><span class="material-symbol">arrow_back</span></button><div class="mini-avatar" id="chatAvatar"></div><div class="profile-label"><strong id="chatName"></strong><span id="chatBio" hidden></span></div><button class="icon-button" id="joinOngoingCall" title="Join an ongoing group call" aria-label="Join ongoing call" hidden><span class="material-symbol">video_call</span></button><button class="icon-button" id="startVoiceCall" title="Start voice/video call" aria-label="Start call"><span class="material-symbol">call</span></button><button class="small-button" id="viewChatProfile">Profile</button></header>
@@ -959,14 +968,17 @@
     let friendRequestUnsubscribe=null, friendsUnsubscribe=null;
     function renderFriendRows(container, docs, incoming=false) {
       container.replaceChildren();
-      if(!docs.length){const empty=document.createElement('div');empty.className='friend-section-empty';empty.textContent=incoming?'No pending requests.':'Your friends will appear here.';container.append(empty);return;}
-      docs.forEach(doc=>{
+      if(!docs.length){const empty=document.createElement('div');empty.className='friend-section-empty';empty.textContent=incoming?'No pending friend requests.':'No friends to show yet. Find someone and add them.';container.append(empty);return;}
+      const filtered=incoming?docs:docs.filter(doc=>{const d=doc.data()||{};return activeFriendsTab!=='online'||['online','idle'].includes(d.status||'online');});
+      if(!filtered.length){const empty=document.createElement('div');empty.className='friend-section-empty';empty.textContent='No friends are online right now.';container.append(empty);return;}
+      filtered.forEach(doc=>{
         const data=doc.data()||{}, uid=incoming?data.fromUid:data.friendUid;
         getPublicProfile(uid).then(profile=>{
+          if(!incoming&&activeFriendsTab==='online'&&!['online','idle'].includes(profile.status||'online'))return;
           const row=document.createElement('div');row.className='friend-card';
           const avatar=document.createElement('div');avatar.className='mini-avatar';setAvatar(avatar,profile.avatar,(profile.name||'P').slice(0,2).toUpperCase());
-          const label=document.createElement('div');label.className='profile-label';const name=document.createElement('strong');setVerifiedName(name,profile.name||'Poko user');const sub=document.createElement('span');sub.textContent=incoming?'Wants to connect':(profile.status||'Online');label.append(name,sub);row.append(avatar,label);
-          if(incoming){const actions=document.createElement('div');actions.className='friend-actions';[['Accept',()=>acceptFriendRequest(doc.id,data)],['Decline',()=>declineFriendRequest(doc.id)]].forEach(([text,fn])=>{const b=document.createElement('button');b.className='friend-action';b.textContent=text;b.addEventListener('click',fn);actions.append(b);});row.append(actions);}
+          const label=document.createElement('div');label.className='profile-label';const name=document.createElement('strong');setVerifiedName(name,profile.name||'Poko user');const sub=document.createElement('span');sub.textContent=incoming?'Incoming friend request':(profile.status||'Online');label.append(name,sub);row.append(avatar,label);
+          if(incoming){const actions=document.createElement('div');actions.className='friend-actions';[['Accept',()=>acceptFriendRequest(doc.id,data)],['Ignore',()=>declineFriendRequest(doc.id)]].forEach(([text,fn])=>{const b=document.createElement('button');b.className='friend-action';b.textContent=text;b.addEventListener('click',fn);actions.append(b);});row.append(actions);}
           else{const b=document.createElement('button');b.className='friend-action';b.textContent='Message';b.addEventListener('click',()=>startDirectMessage(profile));row.append(b);}
           container.append(row);
         });
@@ -996,12 +1008,27 @@
       if(friendsUnsubscribe)friendsUnsubscribe();if(friendRequestUnsubscribe)friendRequestUnsubscribe();
       friendsUnsubscribe=profileDb.collection('friendships').where('users','array-contains',currentUser.uid).onSnapshot(snapshot=>{
         const docs=snapshot.docs.map(d=>({id:d.id,data:()=>({friendUid:(d.data().users||[]).find(uid=>uid!==currentUser.uid)})}));
-        $('friendCount').textContent=String(docs.length);renderFriendRows($('friendsList'),docs,false);
+        lastFriendDocs=docs;renderFriendRows($('friendsList'),docs,false);
       },e=>{console.error(e);$('friendsList').textContent='Could not load friends.';});
       friendRequestUnsubscribe=profileDb.collection('friendRequests').where('toUid','==',currentUser.uid).where('status','==','pending').onSnapshot(snapshot=>{
-        $('requestCount').textContent=String(snapshot.size);renderFriendRows($('friendRequestsList'),snapshot.docs,true);
+        lastRequestDocs=snapshot.docs;        $('requestCount').textContent=String(snapshot.size);$('requestCount').hidden=!snapshot.size;$('pendingTabCount').textContent=snapshot.size?'('+snapshot.size+')':'';renderFriendRows($('friendRequestsList'),snapshot.docs,true);
       },e=>{console.error(e);$('friendRequestsList').textContent='Could not load requests.';});
     }
+    let activeFriendsTab='all';
+    function openFriendsView(tab='all'){
+      if(!currentUser){showToast('Sign in to view your friends.');openEditor();return;}
+      activeFriendsTab=tab;$('chatPanel').hidden=true;$('welcomePanel').hidden=true;$('friendsPanel').hidden=false;$('topbarTitle').textContent='Friends';
+      document.querySelectorAll('.friends-tab').forEach(button=>button.classList.toggle('active',button.dataset.friendTab===tab));
+      $('friendsList').hidden=tab==='pending';$('friendRequestsList').hidden=tab!=='pending';
+      $('friendsSubtitle').textContent=tab==='pending'?'Review incoming friend requests.':'Your Poko friends, all in one place.';
+      if(tab!=='pending')renderFriendRows($('friendsList'),lastFriendDocs,false);
+      else renderFriendRows($('friendRequestsList'),lastRequestDocs,true);
+    }
+    let lastFriendDocs=[],lastRequestDocs=[];
+    document.querySelectorAll('.friends-tab').forEach(button=>button.addEventListener('click',()=>openFriendsView(button.dataset.friendTab)));
+    $('friendsNav').addEventListener('click',()=>openFriendsView('all'));
+    $('requestsNav').addEventListener('click',()=>openFriendsView('pending'));
+    $('addFriendButton').addEventListener('click',showNewChat);
     function showNewChat() {
       if (!currentUser) { showToast('Sign in with Google before starting a conversation.'); openEditor(); return; }
       $('newChatOverlay').classList.remove('closing');
@@ -1197,6 +1224,8 @@
       activeConversationId = item.id;
       renderConversationList();
       $('welcomePanel').hidden = true;
+      $('friendsPanel').hidden = true;
+      $('topbarTitle').textContent=item.displayName || item.otherProfile.name;
       $('chatPanel').hidden = false;
       if (window.matchMedia('(max-width: 760px)').matches) app.classList.add('show-main');
       setVerifiedName($('chatName'), item.displayName || item.otherProfile.name);
@@ -1267,7 +1296,7 @@
       if (messagesUnsubscribe) messagesUnsubscribe();
       messagesUnsubscribe = null;
       activeConversationId = null; activeConversation = null;
-      $('chatPanel').hidden = true; $('welcomePanel').hidden = false;
+      $('chatPanel').hidden = true; $('friendsPanel').hidden = true; $('welcomePanel').hidden = false; $('topbarTitle').textContent='Messages';
     }
     async function toggleReaction(messageId, emoji, users) {
       if (!currentUser || !activeConversationId || !profileDb) return;
