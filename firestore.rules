@@ -5,66 +5,170 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    function isConversationMember(conversationId) {
+    // Admin documents are provisioned only with the Firebase Admin SDK.
+    function isAdmin() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    function conversationMember(conversationId) {
       return signedIn()
         && exists(/databases/$(database)/documents/conversations/$(conversationId))
-        && request.auth.uid in get(/databases/$(database)/documents/conversations/$(conversationId)).data.participants;
+        && get(/databases/$(database)/documents/conversations/$(conversationId))
+             .data.participants is list
+        && get(/databases/$(database)/documents/conversations/$(conversationId))
+             .data.participants.hasAny([request.auth.uid]);
     }
 
-    function validParticipants(data) {
-      return data.participants is list
-        && data.participants.size() >= 2
-        && data.participants.size() <= 50
-        && request.auth.uid in data.participants;
+    match /profiles/{uid} {
+      allow get, list: if signedIn();
+      allow create: if signedIn()
+        && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly([
+          'name', 'avatar', 'banner', 'bio', 'status',
+          'presenceUpdatedAt', 'updatedAt'
+        ]);
+      allow update: if signedIn()
+        && request.auth.uid == uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'name', 'avatar', 'banner', 'bio', 'status',
+          'presenceUpdatedAt', 'updatedAt'
+        ]);
+      allow delete: if signedIn() && request.auth.uid == uid;
     }
 
-    match /profiles/{userId} {
-      allow read: if signedIn();
-      allow create: if signedIn() && request.auth.uid == userId;
-      allow update: if signedIn() && request.auth.uid == userId;
-      allow delete: if signedIn() && request.auth.uid == userId;
+    match /friendRequests/{requestId} {
+      allow read: if signedIn()
+        && (resource.data.fromUid == request.auth.uid
+          || resource.data.toUid == request.auth.uid);
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly([
+          'fromUid', 'toUid', 'status', 'createdAt'
+        ])
+        && request.resource.data.fromUid == request.auth.uid
+        && request.resource.data.toUid is string
+        && request.resource.data.toUid != request.auth.uid
+        && request.resource.data.status == 'pending';
+      allow update: if signedIn()
+        && resource.data.toUid == request.auth.uid
+        && request.resource.data.fromUid == resource.data.fromUid
+        && request.resource.data.toUid == resource.data.toUid
+        && request.resource.data.createdAt == resource.data.createdAt
+        && resource.data.status == 'pending'
+        && request.resource.data.status in ['accepted', 'declined']
+        && request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(['status', 'updatedAt']);
+      allow delete: if signedIn()
+        && (resource.data.fromUid == request.auth.uid
+          || resource.data.toUid == request.auth.uid);
+    }
+
+    match /friendships/{friendshipId} {
+      allow read: if signedIn()
+        && resource.data.users is list
+        && resource.data.users.hasAny([request.auth.uid]);
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['users', 'createdAt'])
+        && request.resource.data.users is list
+        && request.resource.data.users.size() == 2
+        && request.resource.data.users.hasAny([request.auth.uid]);
+      allow update, delete: if signedIn()
+        && resource.data.users is list
+        && resource.data.users.hasAny([request.auth.uid]);
     }
 
     match /conversations/{conversationId} {
-      allow read: if signedIn() && request.auth.uid in resource.data.participants;
+      allow read: if signedIn()
+        && resource.data.participants is list
+        && resource.data.participants.hasAny([request.auth.uid]);
       allow create: if signedIn()
-        && validParticipants(request.resource.data)
-        && request.resource.data.participants.size() <= 50;
+        && request.resource.data.participants is list
+        && request.resource.data.participants.size() >= 2
+        && request.resource.data.participants.size() <= 50
+        && request.resource.data.participants.hasAny([request.auth.uid])
+        && (!('createdBy' in request.resource.data)
+          || request.resource.data.createdBy == request.auth.uid);
       allow update: if signedIn()
-        && request.auth.uid in resource.data.participants
-        && request.resource.data.participants == resource.data.participants;
+        && resource.data.participants is list
+        && resource.data.participants.hasAny([request.auth.uid])
+        && request.resource.data.participants == resource.data.participants
+        && (!('createdBy' in resource.data)
+          || request.resource.data.createdBy == resource.data.createdBy)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'lastMessage', 'lastSenderId', 'updatedAt',
+          'offer', 'answer', 'callState',
+          'callerCandidates', 'calleeCandidates',
+          'callerCameraEnabled', 'calleeCameraEnabled',
+          'callerSharingScreen', 'calleeSharingScreen'
+        ]);
       allow delete: if signedIn()
-        && request.auth.uid in resource.data.participants
-        && (resource.data.createdBy == request.auth.uid || resource.data.participants.size() == 2);
+        && resource.data.participants is list
+        && resource.data.participants.hasAny([request.auth.uid])
+        && (resource.data.createdBy == request.auth.uid || isAdmin());
 
       match /messages/{messageId} {
-        allow read: if isConversationMember(conversationId);
-        allow create: if isConversationMember(conversationId)
+        allow read: if conversationMember(conversationId);
+        allow create: if conversationMember(conversationId)
           && request.resource.data.senderId == request.auth.uid
-          && request.resource.data.keys().hasOnly(['text','gifUrl','senderId','createdAt','reactions']);
-        allow update: if isConversationMember(conversationId)
+          && request.resource.data.keys().hasOnly([
+            'text', 'gifUrl', 'senderId', 'createdAt'
+          ])
+          && ((request.resource.data.text is string
+              && request.resource.data.text.size() <= 4000)
+            || (request.resource.data.gifUrl is string
+              && request.resource.data.gifUrl.size() <= 2000));
+        allow update: if conversationMember(conversationId)
+          && resource.data.senderId == request.auth.uid
           && request.resource.data.senderId == resource.data.senderId
-          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactions']);
-        allow delete: if isConversationMember(conversationId)
-          && resource.data.senderId == request.auth.uid;
+          && request.resource.data.diff(resource.data).affectedKeys()
+               .hasOnly(['reactions']);
+        allow delete: if conversationMember(conversationId)
+          && (resource.data.senderId == request.auth.uid || isAdmin());
       }
 
-      match /groupCalls/{sessionId} {
-        allow read: if isConversationMember(conversationId);
-        allow create: if isConversationMember(conversationId)
-          && request.resource.data.conversationId == conversationId
-          && request.resource.data.callerId == request.auth.uid
-          && request.resource.data.calleeId in get(/databases/$(database)/documents/conversations/$(conversationId)).data.participants
-          && request.resource.data.calleeId != request.auth.uid
-          && request.resource.data.state == 'ringing';
-        allow update: if isConversationMember(conversationId)
-          && (request.auth.uid == resource.data.callerId || request.auth.uid == resource.data.calleeId)
-          && request.resource.data.callerId == resource.data.callerId
-          && request.resource.data.calleeId == resource.data.calleeId
-          && request.resource.data.conversationId == resource.data.conversationId;
-        allow delete: if isConversationMember(conversationId)
-          && (request.auth.uid == resource.data.callerId || request.auth.uid == resource.data.calleeId);
+      match /groupCalls/{groupCallId} {
+        allow read, create, update, delete: if conversationMember(conversationId);
       }
+    }
+
+    match /bans/{uid} {
+      allow get: if signedIn() && (request.auth.uid == uid || isAdmin());
+      allow list: if isAdmin();
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /appeals/{appealId} {
+      allow create: if signedIn()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.keys().hasOnly([
+          'uid', 'message', 'createdAt', 'status'
+        ])
+        && request.resource.data.message is string
+        && request.resource.data.message.size() > 0
+        && request.resource.data.message.size() <= 3000
+        && request.resource.data.status == 'pending';
+      allow read: if signedIn()
+        && (resource.data.uid == request.auth.uid || isAdmin());
+      allow update, delete: if isAdmin();
+    }
+
+    match /tosAcceptances/{uid} {
+      allow get: if signedIn() && request.auth.uid == uid;
+      allow list: if isAdmin();
+      allow create, update: if signedIn()
+        && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['version', 'acceptedAt'])
+        && request.resource.data.version is string;
+      allow delete: if isAdmin();
+    }
+
+    match /admins/{uid} {
+      allow read: if isAdmin() || (signedIn() && request.auth.uid == uid);
+      allow write: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }
