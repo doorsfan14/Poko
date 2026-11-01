@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#222428">
-  <meta name="description" content="Direct messages. Your conversations, in one place.">
-  <title>Messages</title>
+  <meta name="description" content="Poko. Find your people and keep your conversations together.">
+  <title>Poko</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -592,6 +592,17 @@
       .friend-section-empty{min-height:220px}
     }
     @media(max-width:380px){.friends-page-head{gap:8px}.friends-page-head p{max-width:185px}.friend-action{padding-inline:8px}}
+
+    /* Brand and navigation fixes */
+    .topbar-title{display:block!important;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text);font-size:.88rem;font-weight:800;letter-spacing:-.025em}
+    .topbar{gap:14px}
+    .topbar-tools{flex:0 0 auto}
+    .user-result[role="button"]{cursor:pointer}
+    .user-result[role="button"]:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+    @media(max-width:760px){
+      .main:has(#friendsPanel:not([hidden])) .topbar-title{display:block!important}
+      .main:has(#friendsPanel:not([hidden])) .topbar{padding-inline:12px}
+    }
 \n  </style>
 </head>
 <body class="poko-loading">
@@ -599,7 +610,7 @@
 
   <section class="login-screen" id="loginScreen" aria-labelledby="loginTitle">
     <div class="login-card">
-      <h1 id="loginTitle">Messages, without the noise.</h1>
+      <h1 id="loginTitle">Welcome to Poko.</h1>
       <p class="login-copy">Sign in to find people, keep your conversations, and make Poko yours.</p>
       <button class="login-google" id="loginGoogle" type="button"><img class="google-logo" src="https://storage.googleapis.com/pe-portal-consumer-prod-wagtail-static/original_images/GoogleG_FullColor_RGB.png?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=wagtail%40pe-portal-consumer-prod.iam.gserviceaccount.com%2F20261029%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20261029T032841Z&X-Goog-Expires=86400&X-Goog-Signature=104e59159f1971b43dc017cb8a16b0cba4432197ea6bf20e8b93433ea3bdff7a741ce2e13d4cbb6fc376a386fef24bfa1eed08f4b45c79e71d99fa5642eb3096cb991fb52e476a8d3f8258d089f6cacb273ec0976fdadee4e6685d95aa3376454e17f4a9887144cac322ea43ea56174204efc9bdb5733c25aade2a0493416a669a67db36b61abc9a77b55c8bf579e285f2fdeb30c01e36fd0186ef685342220154816a864bc0adc18ff39511e67a21f10ea879d3615e906434e64ec51dbd0c5f65ae15cca57ddf2b3877a272d66dddd6ac7647da974c891108db31f4e8af3a8a9d75afb74e3c66f1953f563ca8c136f2f5983bcbaf4b95877b7f609841a066af&X-Goog-SignedHeaders=host&response-content-disposition=attachment%3B+filename%3DGoogleG_FullColor_RGB.png" alt="" referrerpolicy="no-referrer"><span>Continue with Google</span></button>
       <p class="login-note" id="loginNote">Your account keeps your profile and conversations synced.</p>
@@ -616,10 +627,10 @@
     </aside>
     <aside class="sidebar" aria-label="Direct messages list">
       <div class="side-header">
-        <h1>Messages</h1>
+        <h1>Poko</h1>
         <label class="search">
           <span class="material-symbol">search</span>
-          <input id="search" type="search" placeholder="Search messages" aria-label="Search messages">
+          <input id="search" type="search" placeholder="Search conversations" aria-label="Search conversations">
         </label>
       </div>
       <div class="side-section"><span>Direct messages</span><button class="icon-button" id="newMessage" aria-label="New message" title="New message"><span class="material-symbol">add</span></button></div>
@@ -640,7 +651,7 @@
       <div class="status-menu" id="statusMenu" hidden><button type="button" data-status="online"><span class="status-dot online"></span>Online</button><button type="button" data-status="idle"><span class="status-dot idle"></span>Idle</button><button type="button" data-status="dnd"><span class="status-dot dnd"></span>Do not disturb</button><button type="button" data-status="invisible"><span class="status-dot invisible"></span>Invisible</button></div>
     </aside>
     <main class="main">
-      <div class="topbar"><button class="icon-button back-mobile" id="backToList" aria-label="Back to messages" title="Back to messages"><span class="material-symbol">arrow_back</span></button><span class="topbar-title" id="topbarTitle">Messages</span><div class="topbar-tools"><button class="small-button friends-nav-button" id="friendsNav" type="button">Friends</button><button class="icon-button request-nav-button" id="requestsNav" aria-label="Friend requests" title="Friend requests"><span class="material-symbol">person_add</span><span class="request-badge" id="requestCount" hidden>0</span></button><button class="icon-button" id="topNewMessage" aria-label="New message" title="New message"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></div></div>
+      <div class="topbar"><button class="icon-button back-mobile" id="backToList" aria-label="Back to messages" title="Back to messages"><span class="material-symbol">arrow_back</span></button><span class="topbar-title" id="topbarTitle">Poko</span><div class="topbar-tools"><button class="small-button friends-nav-button" id="friendsNav" type="button">Friends</button><button class="icon-button request-nav-button" id="requestsNav" aria-label="Friend requests" title="Friend requests"><span class="material-symbol">person_add</span><span class="request-badge" id="requestCount" hidden>0</span></button><button class="icon-button" id="topNewMessage" aria-label="New message" title="New message"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></div></div>
       <section class="content-empty" id="welcomePanel">
         <div class="welcome">
           <div class="welcome-art"><span class="material-symbol">swap_horiz</span></div>
@@ -775,14 +786,13 @@
     async function loadCloudProfile(user) {
       const loadId = ++activeProfileLoad;
       if (ownProfileUnsubscribe) { ownProfileUnsubscribe(); ownProfileUnsubscribe = null; }
-      if(firebaseAuth)firebaseAuth.onAuthStateChanged(user=>{if(user)subscribeFriends();else{if(friendsUnsubscribe)friendsUnsubscribe();if(friendRequestUnsubscribe)friendRequestUnsubscribe();$('friendsList').replaceChildren();$('friendRequestsList').replaceChildren();}});
-    restoreProfile();
+      restoreProfile();
       if (!user || !profileDb) return;
       ownProfileUnsubscribe = profileDb.collection('profiles').doc(user.uid).onSnapshot(async snapshot => {
         if (loadId !== activeProfileLoad || firebaseAuth.currentUser?.uid !== user.uid) return;
         if (snapshot.exists) {
           const data = snapshot.data() || {};
-        if(peerConnection){const remoteRole=initiator?'callee':'caller';const remoteCamera=data[remoteRole+'CameraEnabled'];const remoteSharing=!!data[remoteRole+'SharingScreen'];if(typeof remoteCamera==='boolean'){remoteCameraEnabled=remoteCamera;remoteSharingScreen=remoteSharing;showDirectCameraCard(!remoteCamera&&!remoteSharing);}}
+        if(peerConnection){const remoteRole=callInitiator?'callee':'caller';const remoteCamera=data[remoteRole+'CameraEnabled'];const remoteSharing=!!data[remoteRole+'SharingScreen'];if(typeof remoteCamera==='boolean'){remoteCameraEnabled=remoteCamera;remoteSharingScreen=remoteSharing;showDirectCameraCard(!remoteCamera&&!remoteSharing);}}
           applyProfile(data);
           try { localStorage.setItem('poko-profile', JSON.stringify(data)); } catch (error) { console.warn('Could not cache profile:', error); }
           return;
@@ -927,6 +937,7 @@
       stopMessagingListeners();
       loadCloudProfile(user);
       if (user) {
+        subscribeFriends();
         updatePresence('online');
         subscribeConversations(user);
       } else {
@@ -1025,12 +1036,18 @@
       if (conversationUnsubscribe) conversationUnsubscribe();
       if (messagesUnsubscribe) messagesUnsubscribe();
       if (conversationListUnsubscribe) conversationListUnsubscribe();
+      if (friendsUnsubscribe) friendsUnsubscribe();
+      if (friendRequestUnsubscribe) friendRequestUnsubscribe();
+      friendsUnsubscribe = friendRequestUnsubscribe = null;
+      lastFriendDocs = []; lastRequestDocs = [];
+      $('requestCount').textContent = '0'; $('requestCount').hidden = true; $('pendingTabCount').textContent = '';
       conversationUnsubscribe = messagesUnsubscribe = conversationListUnsubscribe = null;
     }
     function conversationKey(uidA, uidB) { return [uidA, uidB].sort().join('__'); }
     let friendRequestUnsubscribe=null, friendsUnsubscribe=null;
     async function renderFriendRows(container, docs, incoming=false) {
-      const renderToken = String(Date.now()) + Math.random();
+      renderFriendRows.sequence = (renderFriendRows.sequence || 0) + 1;
+      const renderToken = String(renderFriendRows.sequence);
       container.dataset.renderToken = renderToken;
       container.replaceChildren();
       const empty = message => {
@@ -1105,7 +1122,9 @@
     let activeFriendsTab='all';
     function openFriendsView(tab='all'){
       if(!currentUser){showToast('Sign in to view your friends.');openEditor();return;}
-      activeFriendsTab=tab;$('chatPanel').hidden=true;$('welcomePanel').hidden=true;$('friendsPanel').hidden=false;$('topbarTitle').textContent='Friends';
+      activeFriendsTab=['all','online','pending'].includes(tab)?tab:'all';
+      if(window.matchMedia('(max-width: 760px)').matches)app.classList.add('show-main');
+      $('chatPanel').hidden=true;$('welcomePanel').hidden=true;$('friendsPanel').hidden=false;$('topbarTitle').textContent='Friends';
       document.querySelectorAll('.friends-tab').forEach(button=>button.classList.toggle('active',button.dataset.friendTab===tab));
       $('friendsList').hidden=tab==='pending';$('friendRequestsList').hidden=tab!=='pending';
       $('friendsSubtitle').textContent=tab==='pending'?'Review incoming friend requests.':'Your Poko friends, all in one place.';
@@ -1268,13 +1287,13 @@
           const message = document.createElement('div'); message.className = 'result-message'; message.textContent = 'No profile found with that exact name. Check the spelling and make sure the other account has saved its profile.'; results.append(message); return;
         }
         users.forEach(user => {
-          const button = document.createElement('button'); button.className = 'user-result'; button.type = 'button';
+          const button = document.createElement('div'); button.className = 'user-result'; button.setAttribute('role','button'); button.tabIndex = 0;
           const avatar = document.createElement('div'); avatar.className = 'mini-avatar'; setAvatar(avatar,user.avatar || '',(user.name || 'Poko').slice(0,2).toUpperCase());
           const label = document.createElement('div'); label.className = 'profile-label';
           const nameEl = document.createElement('strong'); setVerifiedName(nameEl,user.name || 'Poko user');
           const bioEl = document.createElement('span'); bioEl.textContent = user.bio || 'No bio yet';
           label.append(nameEl,bioEl); button.append(avatar,label);
-          button.addEventListener('click', async () => {
+          const activateUserResult = async () => {
             if (groupSelectionMode) { if(selectedGroupMembers.has(user.uid)){selectedGroupMembers.delete(user.uid);button.classList.remove('selected');}else{selectedGroupMembers.set(user.uid,user);button.classList.add('selected');}renderGroupSelection();return; }
             try {
               const id = conversationKey(currentUser.uid,user.uid);
@@ -1292,7 +1311,9 @@
               console.error('Could not start conversation:',error);
               showToast('Could not start conversation: ' + (error.code || error.message || 'check Firestore rules'));
             }
-          });
+          };
+          button.addEventListener('click', activateUserResult);
+          button.addEventListener('keydown', event => { if(event.target===button && (event.key==='Enter'||event.key===' ')){event.preventDefault();activateUserResult();} });
           if(!groupSelectionMode){const add=document.createElement('button');add.type='button';add.className='friend-action';add.textContent='Add friend';add.addEventListener('click',e=>{e.stopPropagation();sendFriendRequest({uid:user.uid,name:user.name||'Poko user',avatar:user.avatar||'',bio:user.bio||'',status:user.status||'online'});});button.append(add);}
           results.append(button);
         });
@@ -1384,7 +1405,7 @@
       if (messagesUnsubscribe) messagesUnsubscribe();
       messagesUnsubscribe = null;
       activeConversationId = null; activeConversation = null;
-      $('chatPanel').hidden = true; $('friendsPanel').hidden = true; $('welcomePanel').hidden = false; $('topbarTitle').textContent='Messages';
+      $('chatPanel').hidden = true; $('friendsPanel').hidden = true; $('welcomePanel').hidden = false; $('topbarTitle').textContent='Poko';
     }
     async function toggleReaction(messageId, emoji, users) {
       if (!currentUser || !activeConversationId || !profileDb) return;
@@ -1750,7 +1771,6 @@
     $('cancelCallSetup').addEventListener('click',closeCallSetup);
     $('confirmCallSetup').addEventListener('click',beginCallWithOptions);
     $('callSetup').addEventListener('click',e=>{if(e.target===$('callSetup'))closeCallSetup();});
-    $('joinOngoingCall').addEventListener('click',async()=>{if(!activeConversationId||!currentUser)return;try{const snap=await groupCallCollection(activeConversationId).where('calleeId','==',currentUser.uid).where('state','in',['ringing','active']).get();const match=snap.docs.find(d=>d.data().state==='ringing');if(match)await acceptGroupCall(match.id,match.data());else showToast('No joinable call invitation was found.');}catch(e){console.error(e);showToast('Could not check ongoing calls.');}});
     $('toggleCamera').addEventListener('click',async()=>{const stream=groupCallActive?groupLocalStream:localStream;const tracks=stream?.getVideoTracks()||[];if(!tracks.length){showToast('Camera is off or unavailable.');return;}cameraDisabled=!cameraDisabled;tracks.forEach(t=>t.enabled=!cameraDisabled);$('toggleCamera').textContent=cameraDisabled?'Turn camera on':'Turn camera off';if(groupCallActive&&!groupScreenStream){await Promise.all([...groupPeers.values()].map(async state=>{const sender=getVideoSender(state.pc);if(sender)await sender.replaceTrack(cameraDisabled?null:tracks[0]).catch(e=>console.warn('Camera sender update failed',e));}));}else if(!groupCallActive&&!screenStream&&peerConnection){const sender=getVideoSender(peerConnection);if(sender){const transceiver=peerConnection.getTransceivers().find(t=>t.sender===sender);if(transceiver&&transceiver.direction==='recvonly')transceiver.direction='sendrecv';await sender.replaceTrack(cameraDisabled?null:tracks[0]).catch(e=>console.warn('Camera sender update failed',e));}syncLocalCameraState(!cameraDisabled,false);}});
 
     $('toggleMic').addEventListener('click', () => {
