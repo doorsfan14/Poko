@@ -44,7 +44,7 @@
     .search svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2}
     .search input{width:100%;min-width:0;border:0;outline:0;background:transparent;color:var(--text);font-size:.8rem}
     .search input::placeholder{color:#81858e}
-    .side-section{padding:12px 18px 0;display:flex;align-items:center;justify-content:space-between;color:var(--muted);font-size:.69rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase}
+    .side-section{padding:12px 18px 0;display:flex;align-items:center;justify-content:space-between;color:var(--muted);font-size:.69rem;font-weight:800;letter-spacing:.04em;text-transform:none}
     .icon-button{width:29px;height:29px;border:0;border-radius:9px;background:transparent;color:var(--muted);display:grid;place-items:center}
     .icon-button:hover{background:var(--hover);color:var(--text)}
     .icon-button svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
@@ -91,7 +91,7 @@
     .dialog-body{padding:22px}
     .banner-preview{height:130px;border-radius:10px;background:#5865f2;background-size:cover;background-position:center;position:relative;overflow:hidden;border:1px solid var(--line)}
     .banner-preview:after{content:none}
-    .avatar-edit-row{display:flex;align-items:center;gap:15px;margin-top:-27px;padding:0 16px 22px;position:relative}
+    .avatar-edit-row{display:flex;align-items:center;margin-top:-38px;padding:0 16px;position:relative;z-index:2}.profile-editor-intro{display:flex;flex-direction:column;gap:4px;padding:8px 16px 22px}.profile-editor-intro strong{font-size:.83rem}.profile-editor-intro span{font-size:.72rem;color:var(--muted)}
     .large-avatar{width:82px;height:82px;flex:0 0 82px;border:5px solid #292b30;border-radius:50%;overflow:hidden;background:#41454d;display:grid;place-items:center;color:#dce2f0;font-size:1.2rem}
     .large-avatar img{width:100%;height:100%;object-fit:cover}
     .field{margin:0 0 18px}
@@ -149,6 +149,13 @@
     /* Poko: restrained blue accents on dark charcoal surfaces */
     :root{--bg:#222428;--panel:#292b30;--panel-2:#303238;--hover:#373a42;--line:rgba(255,255,255,.075);--text:#f1f2f4;--muted:#a4a7b0;--soft:#858995;--accent:#5B8CFF;--accent-ink:#fff}
     html,body{width:100%;height:100%;min-height:0;overflow:hidden}
+    *{scrollbar-width:thin;scrollbar-color:rgba(145,155,180,.28) transparent}
+    *::-webkit-scrollbar{width:7px;height:7px}
+    *::-webkit-scrollbar-track{background:transparent}
+    *::-webkit-scrollbar-thumb{background:rgba(145,155,180,.28);border:2px solid transparent;border-radius:99px;background-clip:padding-box}
+    *::-webkit-scrollbar-thumb:hover{background:rgba(145,155,180,.48);border:2px solid transparent;background-clip:padding-box}
+    *::-webkit-scrollbar-corner{background:transparent}
+    .friends-tabs{scrollbar-width:none}.friends-tabs::-webkit-scrollbar{display:none}
     body{background:var(--bg)}
     .app{width:100%;height:100dvh;min-height:0;overflow:hidden;grid-template-columns:68px 280px minmax(0,1fr)}
     .rail{background:#1d1f23;border-right:1px solid var(--line);padding:14px 0;gap:10px}
@@ -685,7 +692,7 @@
       <div class="dialog-header"><h2 id="profileTitle">Personalize your profile</h2><div class="dialog-header-actions"><button class="icon-button" id="themeToggle" type="button" aria-label="Switch to light mode" title="Switch to light mode"><span class="material-symbol" id="themeToggleIcon">light_mode</span></button><button class="icon-button" id="closeEditor" aria-label="Close profile editor"><span class="material-symbol">close</span></button></div></div>
       <div class="dialog-body">
         <div class="banner-preview" id="bannerPreview"></div>
-        <div class="avatar-edit-row"><div class="large-avatar" id="largeAvatar">You</div><div><strong style="font-size:.83rem">Your profile</strong><div style="font-size:.72rem;color:var(--muted);margin-top:4px">Make it yours.</div></div></div>
+        <div class="avatar-edit-row"><div class="large-avatar" id="largeAvatar">You</div></div><div class="profile-editor-intro"><strong>Your profile</strong><span>Make it yours.</span></div>
         <div class="field"><label for="bannerFile">Profile banner</label><div class="file-control"><span>Choose a banner</span><input id="bannerFile" type="file" accept="image/*"></div><small>Images upload to Cloudinary when you save. Animated GIF and WebP are supported.</small></div>
         <div class="field"><label for="avatarFile">Profile picture</label><div class="file-control"><span>Choose a picture</span><input id="avatarFile" type="file" accept="image/*"></div><small>Images upload to Cloudinary when you save. Animated GIF and WebP are supported.</small></div>
         <div class="field"><label for="nameInput">Username</label><input id="nameInput" type="text" maxlength="40" placeholder="Your username" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#222428;color:var(--text);padding:11px 12px;font-size:.8rem"></div>
@@ -727,7 +734,7 @@
         const labels = {system:'Using system theme. Switch to light mode',light:'Light mode. Switch to dark mode',dark:'Dark mode. Switch to system theme'};
         toggle.setAttribute('aria-label', labels[themeMode]);
         toggle.title = labels[themeMode];
-        if (icon) icon.textContent = themeMode === 'system' ? 'brightness_auto' : themeMode === 'light' ? 'dark_mode' : 'light_mode';
+        if (icon) { icon.textContent = resolved === 'light' ? '☾' : '☼'; icon.style.fontFamily = 'system-ui, sans-serif'; icon.style.fontSize = '20px'; icon.style.lineHeight = '1'; }
       }
     }
     try { applyTheme(localStorage.getItem('poko-theme') || 'system', false); } catch { applyTheme('system', false); }
@@ -902,7 +909,7 @@
       $('app').setAttribute('aria-hidden', visible ? 'true' : 'false');
       if ($('loginGoogle')) $('loginGoogle').disabled = false;
     }
-    async function updatePresence(status) {
+    async function updatePresence(status = myActivityStatus) {
       const user = firebaseAuth?.currentUser;
       if (!user || !profileDb) return;
       try {
@@ -914,6 +921,52 @@
         console.warn('Presence update failed:', error);
       }
     }
+    let presenceHeartbeatTimer = null;
+    let presenceRefreshTimer = null;
+    function presenceIsStale(profile) {
+      const stamp = profile?.presenceUpdatedAt;
+      const time = stamp?.toMillis ? stamp.toMillis() : stamp?.seconds ? stamp.seconds * 1000 : 0;
+      return !time || Date.now() - time > 70000;
+    }
+    function effectivePresence(profile) {
+      if (!profile || presenceIsStale(profile)) return 'offline';
+      return ['online','idle','dnd','invisible'].includes(profile.status) ? profile.status : 'offline';
+    }
+    function stopPresenceHeartbeat() {
+      if (presenceHeartbeatTimer) window.clearInterval(presenceHeartbeatTimer);
+      if (presenceRefreshTimer) window.clearInterval(presenceRefreshTimer);
+      presenceHeartbeatTimer = presenceRefreshTimer = null;
+    }
+    function startPresenceHeartbeat() {
+      stopPresenceHeartbeat();
+      if (!firebaseAuth?.currentUser || !profileDb) return;
+      updatePresence(myActivityStatus);
+      presenceHeartbeatTimer = window.setInterval(() => {
+        if (document.visibilityState === 'visible') updatePresence(myActivityStatus);
+      }, 25000);
+      presenceRefreshTimer = window.setInterval(() => {
+        profileCache.forEach(profile => { profile.status = effectivePresence(profile); });
+        if (!$('friendsPanel').hidden && activeFriendsTab !== 'pending') renderFriendRows($('friendsList'), lastFriendDocs, false);
+        renderConversationList();
+        if (activeConversation?.otherUid) {
+          const profile = profileCache.get(activeConversation.otherUid);
+          const dot = $('chatStatusDot');
+          if (dot && profile) dot.className = 'status-dot ' + effectivePresence(profile);
+        }
+      }, 15000);
+    }
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && firebaseAuth?.currentUser) updatePresence(myActivityStatus);
+    });
+    window.addEventListener('pagehide', () => {
+      const user = firebaseAuth?.currentUser;
+      if (user && profileDb) {
+        profileDb.collection('profiles').doc(user.uid).set({
+          status:'offline',
+          presenceUpdatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, {merge:true}).catch(error => console.warn('Could not mark presence offline:', error));
+      }
+    });
     async function signInFromLogin() {
       if (!firebaseAuth) { $('loginNote').textContent = 'Sign-in is unavailable. Check the Firebase configuration.'; return; }
       const button = $('loginGoogle');
@@ -942,9 +995,10 @@
       loadCloudProfile(user);
       if (user) {
         subscribeFriends();
-        updatePresence('online');
+        startPresenceHeartbeat();
         subscribeConversations(user);
       } else {
+        stopPresenceHeartbeat();
         revealInitialPage();
         knownConversations = [];
         renderConversationList();
@@ -1083,8 +1137,8 @@
         const label=document.createElement('div');label.className='profile-label';
         const name=document.createElement('strong');setVerifiedName(name,profile.name||'Poko user');
         const sub=document.createElement('span');sub.className='friend-presence';
-        const dot=document.createElement('i');dot.className='status-dot '+(profile.status||'online');
-        const statusText=incoming?'Wants to connect':({online:'Online',idle:'Idle',dnd:'Do not disturb',invisible:'Offline'}[profile.status]||'Offline');
+        const presence=effectivePresence(profile);const dot=document.createElement('i');dot.className='status-dot '+presence;
+        const statusText=incoming?'Wants to connect':({online:'Online',idle:'Idle',dnd:'Do not disturb',invisible:'Offline',offline:'Offline'}[presence]||'Offline');
         sub.append(dot,document.createTextNode(statusText));label.append(name,sub);row.append(avatar,label);
         if(incoming){
           const actions=document.createElement('div');actions.className='friend-actions';
@@ -1130,7 +1184,7 @@
           if(friendProfileUnsubscribers.has(uid))return;
           const unsubscribe=profileDb.collection('profiles').doc(uid).onSnapshot(profileSnapshot=>{
             const data=profileSnapshot.exists?(profileSnapshot.data()||{}):{};
-            profileCache.set(uid,{uid,name:data.name||'Poko user',avatar:data.avatar||'',banner:data.banner||'',bio:data.bio||'',status:['online','idle','dnd','invisible'].includes(data.status)?data.status:'online'});
+            profileCache.set(uid,{uid,name:data.name||'Poko user',avatar:data.avatar||'',banner:data.banner||'',bio:data.bio||'',status:effectivePresence(data),presenceUpdatedAt:data.presenceUpdatedAt||null});
             if(!$('friendsPanel').hidden&&activeFriendsTab!=='pending')renderFriendRows($('friendsList'),lastFriendDocs,false);
           },error=>console.warn('Friend presence listener failed:',error));
           friendProfileUnsubscribers.set(uid,unsubscribe);
@@ -1188,7 +1242,7 @@
           if(profileStatusUnsubscribers.has(item.otherUid))return;
           const unsubscribe=profileDb.collection('profiles').doc(item.otherUid).onSnapshot(profileSnapshot=>{
             const data=profileSnapshot.exists?(profileSnapshot.data()||{}):{};
-            const profile={uid:item.otherUid,name:data.name||'Poko user',avatar:data.avatar||'',banner:data.banner||'',bio:data.bio||'',status:['online','idle','dnd','invisible'].includes(data.status)?data.status:'online'};
+            const profile={uid:item.otherUid,name:data.name||'Poko user',avatar:data.avatar||'',banner:data.banner||'',bio:data.bio||'',status:effectivePresence(data),presenceUpdatedAt:data.presenceUpdatedAt||null};
             profileCache.set(item.otherUid,profile);
             knownConversations=knownConversations.map(existing=>existing.otherUid===item.otherUid?{...existing,otherProfile:profile}:existing);
             if(activeConversation?.otherUid===item.otherUid){
@@ -1230,7 +1284,7 @@
       try {
         const snapshot = await profileDb.collection('profiles').doc(uid).get();
         const data = snapshot.exists ? snapshot.data() : {};
-        const profile = {uid, name:data.name || 'Poko user', avatar:data.avatar || '', banner:data.banner || '', bio:data.bio || '', status:['online','idle','dnd','invisible'].includes(data.status) ? data.status : 'online'};
+        const profile = {uid, name:data.name || 'Poko user', avatar:data.avatar || '', banner:data.banner || '', bio:data.bio || '', status:effectivePresence(data), presenceUpdatedAt:data.presenceUpdatedAt || null};
         profileCache.set(uid, profile);
         return profile;
       } catch (error) {
@@ -1261,7 +1315,7 @@
       items.forEach(item => {
         const button = document.createElement('button');
         button.className = 'conversation-item' + (item.id === activeConversationId ? ' active' : '');
-        const avatar = document.createElement('div'); avatar.className = 'mini-avatar'; if(item.group)setGroupAvatar(avatar,item);else{setAvatar(avatar,item.otherProfile.avatar,(item.displayName || item.otherProfile.name).slice(0,2).toUpperCase());setAvatarStatus(avatar,item.otherProfile.status);}
+        const avatar = document.createElement('div'); avatar.className = 'mini-avatar'; if(item.group)setGroupAvatar(avatar,item);else{setAvatar(avatar,item.otherProfile.avatar,(item.displayName || item.otherProfile.name).slice(0,2).toUpperCase());setAvatarStatus(avatar,effectivePresence(item.otherProfile));}
         const label = document.createElement('div'); label.className = 'profile-label';
         const name = document.createElement('strong'); setVerifiedName(name, item.displayName || item.otherProfile.name);
         const last = document.createElement('span'); last.textContent = item.lastMessage || 'Start a conversation';
@@ -1857,7 +1911,7 @@
     $('gifSearchForm').addEventListener('submit',e=>{e.preventDefault();const q=$('gifSearchInput').value.trim();if(q)loadGifs(q);});
     $('themeToggle').addEventListener('click', () => applyTheme(themeMode === 'system' ? 'light' : themeMode === 'light' ? 'dark' : 'system'));
     $('statusTrigger').addEventListener('click',e=>{e.stopPropagation();$('statusMenu').hidden=!$('statusMenu').hidden;});
-    $('statusMenu').querySelectorAll('[data-status]').forEach(button=>button.addEventListener('click',async()=>{const status=button.dataset.status;myActivityStatus=status;const labels={online:'Online',idle:'Idle',dnd:'Do not disturb',invisible:'Invisible'};const profile=(()=>{try{return JSON.parse(localStorage.getItem('poko-profile')||'{}')}catch{return {}}})();profile.status=status;try{localStorage.setItem('poko-profile',JSON.stringify(profile));}catch(error){console.warn('Could not save local activity status:',error);}if($('myStatusLabel'))$('myStatusLabel').textContent=labels[status];if($('myStatusDot'))$('myStatusDot').className='status-dot '+status;$('statusTriggerDot').className='status-dot '+status;setAvatarStatus($('sideAvatar'),status);setAvatarStatus($('largeAvatar'),status);if($('profileViewAvatar'))setAvatarStatus($('profileViewAvatar'),status);$('statusMenu').hidden=true;const user=firebaseAuth?.currentUser;if(user&&profileDb){try{await profileDb.collection('profiles').doc(user.uid).set({status,updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});showToast('Activity status updated.');}catch(error){console.error('Status update failed:',error);showToast('Status saved on this device, but cloud sync failed. Check Firestore rules.');}}else{showToast('Activity status saved on this device. Sign in to sync it with friends.');}}));
+    $('statusMenu').querySelectorAll('[data-status]').forEach(button=>button.addEventListener('click',async()=>{const status=button.dataset.status;myActivityStatus=status;const labels={online:'Online',idle:'Idle',dnd:'Do not disturb',invisible:'Invisible'};const profile=(()=>{try{return JSON.parse(localStorage.getItem('poko-profile')||'{}')}catch{return {}}})();profile.status=status;try{localStorage.setItem('poko-profile',JSON.stringify(profile));}catch(error){console.warn('Could not save local activity status:',error);}if($('myStatusLabel'))$('myStatusLabel').textContent=labels[status];if($('myStatusDot'))$('myStatusDot').className='status-dot '+status;$('statusTriggerDot').className='status-dot '+status;setAvatarStatus($('sideAvatar'),status);setAvatarStatus($('largeAvatar'),status);if($('profileViewAvatar'))setAvatarStatus($('profileViewAvatar'),status);$('statusMenu').hidden=true;const user=firebaseAuth?.currentUser;if(user&&profileDb){try{await profileDb.collection('profiles').doc(user.uid).set({status,presenceUpdatedAt:firebase.firestore.FieldValue.serverTimestamp(),updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});showToast('Activity status updated.');}catch(error){console.error('Status update failed:',error);showToast('Status saved on this device, but cloud sync failed. Check Firestore rules.');}}else{showToast('Activity status saved on this device. Sign in to sync it with friends.');}}));
     document.addEventListener('click',e=>{if(!pickerPanel.contains(e.target)&&!['openEmoji','openGif'].includes(e.target.id))closePicker();if(!$('statusMenu').contains(e.target)&&e.target.id!=='statusTrigger')$('statusMenu').hidden=true;if(!e.target.closest('.message-actions'))document.querySelectorAll('.message-actions.open').forEach(el=>{el.classList.remove('open');el.querySelector('.message-action-menu').hidden=true;el.querySelector('.message-reaction-menu').hidden=true;});});
     $('messageInput').addEventListener('keydown', e => {
       if (e.key !== 'Enter' || e.shiftKey || e.isComposing) return;
