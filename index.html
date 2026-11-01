@@ -1038,6 +1038,9 @@
       if (conversationListUnsubscribe) conversationListUnsubscribe();
       if (friendsUnsubscribe) friendsUnsubscribe();
       if (friendRequestUnsubscribe) friendRequestUnsubscribe();
+      friendProfileUnsubscribers.forEach(unsubscribe=>unsubscribe()); friendProfileUnsubscribers.clear();
+      if (groupCallActive) endGroupCall(false);
+      if (peerConnection) endCall(false);
       friendsUnsubscribe = friendRequestUnsubscribe = null;
       lastFriendDocs = []; lastRequestDocs = [];
       $('requestCount').textContent = '0'; $('requestCount').hidden = true; $('pendingTabCount').textContent = '';
@@ -1045,6 +1048,7 @@
     }
     function conversationKey(uidA, uidB) { return [uidA, uidB].sort().join('__'); }
     let friendRequestUnsubscribe=null, friendsUnsubscribe=null;
+    const friendProfileUnsubscribers=new Map();
     async function renderFriendRows(container, docs, incoming=false) {
       renderFriendRows.sequence = (renderFriendRows.sequence || 0) + 1;
       const renderToken = String(renderFriendRows.sequence);
@@ -1093,8 +1097,10 @@
       try{const id=conversationKey(currentUser.uid,profile.uid);const ref=profileDb.collection('conversations').doc(id);await ref.set({participants:[currentUser.uid,profile.uid].sort(),updatedAt:firebase.firestore.FieldValue.serverTimestamp(),lastMessage:''},{merge:true});closeNewChat();openConversation({id,participants:[currentUser.uid,profile.uid].sort(),otherUid:profile.uid,otherProfile:profile,lastMessage:''});}catch(e){showToast('Could not open conversation. Check Firestore rules.');}
     }
     async function sendFriendRequest(profile){
-      if(!currentUser||!profileDb)return;
+      if(!currentUser||!profileDb||!profile?.uid||profile.uid===currentUser.uid)return;
       try{
+        const friendship=await profileDb.collection('friendships').doc(conversationKey(currentUser.uid,profile.uid)).get();
+        if(friendship.exists){showToast('You are already friends.');return;}
         const existing=await profileDb.collection('friendRequests').where('fromUid','==',currentUser.uid).where('toUid','==',profile.uid).where('status','==','pending').limit(1).get();
         if(!existing.empty){showToast('Friend request already sent.');return;}
         const reverse=await profileDb.collection('friendRequests').where('fromUid','==',profile.uid).where('toUid','==',currentUser.uid).where('status','==','pending').limit(1).get();
@@ -1113,7 +1119,19 @@
       if(friendsUnsubscribe)friendsUnsubscribe();if(friendRequestUnsubscribe)friendRequestUnsubscribe();
       friendsUnsubscribe=profileDb.collection('friendships').where('users','array-contains',currentUser.uid).onSnapshot(snapshot=>{
         const docs=snapshot.docs.map(d=>({id:d.id,data:()=>({friendUid:(d.data().users||[]).find(uid=>uid!==currentUser.uid)})}));
-        lastFriendDocs=docs;renderFriendRows($('friendsList'),docs,false);
+        lastFriendDocs=docs;
+        const wanted=new Set(docs.map(doc=>doc.data().friendUid).filter(Boolean));
+        for(const [uid,unsubscribe] of friendProfileUnsubscribers){if(!wanted.has(uid)){unsubscribe();friendProfileUnsubscribers.delete(uid);}}
+        wanted.forEach(uid=>{
+          if(friendProfileUnsubscribers.has(uid))return;
+          const unsubscribe=profileDb.collection('profiles').doc(uid).onSnapshot(profileSnapshot=>{
+            const data=profileSnapshot.exists?(profileSnapshot.data()||{}):{};
+            profileCache.set(uid,{uid,name:data.name||'Poko user',avatar:data.avatar||'',banner:data.banner||'',bio:data.bio||'',status:['online','idle','dnd','invisible'].includes(data.status)?data.status:'online'});
+            if(!$('friendsPanel').hidden&&activeFriendsTab!=='pending')renderFriendRows($('friendsList'),lastFriendDocs,false);
+          },error=>console.warn('Friend presence listener failed:',error));
+          friendProfileUnsubscribers.set(uid,unsubscribe);
+        });
+        renderFriendRows($('friendsList'),docs,false);
       },e=>{console.error(e);$('friendsList').textContent='Could not load friends.';});
       friendRequestUnsubscribe=profileDb.collection('friendRequests').where('toUid','==',currentUser.uid).where('status','==','pending').onSnapshot(snapshot=>{
         lastRequestDocs=snapshot.docs;        $('requestCount').textContent=String(snapshot.size);$('requestCount').hidden=!snapshot.size;$('pendingTabCount').textContent=snapshot.size?'('+snapshot.size+')':'';renderFriendRows($('friendRequestsList'),snapshot.docs,true);
@@ -1125,10 +1143,10 @@
       activeFriendsTab=['all','online','pending'].includes(tab)?tab:'all';
       if(window.matchMedia('(max-width: 760px)').matches)app.classList.add('show-main');
       $('chatPanel').hidden=true;$('welcomePanel').hidden=true;$('friendsPanel').hidden=false;$('topbarTitle').textContent='Friends';
-      document.querySelectorAll('.friends-tab').forEach(button=>button.classList.toggle('active',button.dataset.friendTab===tab));
-      $('friendsList').hidden=tab==='pending';$('friendRequestsList').hidden=tab!=='pending';
-      $('friendsSubtitle').textContent=tab==='pending'?'Review incoming friend requests.':'Your Poko friends, all in one place.';
-      if(tab!=='pending')renderFriendRows($('friendsList'),lastFriendDocs,false);
+      document.querySelectorAll('.friends-tab').forEach(button=>button.classList.toggle('active',button.dataset.friendTab===activeFriendsTab));
+      $('friendsList').hidden=activeFriendsTab==='pending';$('friendRequestsList').hidden=activeFriendsTab!=='pending';
+      $('friendsSubtitle').textContent=activeFriendsTab==='pending'?'Review incoming friend requests.':'Your Poko friends, all in one place.';
+      if(activeFriendsTab!=='pending')renderFriendRows($('friendsList'),lastFriendDocs,false);
       else renderFriendRows($('friendRequestsList'),lastRequestDocs,true);
     }
     let lastFriendDocs=[],lastRequestDocs=[];
@@ -1328,6 +1346,11 @@
     $('createGroupChat').addEventListener('click', createGroupChat);
     async function openConversation(item) {
       if (!currentUser) return;
+      const previousConversationId=activeConversationId;
+      if(previousConversationId&&previousConversationId!==item.id){
+        const previousGroupWatch=groupUnsubscribers.get('watch_'+previousConversationId);
+        if(previousGroupWatch){previousGroupWatch();groupUnsubscribers.delete('watch_'+previousConversationId);}
+      }
       if (messagesUnsubscribe) messagesUnsubscribe();
       activeConversation = item;
       activeConversationId = item.id;
@@ -1403,6 +1426,7 @@
     }
     function closeConversation() {
       if (messagesUnsubscribe) messagesUnsubscribe();
+      if(activeConversationId){const watch=groupUnsubscribers.get('watch_'+activeConversationId);if(watch){watch();groupUnsubscribers.delete('watch_'+activeConversationId);}}
       messagesUnsubscribe = null;
       activeConversationId = null; activeConversation = null;
       $('chatPanel').hidden = true; $('friendsPanel').hidden = true; $('welcomePanel').hidden = false; $('topbarTitle').textContent='Poko';
