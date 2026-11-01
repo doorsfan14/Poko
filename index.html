@@ -58,6 +58,19 @@
     .small-button:hover{background:var(--hover)}
     .profile-row{display:flex;align-items:center;gap:10px;margin:8px;padding:10px 9px;border:1px solid transparent;border-radius:12px;background:var(--panel);cursor:pointer;transition:background .16s,border-color .16s}
     .profile-row:hover{background:var(--bg);border-color:var(--line)}
+    .poko-demo-overlay{position:fixed;inset:0;z-index:1200;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(8,10,15,.72);backdrop-filter:blur(12px)}
+    .poko-demo-overlay.open{display:flex}.poko-demo-window{width:min(760px,100%);max-height:min(86dvh,780px);display:grid;grid-template-columns:190px minmax(0,1fr);overflow:hidden;border:1px solid var(--line);border-radius:18px;background:var(--panel);box-shadow:0 28px 90px rgba(0,0,0,.5)}
+    .poko-demo-nav{padding:18px 12px;border-right:1px solid var(--line);background:var(--panel-2)}.poko-demo-brand{padding:4px 10px 16px;font-size:.95rem;font-weight:800;letter-spacing:-.03em}
+    .poko-demo-nav button{display:flex;width:100%;align-items:center;gap:10px;padding:10px;border:0;border-radius:9px;background:transparent;color:var(--muted);text-align:left;font:inherit;font-size:.78rem;cursor:pointer}
+    .poko-demo-nav button.active,.poko-demo-nav button:hover{background:var(--hover);color:var(--text)}.poko-demo-content{min-width:0;overflow:auto;padding:22px}
+    .poko-demo-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}.poko-demo-header h2{margin:0;font-size:1.05rem}
+    .poko-demo-close{border:0;background:transparent;color:var(--muted);font-size:1.35rem;cursor:pointer}.poko-demo-section{display:none}.poko-demo-section.active{display:block}
+    .poko-demo-card{padding:16px;margin:0 0 12px;border:1px solid var(--line);border-radius:12px;background:var(--panel-2)}.poko-demo-card h3{margin:0 0 8px;font-size:.85rem}.poko-demo-card p{margin:0;color:var(--muted);font-size:.78rem;line-height:1.6}
+    .poko-demo-meta{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--line);font-size:.76rem}.poko-demo-meta:last-child{border-bottom:0}.poko-demo-meta span:first-child{color:var(--muted)}.poko-demo-meta code{overflow-wrap:anywhere;text-align:right;color:var(--text)}
+    .poko-demo-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}.poko-demo-actions button{padding:8px 12px;border:1px solid var(--line);border-radius:9px;background:var(--hover);color:var(--text);font:inherit;font-size:.75rem;cursor:pointer}.poko-demo-actions button.primary-demo{background:var(--accent);color:var(--accent-ink);border-color:transparent}
+    .poko-demo-preview{padding:20px;border:1px solid var(--line);border-radius:14px;background:var(--bg);text-align:center}.poko-demo-preview .preview-mark{width:46px;height:46px;display:grid;place-items:center;margin:0 auto 12px;border-radius:15px;background:rgba(237,79,98,.13);color:#ed4f62}
+    .poko-demo-preview h3{margin:0 0 7px;font-size:1rem}.poko-demo-preview p{max-width:390px;margin:0 auto;color:var(--muted);font-size:.78rem;line-height:1.6}
+    @media(max-width:560px){.poko-demo-window{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr)}.poko-demo-nav{display:flex;gap:5px;overflow:auto;padding:9px;border-right:0;border-bottom:1px solid var(--line)}.poko-demo-brand{display:none}.poko-demo-nav button{width:auto;white-space:nowrap;padding:8px}.poko-demo-content{padding:16px}}
     .profile-open{display:none;position:fixed;inset:0;z-index:6;background:rgba(0,0,0,.45);align-items:center;justify-content:center;padding:18px}
     .profile-open.open{display:flex}
     .profile-card{width:min(420px,100%);overflow:hidden;border:1px solid var(--line);border-radius:16px;background:var(--panel);box-shadow:0 18px 55px rgba(0,0,0,.48)}
@@ -636,6 +649,7 @@
         <span class="material-symbol">chat</span>
       </button>
       <div class="rail-spacer"></div>
+      <button class="rail-button" id="demoPanelNav" type="button" aria-label="Developer demo panel" title="Developer demo panel"><iconify-icon icon="solar:code-square-bold" width="22" height="22" aria-hidden="true"></iconify-icon></button>
       <div class="rail-divider"></div>
     </aside>
     <aside class="sidebar" aria-label="Direct messages list">
@@ -688,6 +702,23 @@
     </main>
   </div>
 
+  <section class="poko-demo-overlay" id="pokoDemoOverlay" role="dialog" aria-modal="true" aria-labelledby="pokoDemoTitle">
+    <div class="poko-demo-window"><nav class="poko-demo-nav" aria-label="Demo panel sections">
+      <div class="poko-demo-brand">Poko / Demo</div>
+      <button class="active" type="button" data-demo-tab="developer"><iconify-icon icon="solar:code-square-bold" width="18"></iconify-icon>Developer info</button>
+      <button type="button" data-demo-tab="tos"><iconify-icon icon="solar:document-text-bold" width="18"></iconify-icon>Terms of Service</button>
+      <button type="button" data-demo-tab="banned"><iconify-icon icon="solar:shield-warning-bold" width="18"></iconify-icon>Banned screen</button>
+    </nav><div class="poko-demo-content">
+      <header class="poko-demo-header"><h2 id="pokoDemoTitle">Developer info</h2><button class="poko-demo-close" id="closePokoDemo" aria-label="Close demo panel">×</button></header>
+      <section class="poko-demo-section active" data-demo-section="developer">
+        <div class="poko-demo-card"><h3>Signed-in account</h3><div class="poko-demo-meta"><span>Display name</span><code id="demoAccountName">Not signed in</code></div><div class="poko-demo-meta"><span>Firebase UID</span><code id="demoAccountUid">Sign in to retrieve</code></div><div class="poko-demo-meta"><span>Authentication</span><code id="demoAuthProvider">—</code></div><div class="poko-demo-actions"><button class="primary-demo" id="copyDemoUid" type="button">Copy UID</button><button id="refreshDemoAccount" type="button">Refresh account</button></div></div>
+        <div class="poko-demo-card"><h3>Application</h3><div class="poko-demo-meta"><span>Product</span><code>Poko</code></div><div class="poko-demo-meta"><span>Project ID</span><code>poko-sc</code></div><div class="poko-demo-meta"><span>Client</span><code>Firebase Web SDK 10.14.1</code></div><div class="poko-demo-meta"><span>Mode</span><code>UI preview only</code></div></div>
+        <div class="poko-demo-card"><h3>About this panel</h3><p>This is a local UI showcase. It does not grant admin privileges, issue bans, change account status, or modify production data. Real moderation must be enforced by trusted backend code and Firestore security rules.</p></div>
+      </section>
+      <section class="poko-demo-section" data-demo-section="tos"><div class="poko-demo-card"><h3>Terms of Service preview</h3><p>Welcome to Poko. Use the service respectfully, keep your account secure, and do not harass, threaten, impersonate, spam, or share unlawful content. Respect other users' privacy and intellectual property. Poko may restrict access when these rules are violated. This is placeholder demo copy, not published legal terms.</p></div><div class="poko-demo-card"><h3>Acceptance preview</h3><p>A production Terms of Service screen should link to the current legal document, show its effective date, and record acceptance only after an authenticated user actively agrees.</p><div class="poko-demo-actions"><button class="primary-demo" type="button" id="previewTosAccepted">Preview accepted state</button></div></div></section>
+      <section class="poko-demo-section" data-demo-section="banned"><div class="poko-demo-preview"><div class="preview-mark"><iconify-icon icon="solar:shield-warning-bold" width="25" height="25"></iconify-icon></div><h3>Account suspended</h3><p>This account is currently unable to access Poko. If you believe this action was made by mistake, contact the Poko moderation team and include your account ID.</p><div class="poko-demo-actions" style="justify-content:center"><button type="button" id="previewBanAppeal">Preview appeal action</button></div></div><div class="poko-demo-card" style="margin-top:12px"><h3>Demo only</h3><p>This screen is a visual preview. It does not ban the signed-in user or write a moderation record.</p></div></section>
+    </div></div>
+  </section>
   <div class="profile-open" id="profileOpen" role="dialog" aria-modal="true" aria-labelledby="profileViewName"><section class="profile-card"><div class="profile-view-banner" id="profileViewBanner"></div><div class="profile-view-body"><div class="profile-view-avatar" id="profileViewAvatar">You</div><div class="profile-view-name" id="profileViewName">your_username</div><div class="profile-view-bio" id="profileViewBio"></div><div class="profile-view-actions"><button class="small-button" id="closeProfileView">Close</button></div></div></section></div>
   <div class="profile-editor" id="profileEditor" role="dialog" aria-modal="true" aria-labelledby="profileTitle">
     <section class="dialog">
@@ -1967,8 +1998,30 @@
     $('dmNav').addEventListener('click', () => { app.classList.remove('show-main'); closeConversation(); });
     $('search').addEventListener('input', renderConversationList);
 
+    const demoOverlay=$('pokoDemoOverlay');
+    function openDemoPanel(){
+      if(!demoOverlay)return;
+      const user=firebaseAuth?.currentUser;
+      $('demoAccountName').textContent=user?(user.displayName||$('displayName').dataset.profileName||'Habib'):'Not signed in';
+      $('demoAccountUid').textContent=user?.uid||'Sign in to retrieve';
+      $('demoAuthProvider').textContent=user?.providerData?.map(p=>p.providerId).filter(Boolean).join(', ')||'—';
+      demoOverlay.classList.add('open');
+    }
+    function closeDemoPanel(){demoOverlay?.classList.remove('open');}
+    $('demoPanelNav').addEventListener('click',openDemoPanel);
+    $('closePokoDemo').addEventListener('click',closeDemoPanel);
+    demoOverlay.addEventListener('click',e=>{if(e.target===demoOverlay)closeDemoPanel();});
+    document.querySelectorAll('[data-demo-tab]').forEach(button=>button.addEventListener('click',()=>{
+      document.querySelectorAll('[data-demo-tab]').forEach(item=>item.classList.toggle('active',item===button));
+      document.querySelectorAll('[data-demo-section]').forEach(section=>section.classList.toggle('active',section.dataset.demoSection===button.dataset.demoTab));
+      $('pokoDemoTitle').textContent=button.textContent.trim();
+    }));
+    $('copyDemoUid').addEventListener('click',async()=>{const uid=firebaseAuth?.currentUser?.uid;if(!uid){showToast('Sign in first to retrieve your Firebase UID.');return;}try{await navigator.clipboard.writeText(uid);showToast('Firebase UID copied.');}catch(error){showToast('Could not copy UID. Select it from the panel.');}});
+    $('refreshDemoAccount').addEventListener('click',openDemoPanel);
+    $('previewTosAccepted').addEventListener('click',()=>showToast('Demo: Terms accepted state previewed.'));
+    $('previewBanAppeal').addEventListener('click',()=>showToast('Demo: appeal action previewed. No request was sent.'));
     restoreProfile();
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeEditor(); closeProfile(); closeNewChat(); } });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeEditor(); closeProfile(); closeNewChat(); closeDemoPanel(); } });
   </script>
 </body>
 </html>
