@@ -518,10 +518,13 @@
       .call-resize-handle{display:none!important}
     }
   
-    .verified-name{display:inline-flex;align-items:center;gap:5px;flex-wrap:wrap}
+    .verified-name{display:inline-flex!important;align-items:center;flex-flow:row nowrap;gap:4px;white-space:nowrap;vertical-align:middle;max-width:100%;min-width:0}
     .verified-badge{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;flex:0 0 14px;border-radius:50%;background:#2787f5;color:#fff;font:700 10px/1 Arial,sans-serif;vertical-align:middle}
     .verified-badge::after{content:'✓'}
-    .plus-badge{display:inline-flex;align-items:center;justify-content:center;padding:2px 5px;border-radius:4px;background:linear-gradient(135deg,#8b5cf6,#5b6cf9);color:#fff;font:800 9px/1.2 Arial,sans-serif;letter-spacing:.45px;vertical-align:middle}
+    .plus-badge{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;padding:2px 4px;border-radius:999px;background:#7560c9;color:#fff;font:750 8px/1 Arial,sans-serif;letter-spacing:.25px;white-space:nowrap;vertical-align:middle}
+    .profile-label strong.verified-name{width:max-content;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+    .message-author.verified-name{max-width:100%}
+    .message-head{align-items:center}
   </style>
 </head>
 <body class="poko-loading">
@@ -740,6 +743,8 @@
       if (!element) return;
       const label = String(name || '');
       const normalized = label.trim().replace(/^@/, '').toLowerCase();
+      element.dataset.profileName = label;
+      element.classList.add('verified-name');
       element.replaceChildren(document.createTextNode(label));
       if (normalized === 'habib' || normalized === 'test') {
         const badge = document.createElement('span');
@@ -750,7 +755,7 @@
         const plus = document.createElement('span');
         plus.className = 'plus-badge';
         plus.textContent = 'PLUS';
-        plus.setAttribute('aria-label', 'Poko Plus subscriber');
+        plus.setAttribute('aria-label', 'Poko Plus');
         plus.title = 'Poko Plus';
         element.append(badge, plus);
       }
@@ -768,7 +773,7 @@
     function openEditor() {
       editor.classList.remove('closing');
       pendingAvatar = avatarUrl; pendingBanner = bannerUrl;
-      $('nameInput').value = $('displayName').textContent === 'your_username' ? '' : $('displayName').textContent;
+      $('nameInput').value = $('displayName').dataset.profileName === 'your_username' ? '' : ($('displayName').dataset.profileName || '');
       $('bioInput').value = profileBio;
       setAvatar($('largeAvatar'), pendingAvatar);
       setAvatarStatus($('largeAvatar'),myActivityStatus);
@@ -888,7 +893,7 @@
     $('profileRow').addEventListener('click', e => { if (!e.target.closest('#editProfile') && !e.target.closest('#statusTrigger')) openProfile(); });
     $('profileRow').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openProfile(); } });
     $('editProfile').addEventListener('click', e => { e.stopPropagation(); openEditor(); });
-    function openProfile() { profileOpen.classList.remove('closing'); const name = $('displayName').textContent; $('profileViewName').textContent = name; $('profileViewBio').textContent = profileBio; setAvatar($('profileViewAvatar'), avatarUrl, name.slice(0,2).toUpperCase()); setAvatarStatus($('profileViewAvatar'),myActivityStatus); $('profileViewBanner').style.backgroundImage = bannerUrl ? `url("${bannerUrl}")` : ''; profileOpen.classList.add('open'); }
+    function openProfile() { profileOpen.classList.remove('closing'); const name = $('displayName').dataset.profileName || $('displayName').textContent; setVerifiedName($('profileViewName'), name); $('profileViewBio').textContent = profileBio; setAvatar($('profileViewAvatar'), avatarUrl, name.slice(0,2).toUpperCase()); setAvatarStatus($('profileViewAvatar'),myActivityStatus); $('profileViewBanner').style.backgroundImage = bannerUrl ? `url("${bannerUrl}")` : ''; profileOpen.classList.add('open'); }
     function closeProfile() { if (!profileOpen.classList.contains('open') || profileOpen.classList.contains('closing')) return; profileOpen.classList.add('closing'); setTimeout(() => { profileOpen.classList.remove('open','closing'); }, 160); }
     $('closeProfileView').addEventListener('click', closeProfile);
     profileOpen.addEventListener('click', e => { if (e.target === profileOpen) closeProfile(); });
@@ -1067,7 +1072,7 @@
       if (!panel) return;
       panel.replaceChildren();
       selectedGroupMembers.forEach(user => {
-        const chip=document.createElement('span'); chip.className='group-chip'; chip.textContent=user.name;
+        const chip=document.createElement('span'); chip.className='group-chip'; const chipName=document.createElement('span'); setVerifiedName(chipName,user.name); chip.append(chipName);
         const remove=document.createElement('button'); remove.type='button'; remove.textContent='×'; remove.setAttribute('aria-label','Remove '+user.name);
         remove.addEventListener('click',()=>{selectedGroupMembers.delete(user.uid);renderGroupSelection();});
         chip.append(remove); panel.append(chip);
@@ -1102,7 +1107,7 @@
           const button = document.createElement('button'); button.className = 'user-result'; button.type = 'button';
           const avatar = document.createElement('div'); avatar.className = 'mini-avatar'; setAvatar(avatar,user.avatar || '',(user.name || 'Poko').slice(0,2).toUpperCase());
           const label = document.createElement('div'); label.className = 'profile-label';
-          const nameEl = document.createElement('strong'); nameEl.textContent = user.name || 'Poko user';
+          const nameEl = document.createElement('strong'); setVerifiedName(nameEl,user.name || 'Poko user');
           const bioEl = document.createElement('span'); bioEl.textContent = user.bio || 'No bio yet';
           label.append(nameEl,bioEl); button.append(avatar,label);
           button.addEventListener('click', async () => {
@@ -1351,7 +1356,7 @@
     let groupScreenStream = null;
     const groupRemoteStreams = new Map();
     function groupCallCollection(conversationId) { return profileDb.collection('conversations').doc(conversationId).collection('groupCalls'); }
-    function renderGroupCallTiles(){const stage=$('callOverlay').querySelector('.call-stage'),existing=new Map([...stage.querySelectorAll('.group-remote-tile')].map(el=>[el.dataset.uid,el]));groupRemoteStreams.forEach((stream,uid)=>{let tile=existing.get(uid);if(!tile){tile=document.createElement('div');tile.className='group-remote-tile';tile.dataset.uid=uid;const video=document.createElement('video');video.autoplay=true;video.playsInline=true;const card=document.createElement('div');card.className='camera-off-card';card.innerHTML='<div class="camera-off-banner"></div><div class="camera-off-avatar" aria-label="Participant avatar"></div>';const label=document.createElement('span');label.textContent=profileCache.get(uid)?.name||'Participant';tile.append(video,card,label);stage.append(tile);getPublicProfile(uid).then(p=>{if(!tile.isConnected)return;label.textContent=p.name||'Participant';card.querySelector('.camera-off-banner').style.backgroundImage=p.banner?'url("'+p.banner+'")':'linear-gradient(135deg,#343b52,#171a22)';setAvatar(card.querySelector('.camera-off-avatar'),p.avatar,p.name||'User');}).catch(()=>{});}else existing.delete(uid);const video=tile.querySelector('video'),card=tile.querySelector('.camera-off-card');if(video.srcObject!==stream)video.srcObject=stream;video.play?.().catch(()=>{});const live=stream.getVideoTracks().some(t=>t.readyState==='live'&&t.enabled&&!t.muted);video.hidden=!live;card.hidden=live;if(stream.getAudioTracks().length&&!speakingMonitors.has(uid))monitorSpeaking(uid,stream,tile);});existing.forEach((tile,uid)=>{stopSpeakingMonitor(uid);tile.remove();});updateCallStatus('Group call · '+(groupPeers.size+1)+' participants');}
+    function renderGroupCallTiles(){const stage=$('callOverlay').querySelector('.call-stage'),existing=new Map([...stage.querySelectorAll('.group-remote-tile')].map(el=>[el.dataset.uid,el]));groupRemoteStreams.forEach((stream,uid)=>{let tile=existing.get(uid);if(!tile){tile=document.createElement('div');tile.className='group-remote-tile';tile.dataset.uid=uid;const video=document.createElement('video');video.autoplay=true;video.playsInline=true;const card=document.createElement('div');card.className='camera-off-card';card.innerHTML='<div class="camera-off-banner"></div><div class="camera-off-avatar" aria-label="Participant avatar"></div>';const label=document.createElement('span');setVerifiedName(label,profileCache.get(uid)?.name||'Participant');tile.append(video,card,label);stage.append(tile);getPublicProfile(uid).then(p=>{if(!tile.isConnected)return;setVerifiedName(label,p.name||'Participant');card.querySelector('.camera-off-banner').style.backgroundImage=p.banner?'url("'+p.banner+'")':'linear-gradient(135deg,#343b52,#171a22)';setAvatar(card.querySelector('.camera-off-avatar'),p.avatar,p.name||'User');}).catch(()=>{});}else existing.delete(uid);const video=tile.querySelector('video'),card=tile.querySelector('.camera-off-card');if(video.srcObject!==stream)video.srcObject=stream;video.play?.().catch(()=>{});const live=stream.getVideoTracks().some(t=>t.readyState==='live'&&t.enabled&&!t.muted);video.hidden=!live;card.hidden=live;if(stream.getAudioTracks().length&&!speakingMonitors.has(uid))monitorSpeaking(uid,stream,tile);});existing.forEach((tile,uid)=>{stopSpeakingMonitor(uid);tile.remove();});updateCallStatus('Group call · '+(groupPeers.size+1)+' participants');}
     let preCallMedia={audio:true,video:true};
     async function getGroupLocalMedia() {
       if(groupLocalStream)return groupLocalStream;
@@ -1663,7 +1668,7 @@
       if (!activeConversation?.otherProfile) return;
       const p = activeConversation.otherProfile;
       $('profileViewName').dataset.uid = p.uid || activeConversation.otherUid || '';
-      $('profileViewName').textContent = p.name;
+      setVerifiedName($('profileViewName'), p.name);
       $('profileViewBio').textContent = p.bio || '';
       setAvatar($('profileViewAvatar'),p.avatar,p.name.slice(0,2).toUpperCase());
       $('profileViewBanner').style.backgroundImage = p.banner ? `url("${p.banner}")` : '';
