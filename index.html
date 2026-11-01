@@ -529,7 +529,70 @@
     .profile-label strong.verified-name{width:max-content;max-width:100%;overflow:hidden;text-overflow:ellipsis}
     .message-author.verified-name{max-width:100%}
     .message-head{align-items:center}
-  </style>
+
+    /* Final Poko social surfaces: one consistent visual language for Friends and Requests. */
+    .main:has(#friendsPanel:not([hidden]))>.topbar .topbar-title{display:block;color:var(--text);font-size:.9rem;font-weight:750}
+    .main:has(#friendsPanel:not([hidden]))>.topbar{background:var(--panel);padding-inline:clamp(18px,3vw,34px)}
+    .friends-nav-button{min-height:36px;padding:0 15px;border:1px solid rgba(91,140,255,.25);border-radius:9px;background:rgba(91,140,255,.12);color:#c9d9ff;font-size:.76rem;font-weight:750;transition:background .16s,border-color .16s}
+    .friends-nav-button:hover{background:rgba(91,140,255,.2);border-color:rgba(91,140,255,.45)}
+    .request-nav-button{width:38px;height:38px;border-radius:9px;color:var(--muted)}
+    .request-nav-button:hover{background:var(--hover);color:var(--text)}
+    .request-badge{right:-2px;top:-2px;min-width:17px;height:17px;border:2px solid var(--panel);font-size:9px}
+    .friends-panel{padding:clamp(22px,4vw,42px) clamp(18px,5vw,64px);background:radial-gradient(ellipse at 50% -18%,rgba(91,140,255,.075),transparent 58%),var(--bg);overscroll-behavior:contain}
+    .friends-page-head{max-width:1040px;margin:0 auto;padding:0 0 25px;border:0;align-items:flex-end}
+    .friends-page-head h2{font-size:clamp(1.55rem,2.6vw,2rem);font-weight:800;letter-spacing:-.055em;line-height:1.15}
+    .friends-page-head p{font-size:.82rem;line-height:1.55;margin-top:8px;color:var(--muted)}
+    #addFriendButton{min-height:39px;padding:0 16px;border-radius:9px;font-size:.76rem;box-shadow:0 4px 14px rgba(54,105,220,.16)}
+    .friends-tabs{max-width:1040px;margin:0 auto;padding:0 0 12px;gap:5px;border-bottom:1px solid var(--line)}
+    .friends-tab{position:relative;min-height:38px;padding:0 15px;border-radius:8px;color:var(--muted);font-size:.76rem;font-weight:700;transition:background .16s,color .16s}
+    .friends-tab:hover{background:var(--hover);color:var(--text)}
+    .friends-tab.active{background:rgba(91,140,255,.14);color:#c9d9ff}
+    .friends-tab.active:after{content:"";position:absolute;left:13px;right:13px;bottom:-13px;height:2px;border-radius:2px;background:var(--accent)}
+    #pendingTabCount{margin-left:4px;color:inherit;font-size:.68rem;opacity:.8}
+    .friends-list-view{max-width:1040px;margin:0 auto;padding-top:16px}
+    .friend-card{min-height:72px;padding:10px 13px;border:1px solid transparent;border-bottom-color:var(--line);border-radius:10px;gap:13px;transition:background .15s,border-color .15s}
+    .friend-card:hover{background:rgba(255,255,255,.025);border-color:var(--line)}
+    .friend-card .mini-avatar{width:42px;height:42px;flex-basis:42px;font-size:.75rem}
+    .friend-card .profile-label strong{font-size:.82rem;letter-spacing:-.015em}
+    .friend-card .profile-label span{display:flex;align-items:center;gap:7px;margin-top:5px;font-size:.68rem;color:var(--muted)}
+    .friend-presence .status-dot{width:7px;height:7px;flex-basis:7px}
+    .friend-actions{gap:7px}
+    .friend-action{min-height:33px;padding:0 13px;border-radius:8px;font-size:.7rem;font-weight:750;transition:background .15s,border-color .15s,transform .15s}
+    .friend-action:active{transform:scale(.97)}
+    .friend-message{background:rgba(91,140,255,.13);border-color:rgba(91,140,255,.22);color:#c9d9ff}
+    .friend-message:hover,.friend-accept:hover{background:rgba(91,140,255,.23);border-color:rgba(91,140,255,.42)}
+    .friend-accept{background:var(--accent);border-color:var(--accent);color:#fff}
+    .friend-ignore{background:transparent;color:var(--muted)}
+    .friend-ignore:hover{background:var(--hover);color:var(--text)}
+    .friend-section-empty{min-height:250px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;padding:32px 18px;text-align:center;border:1px dashed var(--line);border-radius:14px;background:rgba(255,255,255,.012);color:var(--muted)}
+    .friend-empty-icon{width:48px;height:48px;display:grid;place-items:center;margin-bottom:5px;border:1px solid rgba(91,140,255,.2);border-radius:14px;background:rgba(91,140,255,.1);color:#a9c3ff;font-size:23px}
+    .friend-section-empty strong{color:var(--text);font-size:.88rem;font-weight:750}
+    .friend-section-empty>span:not(.friend-empty-icon){max-width:290px;font-size:.74rem;line-height:1.6}
+    .friend-section-empty .primary{margin-top:8px;min-height:36px;padding:0 14px}
+    html[data-theme="light"] .friends-panel{background:radial-gradient(ellipse at 50% -18%,rgba(91,140,255,.08),transparent 58%),var(--bg)}
+    html[data-theme="light"] .friends-nav-button{background:rgba(91,140,255,.1);color:#315ba8;border-color:rgba(91,140,255,.22)}
+    html[data-theme="light"] .friends-tab.active{color:#315ba8}
+    html[data-theme="light"] .friend-card:hover{background:rgba(32,38,56,.025)}
+    html[data-theme="light"] .friend-message{color:#315ba8}
+    html[data-theme="light"] .friend-section-empty{background:rgba(32,38,56,.015)}
+    @media(max-width:760px){
+      .main:has(#friendsPanel:not([hidden]))>.topbar{padding-inline:14px}
+      .friends-panel{padding:23px 15px calc(24px + env(safe-area-inset-bottom))}
+      .friends-page-head{align-items:flex-start;padding-bottom:20px}
+      .friends-page-head h2{font-size:1.55rem}
+      .friends-page-head p{font-size:.74rem;max-width:230px}
+      #addFriendButton{min-height:36px;padding:0 12px;white-space:nowrap}
+      .friends-tabs{overflow-x:auto;scrollbar-width:none}
+      .friends-tabs::-webkit-scrollbar{display:none}
+      .friends-tab{flex:0 0 auto;padding-inline:13px}
+      .friend-card{min-height:68px;padding:9px 7px;gap:10px}
+      .friend-card .mini-avatar{width:39px;height:39px;flex-basis:39px}
+      .friend-action{min-height:34px;padding-inline:10px}
+      .friend-actions{gap:5px}
+      .friend-section-empty{min-height:220px}
+    }
+    @media(max-width:380px){.friends-page-head{gap:8px}.friends-page-head p{max-width:185px}.friend-action{padding-inline:8px}}
+\n  </style>
 </head>
 <body class="poko-loading">
   <div class="page-loader" id="pageLoader" aria-hidden="true"></div>
@@ -966,22 +1029,47 @@
     }
     function conversationKey(uidA, uidB) { return [uidA, uidB].sort().join('__'); }
     let friendRequestUnsubscribe=null, friendsUnsubscribe=null;
-    function renderFriendRows(container, docs, incoming=false) {
+    async function renderFriendRows(container, docs, incoming=false) {
+      const renderToken = String(Date.now()) + Math.random();
+      container.dataset.renderToken = renderToken;
       container.replaceChildren();
-      if(!docs.length){const empty=document.createElement('div');empty.className='friend-section-empty';empty.textContent=incoming?'No pending friend requests.':'No friends to show yet. Find someone and add them.';container.append(empty);return;}
-      const filtered=incoming?docs:docs.filter(doc=>{const d=doc.data()||{};return activeFriendsTab!=='online'||['online','idle'].includes(d.status||'online');});
-      if(!filtered.length){const empty=document.createElement('div');empty.className='friend-section-empty';empty.textContent='No friends are online right now.';container.append(empty);return;}
-      filtered.forEach(doc=>{
-        const data=doc.data()||{}, uid=incoming?data.fromUid:data.friendUid;
-        getPublicProfile(uid).then(profile=>{
-          if(!incoming&&activeFriendsTab==='online'&&!['online','idle'].includes(profile.status||'online'))return;
-          const row=document.createElement('div');row.className='friend-card';
-          const avatar=document.createElement('div');avatar.className='mini-avatar';setAvatar(avatar,profile.avatar,(profile.name||'P').slice(0,2).toUpperCase());
-          const label=document.createElement('div');label.className='profile-label';const name=document.createElement('strong');setVerifiedName(name,profile.name||'Poko user');const sub=document.createElement('span');sub.textContent=incoming?'Incoming friend request':(profile.status||'Online');label.append(name,sub);row.append(avatar,label);
-          if(incoming){const actions=document.createElement('div');actions.className='friend-actions';[['Accept',()=>acceptFriendRequest(doc.id,data)],['Ignore',()=>declineFriendRequest(doc.id)]].forEach(([text,fn])=>{const b=document.createElement('button');b.className='friend-action';b.textContent=text;b.addEventListener('click',fn);actions.append(b);});row.append(actions);}
-          else{const b=document.createElement('button');b.className='friend-action';b.textContent='Message';b.addEventListener('click',()=>startDirectMessage(profile));row.append(b);}
-          container.append(row);
-        });
+      const empty = message => {
+        const panel=document.createElement('div');panel.className='friend-section-empty';
+        const icon=document.createElement('span');icon.className='friend-empty-icon material-symbol';icon.textContent=incoming?'person_add':'group';
+        const title=document.createElement('strong');title.textContent=message;
+        const copy=document.createElement('span');copy.textContent=incoming?'When someone sends you a request, it will appear here.':'Add people you know and your friends will show up here.';
+        panel.append(icon,title,copy);
+        if(!incoming){const add=document.createElement('button');add.type='button';add.className='primary';add.textContent='Find people';add.addEventListener('click',showNewChat);panel.append(add);}
+        container.append(panel);
+      };
+      if(!docs.length){empty(incoming?'You’re all caught up':'Your friends list is empty');return;}
+      const rows=await Promise.all(docs.map(async doc=>{
+        const data=doc.data()||{},uid=incoming?data.fromUid:data.friendUid;
+        if(!uid)return null;
+        const profile=await getPublicProfile(uid);
+        return {doc,data,profile};
+      }));
+      if(container.dataset.renderToken!==renderToken)return;
+      const filtered=incoming?rows.filter(Boolean):rows.filter(item=>item&&(activeFriendsTab!=='online'||['online','idle'].includes(item.profile.status||'online')));
+      if(!filtered.length){empty(incoming?'You’re all caught up':'No friends are online right now');return;}
+      filtered.forEach(({doc,data,profile})=>{
+        const row=document.createElement('article');row.className='friend-card';
+        const avatar=document.createElement('div');avatar.className='mini-avatar';setAvatar(avatar,profile.avatar,(profile.name||'P').slice(0,2).toUpperCase());setAvatarStatus(avatar,profile.status||'online');
+        const label=document.createElement('div');label.className='profile-label';
+        const name=document.createElement('strong');setVerifiedName(name,profile.name||'Poko user');
+        const sub=document.createElement('span');sub.className='friend-presence';
+        const dot=document.createElement('i');dot.className='status-dot '+(profile.status||'online');
+        const statusText=incoming?'Wants to connect':({online:'Online',idle:'Idle',dnd:'Do not disturb',invisible:'Offline'}[profile.status]||'Offline');
+        sub.append(dot,document.createTextNode(statusText));label.append(name,sub);row.append(avatar,label);
+        if(incoming){
+          const actions=document.createElement('div');actions.className='friend-actions';
+          const accept=document.createElement('button');accept.type='button';accept.className='friend-action friend-accept';accept.textContent='Accept';accept.addEventListener('click',()=>acceptFriendRequest(doc.id,data));
+          const ignore=document.createElement('button');ignore.type='button';ignore.className='friend-action friend-ignore';ignore.textContent='Ignore';ignore.addEventListener('click',()=>declineFriendRequest(doc.id));
+          actions.append(accept,ignore);row.append(actions);
+        }else{
+          const message=document.createElement('button');message.type='button';message.className='friend-action friend-message';message.textContent='Message';message.addEventListener('click',()=>startDirectMessage(profile));row.append(message);
+        }
+        container.append(row);
       });
     }
     async function startDirectMessage(profile){
