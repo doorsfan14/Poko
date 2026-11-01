@@ -518,9 +518,10 @@
       .call-resize-handle{display:none!important}
     }
   
-    .verified-name{display:inline-flex;align-items:center;gap:4px}
+    .verified-name{display:inline-flex;align-items:center;gap:5px;flex-wrap:wrap}
     .verified-badge{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;flex:0 0 14px;border-radius:50%;background:#2787f5;color:#fff;font:700 10px/1 Arial,sans-serif;vertical-align:middle}
     .verified-badge::after{content:'✓'}
+    .plus-badge{display:inline-flex;align-items:center;justify-content:center;padding:2px 5px;border-radius:4px;background:linear-gradient(135deg,#8b5cf6,#5b6cf9);color:#fff;font:800 9px/1.2 Arial,sans-serif;letter-spacing:.45px;vertical-align:middle}
   </style>
 </head>
 <body class="poko-loading">
@@ -746,7 +747,12 @@
         badge.setAttribute('role', 'img');
         badge.setAttribute('aria-label', 'Verified');
         badge.title = 'Verified';
-        element.append(badge);
+        const plus = document.createElement('span');
+        plus.className = 'plus-badge';
+        plus.textContent = 'PLUS';
+        plus.setAttribute('aria-label', 'Poko Plus subscriber');
+        plus.title = 'Poko Plus';
+        element.append(badge, plus);
       }
     }
     function setAvatar(el, url, fallback='You') {
