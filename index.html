@@ -856,7 +856,6 @@
         try {
           await profileDb.collection('profiles').doc(user.uid).set({
             ...profile,
-            email: user.email || '',
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
           }, {merge:true});
           localStorage.setItem('poko-profile', JSON.stringify(profile));
