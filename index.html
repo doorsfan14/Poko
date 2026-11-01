@@ -597,8 +597,12 @@
     .topbar-title{display:block!important;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text);font-size:.88rem;font-weight:800;letter-spacing:-.025em}
     .topbar{gap:14px}
     .topbar-tools{flex:0 0 auto}
-    .user-result[role="button"]{cursor:pointer}
-    .user-result[role="button"]:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+    .user-result{display:flex;align-items:center;gap:4px}
+
+    .user-result-main{display:flex;align-items:center;gap:11px;flex:1;min-width:0;padding:10px;border:0;border-radius:10px;background:transparent;color:var(--text);text-align:left;cursor:pointer}
+    .user-result-main:hover,.user-result-main:focus-visible{background:var(--hover)}
+    .user-result.selected{background:rgba(91,140,255,.12);border-radius:10px}
+    .user-result>.friend-action{margin:0 8px 0 4px}
     @media(max-width:760px){
       .main:has(#friendsPanel:not([hidden])) .topbar-title{display:block!important}
       .main:has(#friendsPanel:not([hidden])) .topbar{padding-inline:12px}
@@ -1305,14 +1309,15 @@
           const message = document.createElement('div'); message.className = 'result-message'; message.textContent = 'No profile found with that exact name. Check the spelling and make sure the other account has saved its profile.'; results.append(message); return;
         }
         users.forEach(user => {
-          const button = document.createElement('div'); button.className = 'user-result'; button.setAttribute('role','button'); button.tabIndex = 0;
+          const row = document.createElement('div'); row.className = 'user-result';
+          const button = document.createElement('button'); button.type = 'button'; button.className = 'user-result-main';
           const avatar = document.createElement('div'); avatar.className = 'mini-avatar'; setAvatar(avatar,user.avatar || '',(user.name || 'Poko').slice(0,2).toUpperCase());
           const label = document.createElement('div'); label.className = 'profile-label';
           const nameEl = document.createElement('strong'); setVerifiedName(nameEl,user.name || 'Poko user');
           const bioEl = document.createElement('span'); bioEl.textContent = user.bio || 'No bio yet';
-          label.append(nameEl,bioEl); button.append(avatar,label);
+          label.append(nameEl,bioEl); button.append(avatar,label); row.append(button);
           const activateUserResult = async () => {
-            if (groupSelectionMode) { if(selectedGroupMembers.has(user.uid)){selectedGroupMembers.delete(user.uid);button.classList.remove('selected');}else{selectedGroupMembers.set(user.uid,user);button.classList.add('selected');}renderGroupSelection();return; }
+            if (groupSelectionMode) { if(selectedGroupMembers.has(user.uid)){selectedGroupMembers.delete(user.uid);row.classList.remove('selected');}else{selectedGroupMembers.set(user.uid,user);row.classList.add('selected');}renderGroupSelection();return; }
             try {
               const id = conversationKey(currentUser.uid,user.uid);
               const ref = profileDb.collection('conversations').doc(id);
@@ -1331,9 +1336,8 @@
             }
           };
           button.addEventListener('click', activateUserResult);
-          button.addEventListener('keydown', event => { if(event.target===button && (event.key==='Enter'||event.key===' ')){event.preventDefault();activateUserResult();} });
-          if(!groupSelectionMode){const add=document.createElement('button');add.type='button';add.className='friend-action';add.textContent='Add friend';add.addEventListener('click',e=>{e.stopPropagation();sendFriendRequest({uid:user.uid,name:user.name||'Poko user',avatar:user.avatar||'',bio:user.bio||'',status:user.status||'online'});});button.append(add);}
-          results.append(button);
+          if(!groupSelectionMode){const add=document.createElement('button');add.type='button';add.className='friend-action';add.textContent='Add friend';add.addEventListener('click',()=>sendFriendRequest({uid:user.uid,name:user.name||'Poko user',avatar:user.avatar||'',bio:user.bio||'',status:user.status||'online'}));row.append(add);}
+          results.append(row);
         });
       } catch (error) {
         console.error('User search failed:',error);
