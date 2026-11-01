@@ -2019,7 +2019,11 @@
     $('copyDemoUid').addEventListener('click',async()=>{const uid=firebaseAuth?.currentUser?.uid;if(!uid){showToast('Sign in first to retrieve your Firebase UID.');return;}try{await navigator.clipboard.writeText(uid);showToast('Firebase UID copied.');}catch(error){showToast('Could not copy UID. Select it from the panel.');}});
     $('refreshDemoAccount').addEventListener('click',openDemoPanel);
     $('previewTosAccepted').addEventListener('click',()=>showToast('Demo: Terms accepted state previewed.'));
-    const banScreenPreview=$('pokoBanScreen');\n    $('openBanScreenPreview').addEventListener('click',()=>{banScreenPreview.classList.add('open');document.body.style.overflow='hidden';const uid=firebaseAuth?.currentUser?.uid;$('banCaseReference').textContent=uid?'POKO-'+uid.slice(0,8).toUpperCase():'POKO-DEMO';});\n    const closeBanScreenPreview=()=>{banScreenPreview.classList.remove('open');document.body.style.overflow='';};\n    $('closeBanScreenPreview').addEventListener('click',closeBanScreenPreview);\n    $('banAppealButton').addEventListener('click',()=>showToast('Demo only: appeal submission is not connected yet.'));
+    const banScreenPreview=$('pokoBanScreen');
+    $('openBanScreenPreview').addEventListener('click',()=>{banScreenPreview.classList.add('open');document.body.style.overflow='hidden';const uid=firebaseAuth?.currentUser?.uid;$('banCaseReference').textContent=uid?'POKO-'+uid.slice(0,8).toUpperCase():'POKO-DEMO';});
+    const closeBanScreenPreview=()=>{banScreenPreview.classList.remove('open');document.body.style.overflow='';};
+    $('closeBanScreenPreview').addEventListener('click',closeBanScreenPreview);
+    $('banAppealButton').addEventListener('click',()=>showToast('Demo only: appeal submission is not connected yet.'));
     restoreProfile();
     document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeEditor(); closeProfile(); closeNewChat(); closeDemoPanel(); if(banScreenPreview.classList.contains('open'))closeBanScreenPreview(); } });
   </script>
