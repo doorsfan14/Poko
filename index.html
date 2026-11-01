@@ -517,6 +517,10 @@
       .call-control{min-height:48px!important;font-size:.82rem!important;touch-action:manipulation}
       .call-resize-handle{display:none!important}
     }
+  
+    .verified-name{display:inline-flex;align-items:center;gap:4px}
+    .verified-badge{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;flex:0 0 14px;border-radius:50%;background:#2787f5;color:#fff;font:700 10px/1 Arial,sans-serif;vertical-align:middle}
+    .verified-badge::after{content:'✓'}
   </style>
 </head>
 <body class="poko-loading">
@@ -674,12 +678,12 @@
       bannerUrl = saved.banner || '';
       profileBio = saved.bio || '';
       const name = saved.name || 'your_username';
-      $('displayName').textContent = name;
+      setVerifiedName($('displayName'), name);
       setAvatar($('sideAvatar'), avatarUrl, name.slice(0,2).toUpperCase());
       setAvatar($('largeAvatar'), avatarUrl, name.slice(0,2).toUpperCase());
       setAvatarStatus($('sideAvatar'),myActivityStatus);
       setAvatarStatus($('largeAvatar'),myActivityStatus);
-      $('profileViewName').textContent = name;
+      setVerifiedName($('profileViewName'), name);
       $('profileViewBio').textContent = profileBio;
       $('profileViewBanner').style.backgroundImage = bannerUrl ? `url("${bannerUrl}")` : '';
       const statusLabels={online:'Online',idle:'Idle',dnd:'Do not disturb',invisible:'Invisible'};
@@ -729,6 +733,21 @@
         console.error('Cloud profile listener failed:', error);
         showToast('Could not load cloud profile. Check Firestore rules.');
       });
+    }
+
+    function setVerifiedName(element, name) {
+      if (!element) return;
+      const label = String(name || '');
+      const normalized = label.trim().replace(/^@/, '').toLowerCase();
+      element.replaceChildren(document.createTextNode(label));
+      if (normalized === 'habib' || normalized === 'test') {
+        const badge = document.createElement('span');
+        badge.className = 'verified-badge';
+        badge.setAttribute('role', 'img');
+        badge.setAttribute('aria-label', 'Verified');
+        badge.title = 'Verified';
+        element.append(badge);
+      }
     }
     function setAvatar(el, url, fallback='You') {
       el.replaceChildren();
@@ -958,14 +977,14 @@
             knownConversations=knownConversations.map(existing=>existing.otherUid===item.otherUid?{...existing,otherProfile:profile}:existing);
             if(activeConversation?.otherUid===item.otherUid){
               activeConversation={...activeConversation,otherProfile:profile};
-              $('chatName').textContent=profile.name;
+              setVerifiedName($('chatName'), profile.name);
               $('chatBio').textContent=profile.bio||'';
               $('chatBio').hidden=!profile.bio;
               setAvatar($('chatAvatar'),profile.avatar,profile.name.slice(0,2).toUpperCase());
               setAvatarStatus($('chatAvatar'),profile.status);
             }
             if(profileOpen.classList.contains('open')&&$('profileViewName').dataset.uid===item.otherUid){
-              $('profileViewName').textContent=profile.name;
+              setVerifiedName($('profileViewName'), profile.name);
               $('profileViewBio').textContent=profile.bio||'';
               setAvatar($('profileViewAvatar'),profile.avatar,profile.name.slice(0,2).toUpperCase());
               setAvatarStatus($('profileViewAvatar'),profile.status);
@@ -1028,7 +1047,7 @@
         button.className = 'conversation-item' + (item.id === activeConversationId ? ' active' : '');
         const avatar = document.createElement('div'); avatar.className = 'mini-avatar'; if(item.group)setGroupAvatar(avatar,item);else{setAvatar(avatar,item.otherProfile.avatar,(item.displayName || item.otherProfile.name).slice(0,2).toUpperCase());setAvatarStatus(avatar,item.otherProfile.status);}
         const label = document.createElement('div'); label.className = 'profile-label';
-        const name = document.createElement('strong'); name.textContent = item.displayName || item.otherProfile.name;
+        const name = document.createElement('strong'); setVerifiedName(name, item.displayName || item.otherProfile.name);
         const last = document.createElement('span'); last.textContent = item.lastMessage || 'Start a conversation';
         label.append(name,last); button.append(avatar,label);
         button.addEventListener('click', () => openConversation(item));
@@ -1119,7 +1138,7 @@
       $('welcomePanel').hidden = true;
       $('chatPanel').hidden = false;
       if (window.matchMedia('(max-width: 760px)').matches) app.classList.add('show-main');
-      $('chatName').textContent = item.displayName || item.otherProfile.name;
+      setVerifiedName($('chatName'), item.displayName || item.otherProfile.name);
       $('chatBio').textContent = item.group ? ((item.participants || []).length + ' members') : (item.otherProfile.bio || '');
       $('chatBio').hidden = !item.group && !item.otherProfile.bio;
       setAvatar($('chatAvatar'),item.group ? '' : item.otherProfile.avatar,(item.displayName || item.otherProfile.name).slice(0,2).toUpperCase());
@@ -1145,7 +1164,7 @@
           setAvatar(avatar, mine ? avatarUrl : senderProfile.avatar, author.slice(0,2).toUpperCase());
           const content = document.createElement('div'); content.className = 'message-content';
           const head = document.createElement('div'); head.className = 'message-head';
-          const authorEl = document.createElement('span'); authorEl.className = 'message-author'; authorEl.textContent = author;
+          const authorEl = document.createElement('span'); authorEl.className = 'message-author'; setVerifiedName(authorEl, author);
           const meta = document.createElement('span'); meta.className = 'message-meta'; meta.textContent = message.createdAt?.toDate ? message.createdAt.toDate().toLocaleTimeString([], {hour:'numeric',minute:'2-digit'}) : '';
           head.append(authorEl,meta);
           const body = document.createElement('div'); body.className = 'message-text'; body.textContent = replaceEmojiShortcodes(message.text || '');
