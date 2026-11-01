@@ -135,6 +135,7 @@
     .result-message{padding:8px 10px;color:var(--muted);font-size:.75rem}
     @media(max-width:760px){.chat-head{height:62px;flex-basis:62px;padding:0 12px}.chat-messages{padding:16px 12px}.chat-composer{padding:12px}.message{max-width:88%}.chat-head .back-mobile{display:grid!important}}
 
+    .friend-action{margin-left:auto;flex:0 0 auto;border:1px solid var(--line);border-radius:8px;padding:7px 9px;background:var(--panel-2);color:var(--text);font-size:.68rem;font-weight:700}.friend-action:hover{background:var(--hover)}.friend-actions{display:flex;gap:5px;margin-left:auto}.friend-actions .friend-action{margin:0}.friend-card{display:flex;align-items:center;gap:9px;padding:8px 9px;border-radius:9px}.friend-card:hover{background:var(--hover)}.friend-card .profile-label{min-width:0}.friend-card .profile-label strong{font-size:.75rem}.friend-card .profile-label span{font-size:.65rem}.friend-section-empty{padding:10px;color:var(--muted);font-size:.72rem;line-height:1.5}
     .toast.show{opacity:1;transform:translate(-50%,0)}
     @media(max-width:760px){.app{grid-template-columns:62px minmax(0,1fr)}.rail{grid-column:1;grid-row:1}.sidebar{grid-column:2;grid-row:1;display:flex;height:100dvh;border-right:0}.main{display:none}.side-header{padding:21px 14px 15px}.side-section{padding-left:14px;padding-right:14px}.profile-row{margin-top:auto}.app.show-main{grid-template-columns:62px minmax(0,1fr)}.app.show-main .sidebar{display:none}.app.show-main .main{display:flex;grid-column:2}.topbar{padding:0 15px;height:62px;flex-basis:62px}.content-empty{padding:20px}.back-mobile{display:grid!important}}
     @media(min-width:761px){.back-mobile{display:none!important}}
@@ -563,6 +564,7 @@
         <button class="small-button" id="startChat">Start a conversation</button>
       </div>
       <div class="conversation-list" id="conversationList" hidden></div>
+      <div class="side-section"><span>Friends</span><span id="friendCount">0</span></div><div class="conversation-list" id="friendsList"><div class="result-message">Your friends will appear here.</div></div><div class="side-section"><span>Friend requests</span><span id="requestCount">0</span></div><div class="conversation-list" id="friendRequestsList"><div class="result-message">No pending requests.</div></div>
       <div class="profile-row" id="profileRow" role="button" tabindex="0" aria-label="View profile">
         <div class="mini-avatar" id="sideAvatar">You</div>
         <div class="profile-label"><strong id="displayName">your_username</strong><span id="myStatusLabel">Online</span></div>
@@ -701,7 +703,8 @@
     async function loadCloudProfile(user) {
       const loadId = ++activeProfileLoad;
       if (ownProfileUnsubscribe) { ownProfileUnsubscribe(); ownProfileUnsubscribe = null; }
-      restoreProfile();
+      if(firebaseAuth)firebaseAuth.onAuthStateChanged(user=>{if(user)subscribeFriends();else{if(friendsUnsubscribe)friendsUnsubscribe();if(friendRequestUnsubscribe)friendRequestUnsubscribe();$('friendsList').replaceChildren();$('friendRequestsList').replaceChildren();}});
+    restoreProfile();
       if (!user || !profileDb) return;
       ownProfileUnsubscribe = profileDb.collection('profiles').doc(user.uid).onSnapshot(async snapshot => {
         if (loadId !== activeProfileLoad || firebaseAuth.currentUser?.uid !== user.uid) return;
@@ -953,6 +956,52 @@
       conversationUnsubscribe = messagesUnsubscribe = conversationListUnsubscribe = null;
     }
     function conversationKey(uidA, uidB) { return [uidA, uidB].sort().join('__'); }
+    let friendRequestUnsubscribe=null, friendsUnsubscribe=null;
+    function renderFriendRows(container, docs, incoming=false) {
+      container.replaceChildren();
+      if(!docs.length){const empty=document.createElement('div');empty.className='friend-section-empty';empty.textContent=incoming?'No pending requests.':'Your friends will appear here.';container.append(empty);return;}
+      docs.forEach(doc=>{
+        const data=doc.data()||{}, uid=incoming?data.fromUid:data.friendUid;
+        getPublicProfile(uid).then(profile=>{
+          const row=document.createElement('div');row.className='friend-card';
+          const avatar=document.createElement('div');avatar.className='mini-avatar';setAvatar(avatar,profile.avatar,(profile.name||'P').slice(0,2).toUpperCase());
+          const label=document.createElement('div');label.className='profile-label';const name=document.createElement('strong');setVerifiedName(name,profile.name||'Poko user');const sub=document.createElement('span');sub.textContent=incoming?'Wants to connect':(profile.status||'Online');label.append(name,sub);row.append(avatar,label);
+          if(incoming){const actions=document.createElement('div');actions.className='friend-actions';[['Accept',()=>acceptFriendRequest(doc.id,data)],['Decline',()=>declineFriendRequest(doc.id)]].forEach(([text,fn])=>{const b=document.createElement('button');b.className='friend-action';b.textContent=text;b.addEventListener('click',fn);actions.append(b);});row.append(actions);}
+          else{const b=document.createElement('button');b.className='friend-action';b.textContent='Message';b.addEventListener('click',()=>startDirectMessage(profile));row.append(b);}
+          container.append(row);
+        });
+      });
+    }
+    async function startDirectMessage(profile){
+      try{const id=conversationKey(currentUser.uid,profile.uid);const ref=profileDb.collection('conversations').doc(id);await ref.set({participants:[currentUser.uid,profile.uid].sort(),updatedAt:firebase.firestore.FieldValue.serverTimestamp(),lastMessage:''},{merge:true});closeNewChat();openConversation({id,participants:[currentUser.uid,profile.uid].sort(),otherUid:profile.uid,otherProfile:profile,lastMessage:''});}catch(e){showToast('Could not open conversation. Check Firestore rules.');}
+    }
+    async function sendFriendRequest(profile){
+      if(!currentUser||!profileDb)return;
+      try{
+        const existing=await profileDb.collection('friendRequests').where('fromUid','==',currentUser.uid).where('toUid','==',profile.uid).where('status','==','pending').limit(1).get();
+        if(!existing.empty){showToast('Friend request already sent.');return;}
+        const reverse=await profileDb.collection('friendRequests').where('fromUid','==',profile.uid).where('toUid','==',currentUser.uid).where('status','==','pending').limit(1).get();
+        if(!reverse.empty){await acceptFriendRequest(reverse.docs[0].id,reverse.docs[0].data());return;}
+        await profileDb.collection('friendRequests').add({fromUid:currentUser.uid,toUid:profile.uid,status:'pending',createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+        showToast('Friend request sent.');
+      }catch(e){console.error('Friend request failed:',e);showToast('Could not send request. Check Firestore rules.');}
+    }
+    async function acceptFriendRequest(id,data){
+      try{const batch=profileDb.batch();batch.set(profileDb.collection('friendships').doc(conversationKey(data.fromUid,data.toUid)),{users:[data.fromUid,data.toUid].sort(),createdAt:firebase.firestore.FieldValue.serverTimestamp()});batch.update(profileDb.collection('friendRequests').doc(id),{status:'accepted',updatedAt:firebase.firestore.FieldValue.serverTimestamp()});await batch.commit();showToast('Friend added.');}
+      catch(e){console.error(e);showToast('Could not accept request. Check Firestore rules.');}
+    }
+    async function declineFriendRequest(id){try{await profileDb.collection('friendRequests').doc(id).update({status:'declined',updatedAt:firebase.firestore.FieldValue.serverTimestamp()});}catch(e){showToast('Could not decline request.');}}
+    function subscribeFriends(){
+      if(!currentUser||!profileDb)return;
+      if(friendsUnsubscribe)friendsUnsubscribe();if(friendRequestUnsubscribe)friendRequestUnsubscribe();
+      friendsUnsubscribe=profileDb.collection('friendships').where('users','array-contains',currentUser.uid).onSnapshot(snapshot=>{
+        const docs=snapshot.docs.map(d=>({id:d.id,data:()=>({friendUid:(d.data().users||[]).find(uid=>uid!==currentUser.uid)})}));
+        $('friendCount').textContent=String(docs.length);renderFriendRows($('friendsList'),docs,false);
+      },e=>{console.error(e);$('friendsList').textContent='Could not load friends.';});
+      friendRequestUnsubscribe=profileDb.collection('friendRequests').where('toUid','==',currentUser.uid).where('status','==','pending').onSnapshot(snapshot=>{
+        $('requestCount').textContent=String(snapshot.size);renderFriendRows($('friendRequestsList'),snapshot.docs,true);
+      },e=>{console.error(e);$('friendRequestsList').textContent='Could not load requests.';});
+    }
     function showNewChat() {
       if (!currentUser) { showToast('Sign in with Google before starting a conversation.'); openEditor(); return; }
       $('newChatOverlay').classList.remove('closing');
@@ -1129,6 +1178,7 @@
               showToast('Could not start conversation: ' + (error.code || error.message || 'check Firestore rules'));
             }
           });
+          if(!groupSelectionMode){const add=document.createElement('button');add.type='button';add.className='friend-action';add.textContent='Add friend';add.addEventListener('click',e=>{e.stopPropagation();sendFriendRequest({uid:user.uid,name:user.name||'Poko user',avatar:user.avatar||'',bio:user.bio||'',status:user.status||'online'});});button.append(add);}
           results.append(button);
         });
       } catch (error) {
