@@ -1171,7 +1171,7 @@
           const wrap = document.createElement('article'); wrap.className = 'message' + (grouped ? ' grouped' : '');
           const avatar = document.createElement('div'); avatar.className = 'mini-avatar';
           const senderProfile = mine ? null : (item.memberProfiles || []).find(p=>p.uid===message.senderId) || item.otherProfile;
-          const author = mine ? ($('displayName').textContent || 'You') : senderProfile.name;
+          const author = mine ? ($('displayName').dataset.profileName || $('displayName').textContent || 'You') : senderProfile.name;
           setAvatar(avatar, mine ? avatarUrl : senderProfile.avatar, author.slice(0,2).toUpperCase());
           const content = document.createElement('div'); content.className = 'message-content';
           const head = document.createElement('div'); head.className = 'message-head';
