@@ -138,7 +138,7 @@ final class PokoSession: ObservableObject {
             guard let idToken = result.user.idToken?.tokenString else { throw PokoError.googleToken }
             let credential = GoogleAuthProvider.credential(withIDToken: idToken, accessToken: result.user.accessToken.tokenString)
             _ = try await Auth.auth().signIn(with: credential)
-            _ = clientID
+            GIDSignIn.sharedInstance.configuration = GIDConfiguration(clientID: clientID)
         } catch { self.error = error.localizedDescription }
     }
 
