@@ -59,7 +59,7 @@ struct ConversationListView: View {
     var body: some View {
         List {
             ForEach(filtered) { item in
-                NavigationLink(value: item) {
+                NavigationLink { ConversationView(conversation: item) } label: {
                     HStack(spacing: 12) {
                         ZStack(alignment: .bottomTrailing) {
                             Circle().fill(PokoStyle.accent.opacity(0.2)).frame(width: 48, height: 48)
@@ -84,7 +84,6 @@ struct ConversationListView: View {
                 } label: { Image(systemName: "plus.circle.fill") }
             }
         }
-        .navigationDestination(for: PokoConversation.self) { ConversationView(conversation: $0) }
         .sheet(isPresented: $showNew) { NewConversationView() }
         .sheet(isPresented: $showGroup) { GroupConversationView() }
         .overlay {
