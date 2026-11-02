@@ -697,13 +697,12 @@
     .dock-position-options button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
     @media(min-width:761px){
       .app.dock-bottom{grid-template-columns:280px minmax(0,1fr)}
-      .app.dock-bottom .rail{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);width:max-content;max-width:calc(100vw - 32px);height:68px;flex-direction:row;justify-content:center;gap:12px;padding:8px 16px;border:1px solid rgba(255,255,255,.12);border-radius:22px;background:rgba(29,31,35,.88);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);box-shadow:0 12px 36px rgba(0,0,0,.32)}
+      .app.dock-bottom .rail{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);width:max-content;max-width:calc(100vw - 32px);height:68px;flex-direction:row;justify-content:center;gap:12px;padding:8px 16px;border:1px solid rgba(255,255,255,.12);border-radius:999px;background:rgba(29,31,35,.88);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);box-shadow:none}
       .app.dock-bottom .rail-spacer,.app.dock-bottom .rail-divider{display:none}
       .app.dock-bottom .rail-button{width:48px;height:48px;flex:0 0 48px}
       .app.dock-bottom .sidebar{grid-column:1;grid-row:1}
       .app.dock-bottom .main{grid-column:2;grid-row:1}
-      .app.dock-bottom .profile-row{margin-bottom:92px}
-      .app.dock-left .rail{margin:12px 8px;height:calc(100% - 24px);align-self:center;border:1px solid rgba(255,255,255,.08);border-radius:22px;background:rgba(29,31,35,.88);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:0 8px 28px rgba(0,0,0,.2)}
+      .app.dock-left .rail{margin:12px 8px;height:calc(100% - 24px);align-self:center;border:1px solid rgba(255,255,255,.08);border-radius:999px;background:rgba(29,31,35,.88);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:none}
     }
     @media(max-width:760px){
       .app.dock-bottom,.app.dock-left{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) 66px}
