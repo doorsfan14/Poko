@@ -181,8 +181,8 @@
     .profile-row{background:#24262b;border-top:1px solid var(--line)}
     .profile-row:hover{background:#303238}
     .main{height:100%;min-height:0;overflow:hidden;background:var(--bg)}
-    .topbar{height:58px;flex:0 0 58px;background:#292b30;border-bottom:1px solid var(--line)}
-    .topbar-title{display:none}
+    .topbar{height:58px;flex:0 0 58px;background:linear-gradient(180deg,#292b30 0%,rgba(41,43,48,.72) 48%,rgba(34,36,40,0) 100%);border-bottom:0}
+    .topbar-title{display:none!important}
     .topbar-tools{margin-left:auto}
     .content-empty{min-height:0;overflow:auto;background:var(--bg)}
     .welcome-art{background:#303238;color:#a7c6ff;border:1px solid rgba(91,140,255,.2);box-shadow:none}
@@ -406,8 +406,8 @@
     .mini-avatar,.profile-view-avatar,.large-avatar{position:relative}
     .avatar-status-badge{position:absolute;right:-1px;bottom:-1px;width:12px;height:12px;border:2px solid var(--panel);border-radius:50%;z-index:2;background:#4ac985;pointer-events:none}
     .avatar-status-badge.online{background:#4ac985}.avatar-status-badge.idle{background:#f2bd4b}.avatar-status-badge.dnd{background:#f05261}.avatar-status-badge.invisible{background:#858995}
-    .mini-avatar .avatar-status-badge{width:17px;height:17px;right:-3px;bottom:-3px}.mini-avatar .avatar-status-badge iconify-icon{width:11px;height:11px}
-    .profile-view-avatar .avatar-status-badge,.large-avatar .avatar-status-badge{width:23px;height:23px;border-width:3px}.profile-view-avatar .avatar-status-badge iconify-icon,.large-avatar .avatar-status-badge iconify-icon{width:15px;height:15px}
+    .mini-avatar .avatar-status-badge{width:20px;height:20px;right:-4px;bottom:-4px}.mini-avatar .avatar-status-badge iconify-icon{width:18px;height:18px}
+    .profile-view-avatar .avatar-status-badge,.large-avatar .avatar-status-badge{width:25px;height:25px}.profile-view-avatar .avatar-status-badge iconify-icon,.large-avatar .avatar-status-badge iconify-icon{width:23px;height:23px}
     #myStatusLabel,#myStatusDot{display:none!important}
     .status-trigger{position:absolute;left:auto;right:42px;top:0;width:28px;height:100%;opacity:0;cursor:pointer;z-index:3}
     .profile-row{position:relative}
@@ -636,9 +636,9 @@
     .status-menu{background:var(--panel);color:var(--text)}
     .status-menu button{color:var(--text)!important}
     .mini-avatar,.avatar,.profile-view-avatar,.large-avatar{position:relative}
-    .avatar-status-badge{position:absolute;right:-4px;bottom:-4px;width:23px;height:23px;z-index:5;pointer-events:none;border:2px solid var(--panel);border-radius:50%;display:grid;place-items:center;background:var(--presence-bg);color:#fff;overflow:hidden}.avatar-status-badge::before{display:none!important;content:none!important}.avatar-status-badge iconify-icon{display:block;width:15px;height:15px;color:#fff}.avatar-status-badge::after{display:none!important;content:none!important}.mini-avatar,.large-avatar,.profile-view-avatar{overflow:visible!important}.large-avatar img,.profile-view-avatar img{border-radius:50%}
+    .avatar-status-badge{position:absolute;right:-5px;bottom:-5px;width:23px;height:23px;z-index:5;pointer-events:none;border:0!important;border-radius:0!important;display:grid;place-items:center;background:transparent!important;color:var(--presence-color);overflow:visible}.avatar-status-badge::before,.avatar-status-badge::after{display:none!important;content:none!important}.avatar-status-badge iconify-icon{display:block;width:21px;height:21px;color:var(--presence-color)}.mini-avatar,.large-avatar,.profile-view-avatar{overflow:visible!important}.large-avatar img,.profile-view-avatar img{border-radius:50%}
     .avatar-status-badge::before{content:'';display:block;width:10px;height:10px;border-radius:50%;background:var(--presence-color)}
-    .avatar-status-badge.online{--presence-bg:#23a55a}.avatar-status-badge.idle{--presence-bg:#d69e2e}.avatar-status-badge.dnd{--presence-bg:#e5484d}.avatar-status-badge.offline{--presence-bg:#737780}.avatar-status-badge.streaming{--presence-bg:#8b5cf6}.avatar-status-badge.focus{--presence-bg:#3b82f6}.avatar-status-badge.gaming{--presence-bg:#d97706}.avatar-status-badge.studying{--presence-bg:#0891b2}.avatar-status-badge.break{--presence-bg:#0d9488}
+    .avatar-status-badge.online{--presence-color:#23a55a}.avatar-status-badge.idle{--presence-color:#d69e2e}.avatar-status-badge.dnd{--presence-color:#e5484d}.avatar-status-badge.offline{--presence-color:#737780}.avatar-status-badge.streaming{--presence-color:#8b5cf6}.avatar-status-badge.focus{--presence-color:#3b82f6}.avatar-status-badge.gaming{--presence-color:#d97706}.avatar-status-badge.studying{--presence-color:#0891b2}.avatar-status-badge.break{--presence-color:#0d9488}
     .avatar-status-badge.idle::before{width:9px;height:9px}
     .avatar-status-badge.idle::after{content:'';position:absolute;width:8px;height:8px;border-radius:50%;background:var(--panel);top:0;right:0}
     .avatar-status-badge.dnd::after{content:'';position:absolute;width:6px;height:2px;border-radius:2px;background:#fff}
@@ -967,7 +967,7 @@
     const statusNames={online:'Online',idle:'Idle',dnd:'Do not disturb',offline:'Offline',streaming:'Streaming',focus:'Focus',gaming:'Gaming',studying:'Studying',break:'On a break'};
     const knownPresence=['online','idle','dnd','invisible','offline','streaming','focus','gaming','studying','break'];
     function visiblePresence(status){return status==='invisible'?'offline':(knownPresence.includes(status)?status:'offline');}
-    const presenceIcons={online:'solar:record-circle-bold',idle:'solar:moon-bold',dnd:'solar:minus-circle-bold',offline:'solar:eye-closed-bold',streaming:'solar:videocamera-record-bold',focus:'solar:target-bold',gaming:'solar:gamepad-bold',studying:'solar:book-bold',break:'solar:cup-hot-bold'};
+    const presenceIcons={online:'solar:check-circle-bold',idle:'solar:moon-bold',dnd:'solar:minus-circle-bold',offline:'solar:eye-closed-bold',streaming:'solar:videocamera-record-bold',focus:'solar:target-bold',gaming:'solar:gamepad-bold',studying:'solar:book-bold',break:'solar:cup-hot-bold'};
     function setStatusIcon(el,status){if(!el)return;const value=visiblePresence(status);el.className='status-dot '+value;const icon=document.createElement('iconify-icon');icon.className='presence-icon '+value;icon.setAttribute('icon',presenceIcons[value]||presenceIcons.offline);icon.setAttribute('width','17');icon.setAttribute('height','17');icon.setAttribute('aria-hidden','true');el.replaceChildren(icon);}
     function setAvatarStatus(el,status='online') {
       if(!el)return;
@@ -977,6 +977,7 @@
       badge.className='avatar-status-badge '+value;
       badge.setAttribute('aria-label',statusNames[value]||'Offline');
       const icon=document.createElement('iconify-icon');
+      icon.className='presence-icon '+value;
       icon.setAttribute('icon',presenceIcons[value]||presenceIcons.offline);
       icon.setAttribute('aria-hidden','true');
       badge.append(icon);
