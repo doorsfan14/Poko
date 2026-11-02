@@ -228,7 +228,7 @@ struct PokoProfile: Identifiable, Hashable {
     }
 }
 
-struct PokoConversation: Identifiable, Hashable {
+struct PokoConversation: Identifiable {
     let id: String
     let name: String
     let isGroup: Bool
