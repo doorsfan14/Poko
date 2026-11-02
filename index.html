@@ -404,10 +404,10 @@
     @keyframes poko-modal-shrink{from{opacity:1;transform:scale(1)}to{opacity:.7;transform:scale(.96)}}
     @media(prefers-reduced-motion:reduce){.profile-open.open,.new-chat-overlay.open,.profile-open.open .profile-card,.new-chat-overlay.open .new-chat-dialog,.profile-editor.open .dialog,.profile-open.closing,.new-chat-overlay.closing,.profile-open.closing .profile-card,.new-chat-overlay.closing .new-chat-dialog,.profile-editor.closing,.profile-editor.closing .dialog,.call-overlay:not([hidden]) .call-window{animation:none!important}}
     .mini-avatar,.profile-view-avatar,.large-avatar{position:relative}
-    .avatar-status-badge{position:absolute;right:-2px;bottom:-2px;width:18px;height:18px;display:grid;place-items:center;overflow:visible;border:0;border-radius:0;z-index:2;background:transparent!important;pointer-events:none}
+    .avatar-status-badge{position:absolute;right:0;bottom:0;width:27px;height:27px;display:grid;place-items:center;overflow:visible;border:2px solid var(--panel);border-radius:50%;z-index:5;background:var(--panel)!important;pointer-events:none}
     .avatar-status-badge.online{background:#4ac985}.avatar-status-badge.idle{background:#f2bd4b}.avatar-status-badge.dnd{background:#f05261}.avatar-status-badge.invisible{background:#858995}
-    .mini-avatar .avatar-status-badge{width:18px;height:18px;right:-2px;bottom:-2px}.mini-avatar .avatar-status-badge iconify-icon{display:block;width:16px;height:16px;flex:none}
-    .profile-view-avatar .avatar-status-badge,.large-avatar .avatar-status-badge{width:22px;height:22px}.profile-view-avatar .avatar-status-badge iconify-icon,.large-avatar .avatar-status-badge iconify-icon{display:block;width:20px;height:20px;flex:none}
+    .mini-avatar .avatar-status-badge{width:24px;height:24px;right:0;bottom:0}.mini-avatar .avatar-status-badge iconify-icon{display:block;width:21px;height:21px;flex:none}
+    .profile-view-avatar .avatar-status-badge,.large-avatar .avatar-status-badge{width:29px;height:29px;right:0!important;bottom:0!important}.profile-view-avatar .avatar-status-badge iconify-icon,.large-avatar .avatar-status-badge iconify-icon{display:block;width:25px;height:25px;flex:none}
     #myStatusLabel,#myStatusDot{display:none!important}
     .status-trigger{position:absolute;left:auto;right:42px;top:0;width:28px;height:100%;opacity:0;cursor:pointer;z-index:3}
     .profile-row{position:relative}
@@ -690,7 +690,7 @@
     .status-trigger .status-dot iconify-icon{width:18px;height:18px}.friend-presence .status-dot{border-radius:50%!important;transform:none!important;clip-path:none!important;border:0!important;width:7px;height:7px;flex:0 0 7px}.friend-presence .status-dot::after{display:none!important}.friend-presence .status-dot.online{background:#23a55a}.friend-presence .status-dot.idle{background:#d69e2e}.friend-presence .status-dot.dnd{background:#e5484d}.friend-presence .status-dot.streaming{background:#8b5cf6}.friend-presence .status-dot.focus{background:#3b82f6}.friend-presence .status-dot.gaming{background:#d97706}.friend-presence .status-dot.studying{background:#0891b2}.friend-presence .status-dot.break{background:#0d9488}
     .mini-avatar,.profile-view-avatar,.large-avatar{filter:none!important;opacity:1!important}
 
-       .friend-presence .presence-icon{width:15px;height:15px;flex:0 0 15px;display:inline-block;vertical-align:middle}.friend-presence{gap:6px!important}     .mini-avatar img{display:block;width:100%;height:100%;object-fit:cover;border-radius:50%}     .group-avatar-collage>.collage-empty{min-width:0;min-height:0;overflow:hidden}     </style>
+       .presence-icon{filter:drop-shadow(1px 0 0 var(--panel)) drop-shadow(-1px 0 0 var(--panel)) drop-shadow(0 1px 0 var(--panel)) drop-shadow(0 -1px 0 var(--panel))}.avatar-status-badge .presence-icon{filter:drop-shadow(0 0 1px var(--panel))}.friend-presence .presence-icon{width:15px;height:15px;flex:0 0 15px;display:inline-block;vertical-align:middle}.friend-presence{gap:6px!important}     .mini-avatar img{display:block;width:100%;height:100%;object-fit:cover;border-radius:50%}     .group-avatar-collage>.collage-empty{min-width:0;min-height:0;overflow:hidden}     </style>
 </head>
 <body class="poko-loading">
   <div class="page-loader" id="pageLoader" aria-hidden="true"></div>
@@ -967,7 +967,7 @@
     const statusNames={online:'Online',idle:'Idle',dnd:'Do not disturb',offline:'Offline',streaming:'Streaming',focus:'Focus',gaming:'Gaming',studying:'Studying',break:'On a break'};
     const knownPresence=['online','idle','dnd','invisible','offline','streaming','focus','gaming','studying','break'];
     function visiblePresence(status){return status==='invisible'?'offline':(knownPresence.includes(status)?status:'offline');}
-    const presenceIcons={online:'solar:record-circle-bold',idle:'solar:moon-bold',dnd:'solar:minus-circle-bold',offline:'solar:eye-closed-bold',streaming:'solar:videocamera-record-bold',focus:'solar:target-bold',gaming:'solar:gamepad-bold',studying:'solar:book-bold',break:'solar:cup-hot-bold'};
+    const presenceIcons={online:'solar:circle-linear',idle:'solar:moon-bold',dnd:'solar:minus-circle-bold',offline:'solar:eye-closed-bold',streaming:'solar:videocamera-record-bold',focus:'solar:target-bold',gaming:'solar:gamepad-bold',studying:'solar:book-bold',break:'solar:cup-hot-bold'};
     function setStatusIcon(el,status){if(!el)return;const value=visiblePresence(status);el.className='status-dot '+value;const icon=document.createElement('iconify-icon');icon.className='presence-icon '+value;icon.setAttribute('icon',presenceIcons[value]||presenceIcons.offline);icon.setAttribute('width','17');icon.setAttribute('height','17');icon.setAttribute('aria-hidden','true');el.replaceChildren(icon);}
     function setAvatarStatus(el,status='online') {
       if(!el)return;
