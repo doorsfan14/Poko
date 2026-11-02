@@ -633,23 +633,42 @@
     #callOverlay .call-control.end:hover{background:#f04747}
     #callOverlay .call-control:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
     .status-trigger{width:28px;height:30px;color:var(--muted)}
-    .status-symbol{flex:none;display:inline-flex;align-items:center;justify-content:center}
-    .status-symbol.online{color:#23a55a}.status-symbol.idle{color:#f0b232}.status-symbol.dnd{color:#f23f43}.status-symbol.offline{color:#80848e}
     .status-menu{background:var(--panel);color:var(--text)}
     .status-menu button{color:var(--text)!important}
-    .avatar-status-badge{position:absolute;right:-2px;bottom:-2px;width:13px;height:13px;display:grid;place-items:center;overflow:hidden;border:3px solid var(--panel);border-radius:50%;box-sizing:content-box}
-    .avatar-status-badge iconify-icon{display:block;color:#fff}
-    .avatar-status-badge.online{background:#23a55a}.avatar-status-badge.idle{background:#f0b232}.avatar-status-badge.dnd{background:#f23f43}.avatar-status-badge.offline{background:#80848e}
-    .status-menu .status-symbol.online,.status-menu .status-symbol.offline{width:12px;height:12px;border-radius:50%;background:currentColor}
-    .status-menu .status-symbol.idle,.status-menu .status-symbol.dnd{width:14px;height:14px}
-    .status-menu .status-symbol.idle{color:#f0b232}.status-menu .status-symbol.dnd{color:#f23f43}
-    .mini-avatar,.avatar{position:relative}
+    .mini-avatar,.avatar,.profile-view-avatar,.large-avatar{position:relative}
+    .avatar-status-badge{position:absolute;right:-2px;bottom:-2px;width:14px;height:14px;z-index:3;pointer-events:none;background:var(--panel);border-radius:50%;display:grid;place-items:center}
+    .avatar-status-badge::before{content:'';display:block;width:10px;height:10px;border-radius:50%;background:var(--presence-color)}
+    .avatar-status-badge.online{--presence-color:#23a55a}.avatar-status-badge.idle{--presence-color:#f0b232}.avatar-status-badge.dnd{--presence-color:#f23f43}.avatar-status-badge.streaming{--presence-color:#9147ff}.avatar-status-badge.focus{--presence-color:#3b82f6}.avatar-status-badge.gaming{--presence-color:#a855f7}.avatar-status-badge.studying{--presence-color:#06b6d4}.avatar-status-badge.break{--presence-color:#f97316}
+    .avatar-status-badge.idle::before{width:9px;height:9px}
+    .avatar-status-badge.idle::after{content:'';position:absolute;width:8px;height:8px;border-radius:50%;background:var(--panel);top:0;right:0}
+    .avatar-status-badge.dnd::after{content:'';position:absolute;width:6px;height:2px;border-radius:2px;background:#fff}
+    .avatar-status-badge.streaming::before{border-radius:3px}
+    .avatar-status-badge.focus::before{width:8px;height:8px;border:2px solid var(--presence-color);background:transparent;transform:rotate(45deg);border-radius:2px}
+    .avatar-status-badge.gaming::before{width:8px;height:8px;border-radius:2px;transform:rotate(45deg)}
+    .avatar-status-badge.studying::before{width:9px;height:9px;clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%);border-radius:0}
+    .avatar-status-badge.break::before{width:9px;height:9px;border:2px solid var(--presence-color);background:transparent}
+    .presence-offline{filter:grayscale(.85);opacity:.72}
+    .status-menu{width:230px;max-height:min(72vh,480px);overflow-y:auto}
+    .status-menu-heading{padding:7px 10px 4px;color:var(--muted);font-size:.64rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase}
+    .status-menu-divider{height:1px;background:var(--line);margin:5px 7px}
+    .presence-mark{position:relative;display:inline-block;flex:0 0 12px;width:12px;height:12px;--presence-color:#23a55a}
+    .presence-mark::before{content:'';position:absolute;inset:1px;border-radius:50%;background:var(--presence-color)}
+    .presence-mark.online{--presence-color:#23a55a}.presence-mark.idle{--presence-color:#f0b232}.presence-mark.dnd{--presence-color:#f23f43}.presence-mark.offline{--presence-color:#80848e}.presence-mark.streaming{--presence-color:#9147ff}.presence-mark.focus{--presence-color:#3b82f6}.presence-mark.gaming{--presence-color:#a855f7}.presence-mark.studying{--presence-color:#06b6d4}.presence-mark.break{--presence-color:#f97316}
+    .presence-mark.idle::before{inset:1px 2px 1px 0}.presence-mark.idle::after{content:'';position:absolute;width:8px;height:8px;border-radius:50%;background:var(--panel);top:-1px;right:-1px}
+    .presence-mark.dnd::after{content:'';position:absolute;left:3px;top:5px;width:6px;height:2px;border-radius:2px;background:#fff}
+    .presence-mark.streaming::before{border-radius:3px}
+    .presence-mark.focus::before{inset:2px;border:2px solid var(--presence-color);background:transparent;transform:rotate(45deg);border-radius:2px}
+    .presence-mark.gaming::before{inset:2px;border-radius:2px;transform:rotate(45deg)}
+    .presence-mark.studying::before{inset:1px;clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%);border-radius:0}
+    .presence-mark.break::before{inset:1px;border:2px solid var(--presence-color);background:transparent}
     html[data-theme="light"] #callOverlay .call-controls{background:#f2f3f7;border-color:rgba(24,30,42,.12)}
     html[data-theme="light"] #callOverlay .call-control{background:#e2e5ed;color:#20242b!important;border-color:rgba(24,30,42,.12)}
     html[data-theme="light"] #callOverlay .call-control:hover{background:#d5dae5;color:#20242b!important}
     html[data-theme="light"] #callOverlay .call-control.end,html[data-theme="light"] #callOverlay .call-control.end:hover{background:#da373c;color:#fff!important}
     html[data-theme="light"] .status-menu{background:#fff;border-color:rgba(24,30,42,.12)}
     html[data-theme="light"] .status-menu button{color:#20242b!important}
+    html[data-theme="light"] .avatar-status-badge{background:var(--panel)}
+    html[data-theme="light"] .presence-mark.idle::after{background:var(--panel)}
 </style>
 </head>
 <body class="poko-loading">
@@ -693,10 +712,10 @@
       <div class="profile-row" id="profileRow" role="button" tabindex="0" aria-label="View profile">
         <div class="mini-avatar" id="sideAvatar">You</div>
         <div class="profile-label"><strong id="displayName">your_username</strong><span id="myStatusLabel">Online</span></div>
-        <button class="status-trigger" id="statusTrigger" type="button" aria-label="Change activity status" title="Change activity status"><iconify-icon class="status-symbol online" id="statusTriggerDot" icon="solar:check-circle-bold" width="19" height="19" aria-hidden="true"></iconify-icon></button>
+        <button class="status-trigger" id="statusTrigger" type="button" aria-label="Change activity status" title="Change activity status"><span class="status-dot online" id="statusTriggerDot" aria-hidden="true"></span></button>
         <button class="icon-button" id="editProfile" aria-label="Edit profile" title="Edit profile"><iconify-icon icon="solar:pen-bold" width="19" height="19" aria-hidden="true"></iconify-icon></button>
       </div>
-      <div class="status-menu" id="statusMenu" hidden><button type="button" data-status="online"><iconify-icon class="status-symbol online" icon="solar:circle-bold" width="12" height="12" aria-hidden="true"></iconify-icon>Online</button><button type="button" data-status="idle"><iconify-icon class="status-symbol idle" icon="solar:moon-bold" width="14" height="14" aria-hidden="true"></iconify-icon>Idle</button><button type="button" data-status="dnd"><iconify-icon class="status-symbol dnd" icon="solar:minus-circle-bold" width="14" height="14" aria-hidden="true"></iconify-icon>Do not disturb</button><button type="button" data-status="invisible"><iconify-icon class="status-symbol offline" icon="solar:circle-bold" width="12" height="12" aria-hidden="true"></iconify-icon>Invisible</button></div>
+      <div class="status-menu" id="statusMenu" hidden><div class="status-menu-heading">Set your status</div><button type="button" data-status="online"><span class="presence-mark online"></span>Online</button><button type="button" data-status="idle"><span class="presence-mark idle"></span>Idle</button><button type="button" data-status="dnd"><span class="presence-mark dnd"></span>Do not disturb</button><button type="button" data-status="invisible"><span class="presence-mark offline"></span>Invisible</button><div class="status-menu-divider"></div><div class="status-menu-heading">More ways to show up</div><button type="button" data-status="streaming"><span class="presence-mark streaming"></span>Streaming</button><button type="button" data-status="focus"><span class="presence-mark focus"></span>Focus</button><button type="button" data-status="gaming"><span class="presence-mark gaming"></span>Gaming</button><button type="button" data-status="studying"><span class="presence-mark studying"></span>Studying</button><button type="button" data-status="break"><span class="presence-mark break"></span>On a break</button></div>
     </aside>
     <main class="main">
       <div class="topbar"><button class="icon-button back-mobile" id="backToList" aria-label="Back to messages" title="Back to messages"><iconify-icon icon="solar:alt-arrow-left-bold" width="20" height="20" aria-hidden="true"></iconify-icon></button><span class="topbar-title" id="topbarTitle">Poko</span><div class="topbar-tools"><button class="small-button friends-nav-button" id="friendsNav" type="button">Friends</button><button class="icon-button request-nav-button" id="requestsNav" aria-label="Friend requests" title="Friend requests"><iconify-icon icon="solar:user-plus-bold" width="21" height="21" aria-hidden="true"></iconify-icon><span class="request-badge" id="requestCount" hidden>0</span></button><button class="icon-button" id="topNewMessage" aria-label="New message" title="New message"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></div></div>
@@ -842,7 +861,7 @@
     let ownProfileUnsubscribe = null;
 
     function applyProfile(saved = {}) {
-      myActivityStatus = ['online','idle','dnd','invisible'].includes(saved.status) ? saved.status : 'online';
+      myActivityStatus = ['online','idle','dnd','invisible','streaming','focus','gaming','studying','break'].includes(saved.status) ? saved.status : 'online';
       avatarUrl = saved.avatar || '';
       bannerUrl = saved.banner || '';
       profileBio = saved.bio || '';
@@ -855,7 +874,7 @@
       setVerifiedName($('profileViewName'), name);
       $('profileViewBio').textContent = profileBio;
       $('profileViewBanner').style.backgroundImage = bannerUrl ? `url("${bannerUrl}")` : '';
-      const statusLabels={online:'Online',idle:'Idle',dnd:'Do not disturb',invisible:'Invisible'};
+      const statusLabels={online:'Online',idle:'Idle',dnd:'Do not disturb',invisible:'Invisible',streaming:'Streaming',focus:'Focus',gaming:'Gaming',studying:'Studying',break:'On a break'};
       if($('myStatusLabel')) $('myStatusLabel').textContent=statusLabels[myActivityStatus];
       if($('myStatusDot')) setStatusIcon($('myStatusDot'),myActivityStatus);if($('statusTriggerDot')) setStatusIcon($('statusTriggerDot'),myActivityStatus);
     }
@@ -884,7 +903,7 @@
           avatar: local.avatar || user.photoURL || '',
           banner: local.banner || '',
           bio: local.bio || '',
-          status: ['online','idle','dnd','invisible'].includes(local.status) ? local.status : 'online'
+          status: ['online','idle','dnd','invisible','streaming','focus','gaming','studying','break'].includes(local.status) ? local.status : 'online'
         };
         applyProfile(profile);
         try {
@@ -929,16 +948,16 @@
       if (url) { const img = document.createElement('img'); img.src = url; img.alt = 'Profile picture'; el.append(img); }
       else el.textContent = fallback;
     }
-    const statusIcons={online:'solar:circle-bold',idle:'solar:moon-bold',dnd:'solar:minus-circle-bold',offline:'solar:circle-bold'};
-    function visiblePresence(status){return status==='invisible'?'offline':(['online','idle','dnd','offline'].includes(status)?status:'offline');}
-    function setStatusIcon(el,status){if(!el)return;const value=visiblePresence(status);el.className=(el.className||'').replace(/\b(online|idle|dnd|invisible|offline)\b/g,'').trim()+' '+value;el.setAttribute('icon',statusIcons[value]);}
+    const statusNames={online:'Online',idle:'Idle',dnd:'Do not disturb',offline:'Offline',streaming:'Streaming',focus:'Focus',gaming:'Gaming',studying:'Studying',break:'On a break'};
+    const knownPresence=['online','idle','dnd','invisible','offline','streaming','focus','gaming','studying','break'];
+    function visiblePresence(status){return status==='invisible'?'offline':(knownPresence.includes(status)?status:'offline');}
+    function setStatusIcon(el,status){if(!el)return;const value=visiblePresence(status);el.className='status-dot '+value;el.removeAttribute('icon');el.textContent='';}
     function setAvatarStatus(el,status='online') {
       if(!el)return;
       el.querySelectorAll(':scope > .avatar-status-badge').forEach(node=>node.remove());
-      const value=visiblePresence(status);
-      const badge=document.createElement('span');badge.className='avatar-status-badge '+value;badge.title=({online:'Online',idle:'Idle',dnd:'Do not disturb',offline:'Offline'})[value];badge.setAttribute('aria-label',badge.title);
-      if(value==='idle'||value==='dnd'){const icon=document.createElement('iconify-icon');icon.setAttribute('icon',statusIcons[value]);icon.setAttribute('width','9');icon.setAttribute('height','9');icon.setAttribute('aria-hidden','true');badge.append(icon);}
-      el.append(badge);
+      const value=visiblePresence(status);el.classList.toggle('presence-offline',value==='offline');
+      if(value==='offline')return;
+      const badge=document.createElement('span');badge.className='avatar-status-badge '+value;badge.title=statusNames[value]||'Offline';badge.setAttribute('aria-label',badge.title);el.append(badge);
     }
     function openEditor() {
       editor.classList.remove('closing');
@@ -1216,7 +1235,7 @@
         return {doc,data,profile};
       }));
       if(container.dataset.renderToken!==renderToken)return;
-      const filtered=incoming?rows.filter(Boolean):rows.filter(item=>item&&(activeFriendsTab!=='online'||['online','idle'].includes(item.profile.status||'online')));
+      const filtered=incoming?rows.filter(Boolean):rows.filter(item=>item&&(activeFriendsTab!=='online'||['online','idle','dnd','streaming','focus','gaming','studying','break'].includes(effectivePresence(item.profile))));
       if(!filtered.length){empty(incoming?'You’re all caught up':'No friends are online right now');return;}
       filtered.forEach(({doc,data,profile})=>{
         const row=document.createElement('article');row.className='friend-card';
@@ -1225,7 +1244,7 @@
         const name=document.createElement('strong');setVerifiedName(name,profile.name||'Poko user');
         const sub=document.createElement('span');sub.className='friend-presence';
         const presence=effectivePresence(profile);const dot=document.createElement('i');dot.className='status-dot '+presence;
-        const statusText=incoming?'Wants to connect':({online:'Online',idle:'Idle',dnd:'Do not disturb',invisible:'Offline',offline:'Offline'}[presence]||'Offline');
+        const statusText=incoming?'Wants to connect':(statusNames[presence]||'Offline');
         sub.append(dot,document.createTextNode(statusText));label.append(name,sub);row.append(avatar,label);
         if(incoming){
           const actions=document.createElement('div');actions.className='friend-actions';
@@ -2000,7 +2019,7 @@
     $('gifSearchForm').addEventListener('submit',e=>{e.preventDefault();const q=$('gifSearchInput').value.trim();if(q)loadGifs(q);});
     $('themeToggle').addEventListener('click', () => applyTheme(themeMode === 'system' ? 'light' : themeMode === 'light' ? 'dark' : 'system'));
     $('statusTrigger').addEventListener('click',e=>{e.stopPropagation();$('statusMenu').hidden=!$('statusMenu').hidden;});
-    $('statusMenu').querySelectorAll('[data-status]').forEach(button=>button.addEventListener('click',async()=>{const status=button.dataset.status;myActivityStatus=status;const labels={online:'Online',idle:'Idle',dnd:'Do not disturb',invisible:'Invisible'};const profile=(()=>{try{return JSON.parse(localStorage.getItem('poko-profile')||'{}')}catch{return {}}})();profile.status=status;try{localStorage.setItem('poko-profile',JSON.stringify(profile));}catch(error){console.warn('Could not save local activity status:',error);}if($('myStatusLabel'))$('myStatusLabel').textContent=labels[status];if($('myStatusDot'))setStatusIcon($('myStatusDot'),status);setStatusIcon($('statusTriggerDot'),status);setAvatarStatus($('sideAvatar'),status);setAvatarStatus($('largeAvatar'),status);if($('profileViewAvatar'))setAvatarStatus($('profileViewAvatar'),status);$('statusMenu').hidden=true;const user=firebaseAuth?.currentUser;if(user&&profileDb){try{await profileDb.collection('profiles').doc(user.uid).set({status,presenceUpdatedAt:firebase.firestore.FieldValue.serverTimestamp(),updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});showToast('Activity status updated.');}catch(error){console.error('Status update failed:',error);showToast('Status saved on this device, but cloud sync failed. Check Firestore rules.');}}else{showToast('Activity status saved on this device. Sign in to sync it with friends.');}}));
+    $('statusMenu').querySelectorAll('[data-status]').forEach(button=>button.addEventListener('click',async()=>{const status=button.dataset.status;myActivityStatus=status;const labels={online:'Online',idle:'Idle',dnd:'Do not disturb',invisible:'Invisible',streaming:'Streaming',focus:'Focus',gaming:'Gaming',studying:'Studying',break:'On a break'};const profile=(()=>{try{return JSON.parse(localStorage.getItem('poko-profile')||'{}')}catch{return {}}})();profile.status=status;try{localStorage.setItem('poko-profile',JSON.stringify(profile));}catch(error){console.warn('Could not save local activity status:',error);}if($('myStatusLabel'))$('myStatusLabel').textContent=labels[status];if($('myStatusDot'))setStatusIcon($('myStatusDot'),status);setStatusIcon($('statusTriggerDot'),status);setAvatarStatus($('sideAvatar'),status);setAvatarStatus($('largeAvatar'),status);if($('profileViewAvatar'))setAvatarStatus($('profileViewAvatar'),status);$('statusMenu').hidden=true;const user=firebaseAuth?.currentUser;if(user&&profileDb){try{await profileDb.collection('profiles').doc(user.uid).set({status,presenceUpdatedAt:firebase.firestore.FieldValue.serverTimestamp(),updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});showToast('Activity status updated.');}catch(error){console.error('Status update failed:',error);showToast('Status saved on this device, but cloud sync failed. Check Firestore rules.');}}else{showToast('Activity status saved on this device. Sign in to sync it with friends.');}}));
     document.addEventListener('click',e=>{if(!pickerPanel.contains(e.target)&&!['openEmoji','openGif'].includes(e.target.id))closePicker();if(!$('statusMenu').contains(e.target)&&e.target.id!=='statusTrigger')$('statusMenu').hidden=true;if(!e.target.closest('.message-actions'))document.querySelectorAll('.message-actions.open').forEach(el=>{el.classList.remove('open');el.querySelector('.message-action-menu').hidden=true;el.querySelector('.message-reaction-menu').hidden=true;});});
     $('messageInput').addEventListener('keydown', e => {
       if (e.key !== 'Enter' || e.shiftKey || e.isComposing) return;
