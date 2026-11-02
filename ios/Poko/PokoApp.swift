@@ -129,7 +129,7 @@ final class PokoSession: ObservableObject {
     func signInGoogle() async {
         guard let clientID = FirebaseApp.app()?.options.clientID,
               let scene = UIApplication.shared.connectedScenes.compactMap({ $0 as? UIWindowScene }).first,
-              let controller = scene.keyWindow?.rootViewController else {
+              let controller = scene.windows.first(where: { $0.isKeyWindow })?.rootViewController else {
             error = "Add a valid GoogleService-Info.plist for the iOS app in Firebase Console."
             return
         }
@@ -200,7 +200,6 @@ final class PokoSession: ObservableObject {
     func updateProfile(name: String, bio: String) async throws {
         guard let user, let db = try? database else { throw PokoError.firebaseMissing }
         try await db.collection("profiles").document(user.uid).setData(["name": name, "bio": bio, "updatedAt": FieldValue.serverTimestamp()], merge: true)
-        try await user.updateDisplayName(name)
     }
 }
 
