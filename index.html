@@ -681,7 +681,16 @@
     .status-dot.break{background:transparent;border:2px solid #f97316}
     .status-trigger .status-dot{width:10px;height:10px;flex-basis:10px;box-shadow:0 0 0 3px rgba(255,255,255,.035)}
     html[data-theme="light"] .status-dot.idle::after{background:var(--panel)}
-</style>
+
+    /* Presence uses Solar icons; profile photos stay completely untouched. */
+    .presence-mark{display:none!important}
+    .presence-icon{flex:0 0 18px;display:inline-block}
+    .presence-icon.online{color:#23a55a}.presence-icon.idle{color:#f0b232}.presence-icon.dnd{color:#f23f43}.presence-icon.offline{color:#80848e}.presence-icon.streaming{color:#9147ff}.presence-icon.focus{color:#3b82f6}.presence-icon.gaming{color:#a855f7}.presence-icon.studying{color:#06b6d4}.presence-icon.break{color:#f97316}
+    .status-trigger .status-dot{width:20px;height:20px;flex:0 0 20px;display:grid;place-items:center;background:transparent!important;border-radius:0}
+    .status-trigger .status-dot iconify-icon{width:18px;height:18px}
+    .mini-avatar,.profile-view-avatar,.large-avatar{filter:none!important;opacity:1!important}
+
+  </style>
 </head>
 <body class="poko-loading">
   <div class="page-loader" id="pageLoader" aria-hidden="true"></div>
@@ -727,7 +736,7 @@
         <button class="status-trigger" id="statusTrigger" type="button" aria-label="Change activity status" title="Change activity status"><span class="status-dot online" id="statusTriggerDot" aria-hidden="true"></span></button>
         <button class="icon-button" id="editProfile" aria-label="Edit profile" title="Edit profile"><iconify-icon icon="solar:pen-bold" width="19" height="19" aria-hidden="true"></iconify-icon></button>
       </div>
-      <div class="status-menu" id="statusMenu" hidden><div class="status-menu-heading">Set your status</div><button type="button" data-status="online"><span class="presence-mark online"></span>Online</button><button type="button" data-status="idle"><span class="presence-mark idle"></span>Idle</button><button type="button" data-status="dnd"><span class="presence-mark dnd"></span>Do not disturb</button><button type="button" data-status="invisible"><span class="presence-mark offline"></span>Invisible</button><div class="status-menu-divider"></div><div class="status-menu-heading">More ways to show up</div><button type="button" data-status="streaming"><span class="presence-mark streaming"></span>Streaming</button><button type="button" data-status="focus"><span class="presence-mark focus"></span>Focus</button><button type="button" data-status="gaming"><span class="presence-mark gaming"></span>Gaming</button><button type="button" data-status="studying"><span class="presence-mark studying"></span>Studying</button><button type="button" data-status="break"><span class="presence-mark break"></span>On a break</button></div>
+      <div class="status-menu" id="statusMenu" hidden><div class="status-menu-heading">Set your status</div><button type="button" data-status="online"><iconify-icon class="presence-icon online" icon="solar:check-circle-bold" width="18" height="18" aria-hidden="true"></iconify-icon>Online</button><button type="button" data-status="idle"><iconify-icon class="presence-icon idle" icon="solar:moon-bold" width="18" height="18" aria-hidden="true"></iconify-icon>Idle</button><button type="button" data-status="dnd"><iconify-icon class="presence-icon dnd" icon="solar:minus-circle-bold" width="18" height="18" aria-hidden="true"></iconify-icon>Do not disturb</button><button type="button" data-status="invisible"><iconify-icon class="presence-icon offline" icon="solar:eye-closed-bold" width="18" height="18" aria-hidden="true"></iconify-icon>Invisible</button><div class="status-menu-divider"></div><div class="status-menu-heading">More ways to show up</div><button type="button" data-status="streaming"><iconify-icon class="presence-icon streaming" icon="solar:videocamera-record-bold" width="18" height="18" aria-hidden="true"></iconify-icon>Streaming</button><button type="button" data-status="focus"><iconify-icon class="presence-icon focus" icon="solar:target-bold" width="18" height="18" aria-hidden="true"></iconify-icon>Focus</button><button type="button" data-status="gaming"><iconify-icon class="presence-icon gaming" icon="solar:gamepad-bold" width="18" height="18" aria-hidden="true"></iconify-icon>Gaming</button><button type="button" data-status="studying"><iconify-icon class="presence-icon studying" icon="solar:book-bold" width="18" height="18" aria-hidden="true"></iconify-icon>Studying</button><button type="button" data-status="break"><iconify-icon class="presence-icon break" icon="solar:cup-hot-bold" width="18" height="18" aria-hidden="true"></iconify-icon>On a break</button></div>
     </aside>
     <main class="main">
       <div class="topbar"><button class="icon-button back-mobile" id="backToList" aria-label="Back to messages" title="Back to messages"><iconify-icon icon="solar:alt-arrow-left-bold" width="20" height="20" aria-hidden="true"></iconify-icon></button><span class="topbar-title" id="topbarTitle">Poko</span><div class="topbar-tools"><button class="small-button friends-nav-button" id="friendsNav" type="button">Friends</button><button class="icon-button request-nav-button" id="requestsNav" aria-label="Friend requests" title="Friend requests"><iconify-icon icon="solar:user-plus-bold" width="21" height="21" aria-hidden="true"></iconify-icon><span class="request-badge" id="requestCount" hidden>0</span></button><button class="icon-button" id="topNewMessage" aria-label="New message" title="New message"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></div></div>
@@ -963,13 +972,12 @@
     const statusNames={online:'Online',idle:'Idle',dnd:'Do not disturb',offline:'Offline',streaming:'Streaming',focus:'Focus',gaming:'Gaming',studying:'Studying',break:'On a break'};
     const knownPresence=['online','idle','dnd','invisible','offline','streaming','focus','gaming','studying','break'];
     function visiblePresence(status){return status==='invisible'?'offline':(knownPresence.includes(status)?status:'offline');}
-    function setStatusIcon(el,status){if(!el)return;const value=visiblePresence(status);el.className='status-dot '+value;el.removeAttribute('icon');el.textContent='';}
+    const presenceIcons={online:'solar:check-circle-bold',idle:'solar:moon-bold',dnd:'solar:minus-circle-bold',offline:'solar:eye-closed-bold',streaming:'solar:videocamera-record-bold',focus:'solar:target-bold',gaming:'solar:gamepad-bold',studying:'solar:book-bold',break:'solar:cup-hot-bold'};
+    function setStatusIcon(el,status){if(!el)return;const value=visiblePresence(status);el.className='status-dot '+value;const icon=document.createElement('iconify-icon');icon.setAttribute('icon',presenceIcons[value]||presenceIcons.offline);icon.setAttribute('width','17');icon.setAttribute('height','17');icon.setAttribute('aria-hidden','true');el.replaceChildren(icon);}
     function setAvatarStatus(el,status='online') {
       if(!el)return;
       el.querySelectorAll(':scope > .avatar-status-badge').forEach(node=>node.remove());
-      const value=visiblePresence(status);el.classList.toggle('presence-offline',value==='offline');
-      if(value==='offline')return;
-      const badge=document.createElement('span');badge.className='avatar-status-badge '+value;badge.title=statusNames[value]||'Offline';badge.setAttribute('aria-label',badge.title);el.append(badge);
+      el.classList.remove('presence-offline');
     }
     function openEditor() {
       editor.classList.remove('closing');
