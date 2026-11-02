@@ -682,7 +682,46 @@
     .status-trigger .status-dot iconify-icon{width:18px;height:18px}.friend-presence .status-dot{border-radius:50%!important;transform:none!important;clip-path:none!important;border:0!important;width:7px;height:7px;flex:0 0 7px}.friend-presence .status-dot::after{display:none!important}.friend-presence .status-dot.online{background:#23a55a}.friend-presence .status-dot.idle{background:#d69e2e}.friend-presence .status-dot.dnd{background:#e5484d}.friend-presence .status-dot.streaming{background:#8b5cf6}.friend-presence .status-dot.focus{background:#3b82f6}.friend-presence .status-dot.gaming{background:#d97706}.friend-presence .status-dot.studying{background:#0891b2}.friend-presence .status-dot.break{background:#0d9488}
     .mini-avatar,.profile-view-avatar,.large-avatar{filter:none!important;opacity:1!important}
 
-       .presence-icon{filter:drop-shadow(1px 0 0 var(--panel)) drop-shadow(-1px 0 0 var(--panel)) drop-shadow(0 1px 0 var(--panel)) drop-shadow(0 -1px 0 var(--panel))}.avatar-status-badge .presence-icon{filter:drop-shadow(0 0 1px var(--panel))}.friend-presence .presence-icon{width:15px;height:15px;flex:0 0 15px;display:inline-block;vertical-align:middle}.friend-presence{gap:6px!important}     .mini-avatar img{display:block;width:100%;height:100%;object-fit:cover;border-radius:50%}     .group-avatar-collage>.collage-empty{min-width:0;min-height:0;overflow:hidden}     </style>
+       .presence-icon{filter:drop-shadow(1px 0 0 var(--panel)) drop-shadow(-1px 0 0 var(--panel)) drop-shadow(0 1px 0 var(--panel)) drop-shadow(0 -1px 0 var(--panel))}.avatar-status-badge .presence-icon{filter:drop-shadow(0 0 1px var(--panel))}.friend-presence .presence-icon{width:15px;height:15px;flex:0 0 15px;display:inline-block;vertical-align:middle}.friend-presence{gap:6px!important}     .mini-avatar img{display:block;width:100%;height:100%;object-fit:cover;border-radius:50%}     .group-avatar-collage>.collage-empty{min-width:0;min-height:0;overflow:hidden}     
+    /* Floating, magnifying navigation dock */
+    .rail{position:relative;z-index:30;overflow:visible}
+    .rail-button{transform:translateZ(0);will-change:transform;transition:transform .18s cubic-bezier(.2,.75,.25,1),background .16s,color .16s,border-radius .16s}
+    .rail-button.active:before{display:none}
+    .rail.dock-magnifying .rail-button{transform:scale(var(--dock-scale,1));}
+    .rail.dock-magnifying .rail-button iconify-icon{pointer-events:none}
+    .dock-position-setting{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin:4px 0 16px}
+    .dock-position-setting strong{display:block;font-size:.78rem}
+    .dock-position-setting small{display:block;margin-top:4px;color:var(--muted);font-size:.68rem}
+    .dock-position-options{display:flex;gap:6px;flex:none}
+    .dock-position-options button{padding:8px 11px;border:1px solid var(--line);border-radius:9px;background:var(--panel-2);color:var(--muted);font:inherit;font-size:.7rem;font-weight:700}
+    .dock-position-options button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+    @media(min-width:761px){
+      .app.dock-bottom{grid-template-columns:280px minmax(0,1fr)}
+      .app.dock-bottom .rail{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);width:max-content;max-width:calc(100vw - 32px);height:68px;flex-direction:row;justify-content:center;gap:12px;padding:8px 16px;border:1px solid rgba(255,255,255,.12);border-radius:22px;background:rgba(29,31,35,.88);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);box-shadow:0 12px 36px rgba(0,0,0,.32)}
+      .app.dock-bottom .rail-spacer,.app.dock-bottom .rail-divider{display:none}
+      .app.dock-bottom .rail-button{width:48px;height:48px;flex:0 0 48px}
+      .app.dock-bottom .sidebar{grid-column:1;grid-row:1}
+      .app.dock-bottom .main{grid-column:2;grid-row:1}
+      .app.dock-bottom .profile-row{margin-bottom:92px}
+      .app.dock-left .rail{margin:12px 8px;height:calc(100% - 24px);align-self:center;border:1px solid rgba(255,255,255,.08);border-radius:22px;background:rgba(29,31,35,.88);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:0 8px 28px rgba(0,0,0,.2)}
+    }
+    @media(max-width:760px){
+      .app.dock-bottom,.app.dock-left{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) 66px}
+      .app.dock-bottom .rail,.app.dock-left .rail{grid-column:1;grid-row:2;position:relative;left:auto;bottom:auto;transform:none;width:auto;max-width:none;height:66px;min-height:66px;flex-direction:row;justify-content:center;align-items:center;padding:7px 16px calc(7px + env(safe-area-inset-bottom));gap:14px;border:0;border-top:1px solid var(--line);border-radius:0;background:#1d1f23;box-shadow:none;backdrop-filter:none}
+      .app.dock-bottom .rail-button,.app.dock-left .rail-button{width:48px;height:48px;flex:0 0 48px}
+      .app.dock-bottom .sidebar,.app.dock-left .sidebar{grid-column:1;grid-row:1}
+      .app.dock-bottom .main,.app.dock-left .main{grid-column:1;grid-row:1}
+      .app.dock-bottom .profile-row,.app.dock-left .profile-row{margin-bottom:8px}
+      .app.dock-left.mobile-dock-left{grid-template-columns:68px minmax(0,1fr);grid-template-rows:minmax(0,1fr)}
+      .app.dock-left.mobile-dock-left .rail{grid-column:1;grid-row:1;width:68px;height:100%;min-height:0;flex-direction:column;padding:14px 0;gap:10px;border:0;border-right:1px solid var(--line);border-radius:0}
+      .app.dock-left.mobile-dock-left .rail-spacer,.app.dock-left.mobile-dock-left .rail-divider{display:block}
+      .app.dock-left.mobile-dock-left .sidebar,.app.dock-left.mobile-dock-left .main{grid-column:2;grid-row:1}
+      .app.dock-left.mobile-dock-left.show-main{grid-template-columns:68px minmax(0,1fr);grid-template-rows:minmax(0,1fr)}
+      .app.dock-left.mobile-dock-left .rail-button{width:46px;height:46px;flex:0 0 46px}
+    }
+    @media(prefers-reduced-motion:reduce){.rail.dock-magnifying .rail-button{transition:none}}
+
+</style>
 </head>
 <body class="poko-loading">
   <div class="page-loader" id="pageLoader" aria-hidden="true"></div>
@@ -789,7 +828,8 @@
         <div class="avatar-edit-row"><div class="large-avatar" id="largeAvatar">You</div></div><div class="profile-editor-intro"><strong>Your profile</strong><span>Make it yours.</span></div>
         <div class="field"><label for="bannerFile">Profile banner</label><div class="file-control"><span>Choose a banner</span><input id="bannerFile" type="file" accept="image/*"></div><small>Images upload to Cloudinary when you save. Animated GIF and WebP are supported.</small></div>
         <div class="field"><label for="avatarFile">Profile picture</label><div class="file-control"><span>Choose a picture</span><input id="avatarFile" type="file" accept="image/*"></div><small>Images upload to Cloudinary when you save. Animated GIF and WebP are supported.</small></div>
-        <div class="field"><label for="nameInput">Username</label><input id="nameInput" type="text" maxlength="40" placeholder="Your username" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#222428;color:var(--text);padding:11px 12px;font-size:.8rem"></div>
+        <div class="dock-position-setting"><div><strong>Navigation dock</strong><small>Choose where Poko’s dock lives.</small></div><div class="dock-position-options"><button type="button" data-dock-position="left" aria-pressed="true">Left</button><button type="button" data-dock-position="bottom" aria-pressed="false">Bottom</button></div></div>
+         <div class="field"><label for="nameInput">Username</label><input id="nameInput" type="text" maxlength="40" placeholder="Your username" style="width:100%;border:1px solid var(--line);border-radius:10px;background:#222428;color:var(--text);padding:11px 12px;font-size:.8rem"></div>
         <div class="field"><label for="bioInput">About me</label><textarea id="bioInput" maxlength="190" rows="3" placeholder="A little about you..." style="width:100%;resize:vertical;border:1px solid var(--line);border-radius:10px;background:#222428;color:var(--text);padding:11px 12px;font:inherit;font-size:.8rem"></textarea><small>Up to 190 characters.</small></div>
         <section class="auth-section"><div class="auth-status" id="authStatus">Not signed in. Sign in to connect your Google account.</div><div class="auth-actions"><button class="auth-button" id="googleSignIn">Continue with Google</button><button class="auth-button" id="googleSignOut" hidden>Sign out</button></div></section>
         <div class="dialog-actions"><button class="small-button" id="cancelEditor">Cancel</button><button class="primary" id="saveProfile">Save changes</button></div>
@@ -893,7 +933,38 @@
     async function loadCloudProfile(user) {
       const loadId = ++activeProfileLoad;
       if (ownProfileUnsubscribe) { ownProfileUnsubscribe(); ownProfileUnsubscribe = null; }
-      restoreProfile();
+  
+    const dockPositionKey='poko-dock-position';
+    function applyDockPosition(position){
+      const selected=position==='bottom'?'bottom':'left';
+      const appElement=$('app');
+      appElement.classList.toggle('dock-bottom',selected==='bottom');
+      appElement.classList.toggle('dock-left',selected==='left');
+      appElement.classList.toggle('mobile-dock-left',selected==='left'&&window.matchMedia('(max-width:760px)').matches);
+      document.querySelectorAll('[data-dock-position]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.dockPosition===selected)));
+      try{localStorage.setItem(dockPositionKey,selected);}catch(error){console.warn('Could not save dock position:',error);}
+    }
+    applyDockPosition((()=>{try{return localStorage.getItem(dockPositionKey)||'left';}catch{return 'left';}})());
+    document.querySelectorAll('[data-dock-position]').forEach(button=>button.addEventListener('click',()=>applyDockPosition(button.dataset.dockPosition)));
+    const navRail=$('.rail');
+    if(navRail){
+      const dockButtons=[...navRail.querySelectorAll('.rail-button')];
+      const resetDockMagnification=()=>dockButtons.forEach(button=>button.style.removeProperty('--dock-scale'));
+      navRail.addEventListener('pointermove',event=>{
+        if(event.pointerType!=='mouse')return;
+        const hovered=event.target.closest('.rail-button');
+        if(!hovered||!navRail.contains(hovered)){resetDockMagnification();return;}
+        const index=dockButtons.indexOf(hovered);
+        dockButtons.forEach((button,i)=>{
+          const distance=Math.abs(i-index);
+          const scale=1+0.48*Math.exp(-(distance*distance)/1.15);
+          button.style.setProperty('--dock-scale',scale.toFixed(3));
+        });
+      });
+      navRail.addEventListener('pointerleave',resetDockMagnification);
+    }
+    window.addEventListener('resize',()=>applyDockPosition((()=>{try{return localStorage.getItem(dockPositionKey)||'left';}catch{return 'left';}})()));
+    restoreProfile();
       if (!user || !profileDb) return;
       ownProfileUnsubscribe = profileDb.collection('profiles').doc(user.uid).onSnapshot(async snapshot => {
         if (loadId !== activeProfileLoad || firebaseAuth.currentUser?.uid !== user.uid) return;
