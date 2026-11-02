@@ -624,7 +624,29 @@
       .main:has(#friendsPanel:not([hidden])) .topbar-title{display:block!important}
       .main:has(#friendsPanel:not([hidden])) .topbar{padding-inline:12px}
     }
-\n  </style>
+\n  
+    #callOverlay .call-controls{gap:12px;background:var(--panel);border-top:1px solid var(--line)}
+    #callOverlay .call-control{width:50px;min-width:50px;height:50px;padding:0;display:grid;place-items:center;border:1px solid var(--line);border-radius:50%;background:var(--hover);color:#fff!important;font-size:0;line-height:1}
+    #callOverlay .call-control iconify-icon{display:block;color:inherit;pointer-events:none}
+    #callOverlay .call-control:hover{background:#454850;color:#fff!important;transform:translateY(-1px)}
+    #callOverlay .call-control.end{min-width:54px;width:54px;height:54px;border-radius:50%;background:#da373c;color:#fff!important}
+    #callOverlay .call-control.end:hover{background:#f04747}
+    #callOverlay .call-control:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+    .status-trigger{width:28px;height:30px;color:var(--muted)}
+    .status-symbol{flex:none;display:inline-flex;align-items:center;justify-content:center}
+    .status-symbol.online{color:#4ac985}.status-symbol.idle{color:#e8ad38}.status-symbol.dnd{color:#f05261}.status-symbol.invisible,.status-symbol.offline{color:#858995}
+    .status-menu{background:var(--panel);color:var(--text)}
+    .status-menu button{color:var(--text)!important}
+    .avatar-status-badge{display:grid;place-items:center;overflow:visible}
+    .avatar-status-badge iconify-icon{display:block;color:#fff}
+    .avatar-status-badge.online{background:#249d65}.avatar-status-badge.idle{background:#bd841d}.avatar-status-badge.dnd{background:#d83c4b}.avatar-status-badge.invisible,.avatar-status-badge.offline{background:#656b78}
+    html[data-theme="light"] #callOverlay .call-controls{background:#f2f3f7;border-color:rgba(24,30,42,.12)}
+    html[data-theme="light"] #callOverlay .call-control{background:#e2e5ed;color:#20242b!important;border-color:rgba(24,30,42,.12)}
+    html[data-theme="light"] #callOverlay .call-control:hover{background:#d5dae5;color:#20242b!important}
+    html[data-theme="light"] #callOverlay .call-control.end,html[data-theme="light"] #callOverlay .call-control.end:hover{background:#da373c;color:#fff!important}
+    html[data-theme="light"] .status-menu{background:#fff;border-color:rgba(24,30,42,.12)}
+    html[data-theme="light"] .status-menu button{color:#20242b!important}
+</style>
 </head>
 <body class="poko-loading">
   <div class="page-loader" id="pageLoader" aria-hidden="true"></div>
@@ -667,10 +689,10 @@
       <div class="profile-row" id="profileRow" role="button" tabindex="0" aria-label="View profile">
         <div class="mini-avatar" id="sideAvatar">You</div>
         <div class="profile-label"><strong id="displayName">your_username</strong><span id="myStatusLabel">Online</span></div>
-        <button class="status-trigger" id="statusTrigger" type="button" aria-label="Change activity status" title="Change activity status"><span class="status-dot online" id="statusTriggerDot" aria-hidden="true"></span></button>
+        <button class="status-trigger" id="statusTrigger" type="button" aria-label="Change activity status" title="Change activity status"><iconify-icon class="status-symbol online" id="statusTriggerDot" icon="solar:check-circle-bold" width="19" height="19" aria-hidden="true"></iconify-icon></button>
         <button class="icon-button" id="editProfile" aria-label="Edit profile" title="Edit profile"><iconify-icon icon="solar:pen-bold" width="19" height="19" aria-hidden="true"></iconify-icon></button>
       </div>
-      <div class="status-menu" id="statusMenu" hidden><button type="button" data-status="online"><span class="status-dot online"></span>Online</button><button type="button" data-status="idle"><span class="status-dot idle"></span>Idle</button><button type="button" data-status="dnd"><span class="status-dot dnd"></span>Do not disturb</button><button type="button" data-status="invisible"><span class="status-dot invisible"></span>Invisible</button></div>
+      <div class="status-menu" id="statusMenu" hidden><button type="button" data-status="online"><iconify-icon class="status-symbol online" icon="solar:check-circle-bold" width="19" height="19" aria-hidden="true"></iconify-icon>Online</button><button type="button" data-status="idle"><iconify-icon class="status-symbol idle" icon="solar:clock-circle-bold" width="19" height="19" aria-hidden="true"></iconify-icon>Idle</button><button type="button" data-status="dnd"><iconify-icon class="status-symbol dnd" icon="solar:minus-circle-bold" width="19" height="19" aria-hidden="true"></iconify-icon>Do not disturb</button><button type="button" data-status="invisible"><iconify-icon class="status-symbol invisible" icon="solar:eye-closed-bold" width="19" height="19" aria-hidden="true"></iconify-icon>Invisible</button></div>
     </aside>
     <main class="main">
       <div class="topbar"><button class="icon-button back-mobile" id="backToList" aria-label="Back to messages" title="Back to messages"><iconify-icon icon="solar:alt-arrow-left-bold" width="20" height="20" aria-hidden="true"></iconify-icon></button><span class="topbar-title" id="topbarTitle">Poko</span><div class="topbar-tools"><button class="small-button friends-nav-button" id="friendsNav" type="button">Friends</button><button class="icon-button request-nav-button" id="requestsNav" aria-label="Friend requests" title="Friend requests"><iconify-icon icon="solar:user-plus-bold" width="21" height="21" aria-hidden="true"></iconify-icon><span class="request-badge" id="requestCount" hidden>0</span></button><button class="icon-button" id="topNewMessage" aria-label="New message" title="New message"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></div></div>
@@ -690,7 +712,7 @@
       </section>
       <section class="chat-panel" id="chatPanel" hidden>
         <header class="chat-head"><button class="icon-button back-mobile" id="chatBack" aria-label="Back to messages"><iconify-icon icon="solar:alt-arrow-left-bold" width="20" height="20" aria-hidden="true"></iconify-icon></button><div class="mini-avatar" id="chatAvatar"></div><div class="profile-label"><strong id="chatName"></strong><span id="chatBio" hidden></span></div><button class="icon-button" id="joinOngoingCall" title="Join an ongoing group call" aria-label="Join ongoing call" hidden><iconify-icon icon="solar:videocamera-record-bold" width="20" height="20" aria-hidden="true"></iconify-icon></button><button class="icon-button" id="startVoiceCall" title="Start voice/video call" aria-label="Start call"><iconify-icon icon="solar:phone-calling-bold" width="20" height="20" aria-hidden="true"></iconify-icon></button><button class="small-button" id="viewChatProfile">Profile</button></header>
-          <div class="call-overlay" id="callOverlay" hidden><section class="call-window"><div class="call-stage"><video id="remoteVideo" autoplay playsinline></video><div id="directCameraOff" class="camera-off-card" hidden><div class="camera-off-banner"></div><div class="camera-off-avatar" aria-label="Participant avatar"></div></div><video id="localVideo" autoplay muted playsinline></video><div class="call-status" id="callStatus">Connecting…</div></div><div class="call-controls"><button class="call-control" id="toggleMic">Mute mic</button><button class="call-control" id="toggleCamera">Turn camera off</button><button class="call-control" id="shareScreen">Share screen</button><button class="call-control end" id="endCall">End call</button></div><div class="call-resize-handle" id="callResizeHandle" role="separator" aria-orientation="horizontal" aria-label="Resize call panel" title="Drag to resize call panel"></div></section></div>
+          <div class="call-overlay" id="callOverlay" hidden><section class="call-window"><div class="call-stage"><video id="remoteVideo" autoplay playsinline></video><div id="directCameraOff" class="camera-off-card" hidden><div class="camera-off-banner"></div><div class="camera-off-avatar" aria-label="Participant avatar"></div></div><video id="localVideo" autoplay muted playsinline></video><div class="call-status" id="callStatus">Connecting…</div></div><div class="call-controls"><button class="call-control" id="toggleMic" type="button" aria-label="Mute microphone" title="Mute microphone"><iconify-icon icon="solar:microphone-bold" width="22" height="22" aria-hidden="true"></iconify-icon></button><button class="call-control" id="toggleCamera" type="button" aria-label="Turn camera off" title="Turn camera off"><iconify-icon icon="solar:videocamera-record-bold" width="22" height="22" aria-hidden="true"></iconify-icon></button><button class="call-control" id="shareScreen" type="button" aria-label="Share screen" title="Share screen"><iconify-icon icon="solar:screen-share-bold" width="22" height="22" aria-hidden="true"></iconify-icon></button><button class="call-control end" id="endCall" type="button" aria-label="End call" title="End call"><iconify-icon icon="solar:phone-hang-up-bold" width="22" height="22" aria-hidden="true"></iconify-icon></button></div><div class="call-resize-handle" id="callResizeHandle" role="separator" aria-orientation="horizontal" aria-label="Resize call panel" title="Drag to resize call panel"></div></section></div>
         <div class="chat-messages" id="chatMessages" aria-live="polite"><div class="chat-empty">Loading messages…</div></div>
         <div class="composer-wrap"><div class="picker-panel" id="pickerPanel" hidden><div class="picker-tabs"><button type="button" class="picker-tab active" id="emojiTab">Emoji</button><button type="button" class="picker-tab" id="gifTab">GIFs</button><button type="button" class="icon-button picker-close" id="closePicker" aria-label="Close picker"><iconify-icon icon="solar:close-circle-bold" width="19" height="19" aria-hidden="true"></iconify-icon></button></div><div id="emojiPanel" class="emoji-grid" aria-label="Emoji picker"></div><div id="gifPanel" hidden><form class="gif-search" id="gifSearchForm"><input id="gifSearchInput" maxlength="50" placeholder="Search GIPHY" aria-label="Search GIFs"><button class="small-button" type="submit">Search</button></form><div class="gif-results" id="gifResults"><div class="result-message">Search for a GIF to send it in this chat.</div></div><div class="giphy-credit">Powered by GIPHY</div></div></div><form class="chat-composer" id="chatComposer"><button type="button" class="composer-tool" id="openEmoji" aria-label="Open emoji picker" title="Emoji">☺</button><button type="button" class="composer-tool" id="openGif" aria-label="Open GIF picker" title="GIF">GIF</button><textarea id="messageInput" rows="1" maxlength="4000" placeholder="Write a message…" aria-label="Write a message" required></textarea><button class="primary" id="sendMessage" type="submit">Send</button></form></div>
       </section>
@@ -831,7 +853,7 @@
       $('profileViewBanner').style.backgroundImage = bannerUrl ? `url("${bannerUrl}")` : '';
       const statusLabels={online:'Online',idle:'Idle',dnd:'Do not disturb',invisible:'Invisible'};
       if($('myStatusLabel')) $('myStatusLabel').textContent=statusLabels[myActivityStatus];
-      if($('myStatusDot')) $('myStatusDot').className='status-dot '+myActivityStatus;if($('statusTriggerDot')) $('statusTriggerDot').className='status-dot '+myActivityStatus;
+      if($('myStatusDot')) setStatusIcon($('myStatusDot'),myActivityStatus);if($('statusTriggerDot')) setStatusIcon($('statusTriggerDot'),myActivityStatus);
     }
     function restoreProfile() {
       try { applyProfile(JSON.parse(localStorage.getItem('poko-profile') || '{}')); }
@@ -903,10 +925,14 @@
       if (url) { const img = document.createElement('img'); img.src = url; img.alt = 'Profile picture'; el.append(img); }
       else el.textContent = fallback;
     }
+    const statusIcons={online:'solar:check-circle-bold',idle:'solar:clock-circle-bold',dnd:'solar:minus-circle-bold',invisible:'solar:eye-closed-bold',offline:'solar:close-circle-bold'};
+    function setStatusIcon(el,status){if(!el)return;const value=['online','idle','dnd','invisible','offline'].includes(status)?status:'online';el.className=(el.className||'').replace(/\b(online|idle|dnd|invisible|offline)\b/g,'').trim()+' '+value;el.setAttribute('icon',statusIcons[value]);}
     function setAvatarStatus(el,status='online') {
       if(!el)return;
       el.querySelectorAll(':scope > .avatar-status-badge').forEach(node=>node.remove());
-      const badge=document.createElement('span');badge.className='avatar-status-badge '+(['online','idle','dnd','invisible','offline'].includes(status)?status:'online');badge.title=({online:'Online',idle:'Idle',dnd:'Do not disturb',invisible:'Invisible',offline:'Offline'}[status]||'Online');badge.setAttribute('aria-label',badge.title);el.append(badge);
+      const value=['online','idle','dnd','invisible','offline'].includes(status)?status:'online';
+      const badge=document.createElement('span');badge.className='avatar-status-badge '+value;badge.title=({online:'Online',idle:'Idle',dnd:'Do not disturb',invisible:'Invisible',offline:'Offline'})[value];badge.setAttribute('aria-label',badge.title);
+      const icon=document.createElement('iconify-icon');icon.setAttribute('icon',statusIcons[value]);icon.setAttribute('width','12');icon.setAttribute('height','12');icon.setAttribute('aria-hidden','true');badge.append(icon);el.append(badge);
     }
     function openEditor() {
       editor.classList.remove('closing');
@@ -1847,14 +1873,15 @@
         || pc.getTransceivers().find(transceiver => transceiver.receiver?.track?.kind === 'video')?.sender
         || null;
     }
-    async function shareScreen() {
+    function setCallControlIcon(button,icon,label){if(!button)return;button.replaceChildren();const glyph=document.createElement('iconify-icon');glyph.setAttribute('icon',icon);glyph.setAttribute('width','22');glyph.setAttribute('height','22');glyph.setAttribute('aria-hidden','true');button.append(glyph);button.setAttribute('aria-label',label);button.title=label;}
+        async function shareScreen() {
       if(groupCallActive){try{
         if(groupScreenStream){
           groupScreenStream.getTracks().forEach(t=>t.stop());groupScreenStream=null;
           const cameraTrack=groupLocalStream?.getVideoTracks()[0]||null;const track=cameraTrack&&!cameraDisabled?cameraTrack:null;
           for(const state of groupPeers.values()){const sender=getVideoSender(state.pc);if(sender){const transceiver=state.pc.getTransceivers().find(t=>t.sender===sender);if(transceiver&&transceiver.direction==='recvonly')transceiver.direction='sendrecv';await sender.replaceTrack(track);}}
           $('localVideo').srcObject=groupLocalStream?.getTracks().length?groupLocalStream:null;
-          $('shareScreen').textContent='Share screen';return;
+          setCallControlIcon($('shareScreen'),'solar:screen-share-bold','Share screen');return;
         }
         if(!navigator.mediaDevices?.getDisplayMedia){showToast('Screen sharing is not supported.');return;}
         groupScreenStream=await navigator.mediaDevices.getDisplayMedia({video:true,audio:false});
@@ -1864,7 +1891,7 @@
           if(!sender){sender=state.pc.addTransceiver('video',{direction:'sendrecv'}).sender;}
           await sender.replaceTrack(track);
         }
-        $('localVideo').srcObject=groupScreenStream;$('shareScreen').textContent='Stop sharing';
+        $('localVideo').srcObject=groupScreenStream;setCallControlIcon($('shareScreen'),'solar:screen-share-bold','Stop sharing');
         track.onended=()=>{if(groupScreenStream)shareScreen();};
       }catch(e){console.error('Group screen share failed:',e);showToast('Screen sharing failed: '+(e.message||e.name));}return;}
       if (!peerConnection) return;
@@ -1876,7 +1903,7 @@
           if (sender) await sender.replaceTrack(cameraTrack&&!cameraDisabled?cameraTrack:null);
           syncLocalCameraState(!!cameraTrack&&!cameraDisabled,false);
           $('localVideo').srcObject = localStream;
-          $('shareScreen').textContent = 'Share screen';
+          setCallControlIcon($('shareScreen'),'solar:screen-share-bold','Share screen');
           return;
         }
         if (!navigator.mediaDevices.getDisplayMedia) { showToast('Screen sharing is not supported by this browser.'); return; }
@@ -1888,7 +1915,7 @@
         await sender.replaceTrack(screenTrack);
         syncLocalCameraState(false,true);
         $('localVideo').srcObject = screenStream;
-        $('shareScreen').textContent = 'Stop sharing';
+        setCallControlIcon($('shareScreen'),'solar:screen-share-bold','Stop sharing');
         screenTrack.onended = () => { if (screenStream) shareScreen(); };
       } catch (error) { console.error('Screen share failed:',error); showToast('Screen sharing cancelled or unavailable.'); }
     }
@@ -1909,13 +1936,13 @@
     $('cancelCallSetup').addEventListener('click',closeCallSetup);
     $('confirmCallSetup').addEventListener('click',beginCallWithOptions);
     $('callSetup').addEventListener('click',e=>{if(e.target===$('callSetup'))closeCallSetup();});
-    $('toggleCamera').addEventListener('click',async()=>{const stream=groupCallActive?groupLocalStream:localStream;const tracks=stream?.getVideoTracks()||[];if(!tracks.length){showToast('Camera is off or unavailable.');return;}cameraDisabled=!cameraDisabled;tracks.forEach(t=>t.enabled=!cameraDisabled);$('toggleCamera').textContent=cameraDisabled?'Turn camera on':'Turn camera off';if(groupCallActive&&!groupScreenStream){await Promise.all([...groupPeers.values()].map(async state=>{const sender=getVideoSender(state.pc);if(sender)await sender.replaceTrack(cameraDisabled?null:tracks[0]).catch(e=>console.warn('Camera sender update failed',e));}));}else if(!groupCallActive&&!screenStream&&peerConnection){const sender=getVideoSender(peerConnection);if(sender){const transceiver=peerConnection.getTransceivers().find(t=>t.sender===sender);if(transceiver&&transceiver.direction==='recvonly')transceiver.direction='sendrecv';await sender.replaceTrack(cameraDisabled?null:tracks[0]).catch(e=>console.warn('Camera sender update failed',e));}syncLocalCameraState(!cameraDisabled,false);}});
+    $('toggleCamera').addEventListener('click',async()=>{const stream=groupCallActive?groupLocalStream:localStream;const tracks=stream?.getVideoTracks()||[];if(!tracks.length){showToast('Camera is off or unavailable.');return;}cameraDisabled=!cameraDisabled;tracks.forEach(t=>t.enabled=!cameraDisabled);setCallControlIcon($('toggleCamera'),cameraDisabled?'solar:videocamera-bold':'solar:videocamera-record-bold',cameraDisabled?'Turn camera on':'Turn camera off');if(groupCallActive&&!groupScreenStream){await Promise.all([...groupPeers.values()].map(async state=>{const sender=getVideoSender(state.pc);if(sender)await sender.replaceTrack(cameraDisabled?null:tracks[0]).catch(e=>console.warn('Camera sender update failed',e));}));}else if(!groupCallActive&&!screenStream&&peerConnection){const sender=getVideoSender(peerConnection);if(sender){const transceiver=peerConnection.getTransceivers().find(t=>t.sender===sender);if(transceiver&&transceiver.direction==='recvonly')transceiver.direction='sendrecv';await sender.replaceTrack(cameraDisabled?null:tracks[0]).catch(e=>console.warn('Camera sender update failed',e));}syncLocalCameraState(!cameraDisabled,false);}});
 
     $('toggleMic').addEventListener('click', () => {
-      if(groupCallActive){if(!groupLocalStream?.getAudioTracks().length){showToast('No microphone available. You can still listen.');return;}micMuted=!micMuted;groupLocalStream.getAudioTracks().forEach(t=>t.enabled=!micMuted);$('toggleMic').textContent=micMuted?'Unmute mic':'Mute mic';return;}
+      if(groupCallActive){if(!groupLocalStream?.getAudioTracks().length){showToast('No microphone available. You can still listen.');return;}micMuted=!micMuted;groupLocalStream.getAudioTracks().forEach(t=>t.enabled=!micMuted);setCallControlIcon($('toggleMic'),micMuted?'solar:microphone-slash-bold':'solar:microphone-bold',micMuted?'Unmute microphone':'Mute microphone');return;}
       if (!localStream?.getAudioTracks().length) { showToast('No microphone is available on this device. You can still listen.'); return; }
       micMuted = !micMuted; localStream.getAudioTracks().forEach(track => track.enabled = !micMuted);
-      $('toggleMic').textContent = micMuted ? 'Unmute mic' : 'Mute mic';
+      setCallControlIcon($('toggleMic'),micMuted?'solar:microphone-slash-bold':'solar:microphone-bold',micMuted?'Unmute microphone':'Mute microphone');
     });
     $('shareScreen').addEventListener('click', shareScreen);
     $('joinOngoingCall').addEventListener('click',async()=>{if(!activeConversationId||!currentUser)return;try{const snap=await groupCallCollection(activeConversationId).where('calleeId','==',currentUser.uid).where('state','==','ringing').get();const match=snap.docs[0];if(match)await acceptGroupCall(match.id,match.data());else showToast('No joinable call invitation was found.');}catch(e){console.error(e);showToast('Could not check ongoing calls.');}});
@@ -1967,7 +1994,7 @@
     $('gifSearchForm').addEventListener('submit',e=>{e.preventDefault();const q=$('gifSearchInput').value.trim();if(q)loadGifs(q);});
     $('themeToggle').addEventListener('click', () => applyTheme(themeMode === 'system' ? 'light' : themeMode === 'light' ? 'dark' : 'system'));
     $('statusTrigger').addEventListener('click',e=>{e.stopPropagation();$('statusMenu').hidden=!$('statusMenu').hidden;});
-    $('statusMenu').querySelectorAll('[data-status]').forEach(button=>button.addEventListener('click',async()=>{const status=button.dataset.status;myActivityStatus=status;const labels={online:'Online',idle:'Idle',dnd:'Do not disturb',invisible:'Invisible'};const profile=(()=>{try{return JSON.parse(localStorage.getItem('poko-profile')||'{}')}catch{return {}}})();profile.status=status;try{localStorage.setItem('poko-profile',JSON.stringify(profile));}catch(error){console.warn('Could not save local activity status:',error);}if($('myStatusLabel'))$('myStatusLabel').textContent=labels[status];if($('myStatusDot'))$('myStatusDot').className='status-dot '+status;$('statusTriggerDot').className='status-dot '+status;setAvatarStatus($('sideAvatar'),status);setAvatarStatus($('largeAvatar'),status);if($('profileViewAvatar'))setAvatarStatus($('profileViewAvatar'),status);$('statusMenu').hidden=true;const user=firebaseAuth?.currentUser;if(user&&profileDb){try{await profileDb.collection('profiles').doc(user.uid).set({status,presenceUpdatedAt:firebase.firestore.FieldValue.serverTimestamp(),updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});showToast('Activity status updated.');}catch(error){console.error('Status update failed:',error);showToast('Status saved on this device, but cloud sync failed. Check Firestore rules.');}}else{showToast('Activity status saved on this device. Sign in to sync it with friends.');}}));
+    $('statusMenu').querySelectorAll('[data-status]').forEach(button=>button.addEventListener('click',async()=>{const status=button.dataset.status;myActivityStatus=status;const labels={online:'Online',idle:'Idle',dnd:'Do not disturb',invisible:'Invisible'};const profile=(()=>{try{return JSON.parse(localStorage.getItem('poko-profile')||'{}')}catch{return {}}})();profile.status=status;try{localStorage.setItem('poko-profile',JSON.stringify(profile));}catch(error){console.warn('Could not save local activity status:',error);}if($('myStatusLabel'))$('myStatusLabel').textContent=labels[status];if($('myStatusDot'))setStatusIcon($('myStatusDot'),status);setStatusIcon($('statusTriggerDot'),status);setAvatarStatus($('sideAvatar'),status);setAvatarStatus($('largeAvatar'),status);if($('profileViewAvatar'))setAvatarStatus($('profileViewAvatar'),status);$('statusMenu').hidden=true;const user=firebaseAuth?.currentUser;if(user&&profileDb){try{await profileDb.collection('profiles').doc(user.uid).set({status,presenceUpdatedAt:firebase.firestore.FieldValue.serverTimestamp(),updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});showToast('Activity status updated.');}catch(error){console.error('Status update failed:',error);showToast('Status saved on this device, but cloud sync failed. Check Firestore rules.');}}else{showToast('Activity status saved on this device. Sign in to sync it with friends.');}}));
     document.addEventListener('click',e=>{if(!pickerPanel.contains(e.target)&&!['openEmoji','openGif'].includes(e.target.id))closePicker();if(!$('statusMenu').contains(e.target)&&e.target.id!=='statusTrigger')$('statusMenu').hidden=true;if(!e.target.closest('.message-actions'))document.querySelectorAll('.message-actions.open').forEach(el=>{el.classList.remove('open');el.querySelector('.message-action-menu').hidden=true;el.querySelector('.message-reaction-menu').hidden=true;});});
     $('messageInput').addEventListener('keydown', e => {
       if (e.key !== 'Enter' || e.shiftKey || e.isComposing) return;

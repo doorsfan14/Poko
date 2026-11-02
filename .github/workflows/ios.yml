@@ -1,0 +1,40 @@
+name: iOS native build
+on:
+  push:
+    branches: [main, ios-native-port]
+    paths:
+      - "ios/**"
+      - ".github/workflows/ios.yml"
+  pull_request:
+    paths:
+      - "ios/**"
+      - ".github/workflows/ios.yml"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select Xcode
+        run: sudo xcode-select -s "$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)/Contents/Developer"
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: Generate native Xcode project
+        run: xcodegen generate --spec ios/project.yml
+      - name: Resolve Swift packages
+        run: xcodebuild -resolvePackageDependencies -project ios/Poko.xcodeproj -scheme Poko
+      - name: Build iOS Simulator app
+        run: xcodebuild -project ios/Poko.xcodeproj -scheme Poko -configuration Release -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build
+      - name: Package simulator app
+        run: |
+          mkdir -p artifacts
+          APP_PATH="$(find ~/Library/Developer/Xcode/DerivedData -path '*/Build/Products/Release-iphonesimulator/Poko.app' -print -quit)"
+          test -n "$APP_PATH"
+          ditto "$APP_PATH" artifacts/Poko-iOS-Simulator.app
+          cd artifacts && zip -qry Poko-iOS-Simulator.zip Poko-iOS-Simulator.app
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Poko-iOS-Simulator
+          path: artifacts/Poko-iOS-Simulator.zip
+          if-no-files-found: error
