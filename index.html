@@ -466,7 +466,7 @@
     .login-screen{position:fixed;inset:0;z-index:2000;display:none;align-items:center;justify-content:center;padding:24px;background:var(--bg);overflow-y:auto}
     .login-screen.visible{display:flex}
     .login-card{width:min(440px,100%);padding:clamp(20px,5vw,40px) 0;text-align:center;background:transparent;border:0;border-radius:0;box-shadow:none}
-    .login-card h1{font-size:clamp(1.8rem,6vw,2.3rem);line-height:1.12;letter-spacing:-.065em;margin:0}
+    .login-card h1{display:flex;align-items:center;justify-content:center;line-height:1;margin:0}.poko-wordmark{display:block;width:min(260px,76vw);height:auto;max-height:104px;object-fit:contain}
     .login-copy{font-size:.88rem;line-height:1.75;color:var(--muted);margin:16px auto 27px;max-width:310px}
     .login-google{width:100%;height:64px;min-height:64px;display:flex;align-items:center;justify-content:center;gap:0;border:1px solid #dadce0;border-radius:8px;background:#fff;color:#3c4043;font-family:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:20px;font-weight:700;letter-spacing:0;transition:background .15s,border-color .15s}
     .login-google:hover{background:#f8faff;border-color:#d2e3fc}
@@ -636,9 +636,9 @@
     .status-menu{background:var(--panel);color:var(--text)}
     .status-menu button{color:var(--text)!important}
     .mini-avatar,.avatar,.profile-view-avatar,.large-avatar{position:relative}
-    .avatar-status-badge{position:absolute;right:-2px;bottom:-2px;width:14px;height:14px;z-index:3;pointer-events:none;background:var(--panel);border-radius:50%;display:grid;place-items:center}
+    .avatar-status-badge{position:absolute;right:-3px;bottom:-3px;width:18px;height:18px;z-index:5;pointer-events:none;border:2px solid var(--panel);border-radius:50%;display:grid;place-items:center;background:var(--presence-bg);color:#fff;overflow:hidden}.avatar-status-badge::before{display:none!important;content:none!important}.avatar-status-badge iconify-icon{display:block;width:11px;height:11px;color:#fff}
     .avatar-status-badge::before{content:'';display:block;width:10px;height:10px;border-radius:50%;background:var(--presence-color)}
-    .avatar-status-badge.online{--presence-color:#23a55a}.avatar-status-badge.idle{--presence-color:#f0b232}.avatar-status-badge.dnd{--presence-color:#f23f43}.avatar-status-badge.streaming{--presence-color:#9147ff}.avatar-status-badge.focus{--presence-color:#3b82f6}.avatar-status-badge.gaming{--presence-color:#a855f7}.avatar-status-badge.studying{--presence-color:#06b6d4}.avatar-status-badge.break{--presence-color:#f97316}
+    .avatar-status-badge.online{--presence-bg:#23a55a}.avatar-status-badge.idle{--presence-bg:#d69e2e}.avatar-status-badge.dnd{--presence-bg:#e5484d}.avatar-status-badge.offline{--presence-bg:#737780}.avatar-status-badge.streaming{--presence-bg:#8b5cf6}.avatar-status-badge.focus{--presence-bg:#3b82f6}.avatar-status-badge.gaming{--presence-bg:#d97706}.avatar-status-badge.studying{--presence-bg:#0891b2}.avatar-status-badge.break{--presence-bg:#0d9488}
     .avatar-status-badge.idle::before{width:9px;height:9px}
     .avatar-status-badge.idle::after{content:'';position:absolute;width:8px;height:8px;border-radius:50%;background:var(--panel);top:0;right:0}
     .avatar-status-badge.dnd::after{content:'';position:absolute;width:6px;height:2px;border-radius:2px;background:#fff}
@@ -685,9 +685,9 @@
     /* Presence uses Solar icons; profile photos stay completely untouched. */
     .presence-mark{display:none!important}
     .presence-icon{flex:0 0 18px;display:inline-block}
-    .presence-icon.online{color:#23a55a}.presence-icon.idle{color:#f0b232}.presence-icon.dnd{color:#f23f43}.presence-icon.offline{color:#80848e}.presence-icon.streaming{color:#9147ff}.presence-icon.focus{color:#3b82f6}.presence-icon.gaming{color:#a855f7}.presence-icon.studying{color:#06b6d4}.presence-icon.break{color:#f97316}
+    .presence-icon.online{color:#23a55a}.presence-icon.idle{color:#d69e2e}.presence-icon.dnd{color:#e5484d}.presence-icon.offline{color:#80848e}.presence-icon.streaming{color:#8b5cf6}.presence-icon.focus{color:#3b82f6}.presence-icon.gaming{color:#d97706}.presence-icon.studying{color:#0891b2}.presence-icon.break{color:#0d9488}
     .status-trigger .status-dot{width:20px;height:20px;flex:0 0 20px;display:grid;place-items:center;background:transparent!important;border-radius:0}
-    .status-trigger .status-dot iconify-icon{width:18px;height:18px}
+    .status-trigger .status-dot iconify-icon{width:18px;height:18px}.friend-presence .status-dot{border-radius:50%!important;transform:none!important;clip-path:none!important;border:0!important;width:7px;height:7px;flex:0 0 7px}.friend-presence .status-dot::after{display:none!important}.friend-presence .status-dot.online{background:#23a55a}.friend-presence .status-dot.idle{background:#d69e2e}.friend-presence .status-dot.dnd{background:#e5484d}.friend-presence .status-dot.streaming{background:#8b5cf6}.friend-presence .status-dot.focus{background:#3b82f6}.friend-presence .status-dot.gaming{background:#d97706}.friend-presence .status-dot.studying{background:#0891b2}.friend-presence .status-dot.break{background:#0d9488}
     .mini-avatar,.profile-view-avatar,.large-avatar{filter:none!important;opacity:1!important}
 
   </style>
@@ -697,7 +697,7 @@
 
   <section class="login-screen" id="loginScreen" aria-labelledby="loginTitle">
     <div class="login-card">
-      <h1 id="loginTitle">Welcome to Poko.</h1>
+      <h1 id="loginTitle"><img class="poko-wordmark" src="Poko.png" alt="Poko"></h1>
       <p class="login-copy">Sign in to find people, keep your conversations, and make Poko yours.</p>
       <button class="login-google" id="loginGoogle" type="button"><img class="google-logo" src="https://storage.googleapis.com/pe-portal-consumer-prod-wagtail-static/original_images/GoogleG_FullColor_RGB.png?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=wagtail%40pe-portal-consumer-prod.iam.gserviceaccount.com%2F20261029%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20261029T032841Z&X-Goog-Expires=86400&X-Goog-Signature=104e59159f1971b43dc017cb8a16b0cba4432197ea6bf20e8b93433ea3bdff7a741ce2e13d4cbb6fc376a386fef24bfa1eed08f4b45c79e71d99fa5642eb3096cb991fb52e476a8d3f8258d089f6cacb273ec0976fdadee4e6685d95aa3376454e17f4a9887144cac322ea43ea56174204efc9bdb5733c25aade2a0493416a669a67db36b61abc9a77b55c8bf579e285f2fdeb30c01e36fd0186ef685342220154816a864bc0adc18ff39511e67a21f10ea879d3615e906434e64ec51dbd0c5f65ae15cca57ddf2b3877a272d66dddd6ac7647da974c891108db31f4e8af3a8a9d75afb74e3c66f1953f563ca8c136f2f5983bcbaf4b95877b7f609841a066af&X-Goog-SignedHeaders=host&response-content-disposition=attachment%3B+filename%3DGoogleG_FullColor_RGB.png" alt="" referrerpolicy="no-referrer"><span>Continue with Google</span></button>
       <p class="login-note" id="loginNote">Your account keeps your profile and conversations synced.</p>
@@ -973,11 +973,19 @@
     const knownPresence=['online','idle','dnd','invisible','offline','streaming','focus','gaming','studying','break'];
     function visiblePresence(status){return status==='invisible'?'offline':(knownPresence.includes(status)?status:'offline');}
     const presenceIcons={online:'solar:check-circle-bold',idle:'solar:moon-bold',dnd:'solar:minus-circle-bold',offline:'solar:eye-closed-bold',streaming:'solar:videocamera-record-bold',focus:'solar:target-bold',gaming:'solar:gamepad-bold',studying:'solar:book-bold',break:'solar:cup-hot-bold'};
-    function setStatusIcon(el,status){if(!el)return;const value=visiblePresence(status);el.className='status-dot '+value;const icon=document.createElement('iconify-icon');icon.setAttribute('icon',presenceIcons[value]||presenceIcons.offline);icon.setAttribute('width','17');icon.setAttribute('height','17');icon.setAttribute('aria-hidden','true');el.replaceChildren(icon);}
+    function setStatusIcon(el,status){if(!el)return;const value=visiblePresence(status);el.className='status-dot '+value;const icon=document.createElement('iconify-icon');icon.className='presence-icon '+value;icon.setAttribute('icon',presenceIcons[value]||presenceIcons.offline);icon.setAttribute('width','17');icon.setAttribute('height','17');icon.setAttribute('aria-hidden','true');el.replaceChildren(icon);}
     function setAvatarStatus(el,status='online') {
       if(!el)return;
       el.querySelectorAll(':scope > .avatar-status-badge').forEach(node=>node.remove());
-      el.classList.remove('presence-offline');
+      const value=visiblePresence(status);
+      const badge=document.createElement('span');
+      badge.className='avatar-status-badge '+value;
+      badge.setAttribute('aria-label',statusNames[value]||'Offline');
+      const icon=document.createElement('iconify-icon');
+      icon.setAttribute('icon',presenceIcons[value]||presenceIcons.offline);
+      icon.setAttribute('aria-hidden','true');
+      badge.append(icon);
+      el.append(badge);
     }
     function openEditor() {
       editor.classList.remove('closing');
