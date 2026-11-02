@@ -134,11 +134,11 @@ final class PokoSession: ObservableObject {
             return
         }
         do {
+            GIDSignIn.sharedInstance.configuration = GIDConfiguration(clientID: clientID)
             let result = try await GIDSignIn.sharedInstance.signIn(withPresenting: controller, hint: nil, additionalScopes: [])
             guard let idToken = result.user.idToken?.tokenString else { throw PokoError.googleToken }
             let credential = GoogleAuthProvider.credential(withIDToken: idToken, accessToken: result.user.accessToken.tokenString)
             _ = try await Auth.auth().signIn(with: credential)
-            GIDSignIn.sharedInstance.configuration = GIDConfiguration(clientID: clientID)
         } catch { self.error = error.localizedDescription }
     }
 
