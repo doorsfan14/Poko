@@ -634,12 +634,16 @@
     #callOverlay .call-control:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
     .status-trigger{width:28px;height:30px;color:var(--muted)}
     .status-symbol{flex:none;display:inline-flex;align-items:center;justify-content:center}
-    .status-symbol.online{color:#4ac985}.status-symbol.idle{color:#e8ad38}.status-symbol.dnd{color:#f05261}.status-symbol.invisible,.status-symbol.offline{color:#858995}
+    .status-symbol.online{color:#23a55a}.status-symbol.idle{color:#f0b232}.status-symbol.dnd{color:#f23f43}.status-symbol.offline{color:#80848e}
     .status-menu{background:var(--panel);color:var(--text)}
     .status-menu button{color:var(--text)!important}
-    .avatar-status-badge{display:grid;place-items:center;overflow:visible}
+    .avatar-status-badge{position:absolute;right:-2px;bottom:-2px;width:13px;height:13px;display:grid;place-items:center;overflow:hidden;border:3px solid var(--panel);border-radius:50%;box-sizing:content-box}
     .avatar-status-badge iconify-icon{display:block;color:#fff}
-    .avatar-status-badge.online{background:#249d65}.avatar-status-badge.idle{background:#bd841d}.avatar-status-badge.dnd{background:#d83c4b}.avatar-status-badge.invisible,.avatar-status-badge.offline{background:#656b78}
+    .avatar-status-badge.online{background:#23a55a}.avatar-status-badge.idle{background:#f0b232}.avatar-status-badge.dnd{background:#f23f43}.avatar-status-badge.offline{background:#80848e}
+    .status-menu .status-symbol.online,.status-menu .status-symbol.offline{width:12px;height:12px;border-radius:50%;background:currentColor}
+    .status-menu .status-symbol.idle,.status-menu .status-symbol.dnd{width:14px;height:14px}
+    .status-menu .status-symbol.idle{color:#f0b232}.status-menu .status-symbol.dnd{color:#f23f43}
+    .mini-avatar,.avatar{position:relative}
     html[data-theme="light"] #callOverlay .call-controls{background:#f2f3f7;border-color:rgba(24,30,42,.12)}
     html[data-theme="light"] #callOverlay .call-control{background:#e2e5ed;color:#20242b!important;border-color:rgba(24,30,42,.12)}
     html[data-theme="light"] #callOverlay .call-control:hover{background:#d5dae5;color:#20242b!important}
@@ -692,7 +696,7 @@
         <button class="status-trigger" id="statusTrigger" type="button" aria-label="Change activity status" title="Change activity status"><iconify-icon class="status-symbol online" id="statusTriggerDot" icon="solar:check-circle-bold" width="19" height="19" aria-hidden="true"></iconify-icon></button>
         <button class="icon-button" id="editProfile" aria-label="Edit profile" title="Edit profile"><iconify-icon icon="solar:pen-bold" width="19" height="19" aria-hidden="true"></iconify-icon></button>
       </div>
-      <div class="status-menu" id="statusMenu" hidden><button type="button" data-status="online"><iconify-icon class="status-symbol online" icon="solar:check-circle-bold" width="19" height="19" aria-hidden="true"></iconify-icon>Online</button><button type="button" data-status="idle"><iconify-icon class="status-symbol idle" icon="solar:clock-circle-bold" width="19" height="19" aria-hidden="true"></iconify-icon>Idle</button><button type="button" data-status="dnd"><iconify-icon class="status-symbol dnd" icon="solar:minus-circle-bold" width="19" height="19" aria-hidden="true"></iconify-icon>Do not disturb</button><button type="button" data-status="invisible"><iconify-icon class="status-symbol invisible" icon="solar:eye-closed-bold" width="19" height="19" aria-hidden="true"></iconify-icon>Invisible</button></div>
+      <div class="status-menu" id="statusMenu" hidden><button type="button" data-status="online"><iconify-icon class="status-symbol online" icon="solar:circle-bold" width="12" height="12" aria-hidden="true"></iconify-icon>Online</button><button type="button" data-status="idle"><iconify-icon class="status-symbol idle" icon="solar:moon-bold" width="14" height="14" aria-hidden="true"></iconify-icon>Idle</button><button type="button" data-status="dnd"><iconify-icon class="status-symbol dnd" icon="solar:minus-circle-bold" width="14" height="14" aria-hidden="true"></iconify-icon>Do not disturb</button><button type="button" data-status="invisible"><iconify-icon class="status-symbol offline" icon="solar:circle-bold" width="12" height="12" aria-hidden="true"></iconify-icon>Invisible</button></div>
     </aside>
     <main class="main">
       <div class="topbar"><button class="icon-button back-mobile" id="backToList" aria-label="Back to messages" title="Back to messages"><iconify-icon icon="solar:alt-arrow-left-bold" width="20" height="20" aria-hidden="true"></iconify-icon></button><span class="topbar-title" id="topbarTitle">Poko</span><div class="topbar-tools"><button class="small-button friends-nav-button" id="friendsNav" type="button">Friends</button><button class="icon-button request-nav-button" id="requestsNav" aria-label="Friend requests" title="Friend requests"><iconify-icon icon="solar:user-plus-bold" width="21" height="21" aria-hidden="true"></iconify-icon><span class="request-badge" id="requestCount" hidden>0</span></button><button class="icon-button" id="topNewMessage" aria-label="New message" title="New message"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></div></div>
@@ -712,7 +716,7 @@
       </section>
       <section class="chat-panel" id="chatPanel" hidden>
         <header class="chat-head"><button class="icon-button back-mobile" id="chatBack" aria-label="Back to messages"><iconify-icon icon="solar:alt-arrow-left-bold" width="20" height="20" aria-hidden="true"></iconify-icon></button><div class="mini-avatar" id="chatAvatar"></div><div class="profile-label"><strong id="chatName"></strong><span id="chatBio" hidden></span></div><button class="icon-button" id="joinOngoingCall" title="Join an ongoing group call" aria-label="Join ongoing call" hidden><iconify-icon icon="solar:videocamera-record-bold" width="20" height="20" aria-hidden="true"></iconify-icon></button><button class="icon-button" id="startVoiceCall" title="Start voice/video call" aria-label="Start call"><iconify-icon icon="solar:phone-calling-bold" width="20" height="20" aria-hidden="true"></iconify-icon></button><button class="small-button" id="viewChatProfile">Profile</button></header>
-          <div class="call-overlay" id="callOverlay" hidden><section class="call-window"><div class="call-stage"><video id="remoteVideo" autoplay playsinline></video><div id="directCameraOff" class="camera-off-card" hidden><div class="camera-off-banner"></div><div class="camera-off-avatar" aria-label="Participant avatar"></div></div><video id="localVideo" autoplay muted playsinline></video><div class="call-status" id="callStatus">Connecting…</div></div><div class="call-controls"><button class="call-control" id="toggleMic" type="button" aria-label="Mute microphone" title="Mute microphone"><iconify-icon icon="solar:microphone-bold" width="22" height="22" aria-hidden="true"></iconify-icon></button><button class="call-control" id="toggleCamera" type="button" aria-label="Turn camera off" title="Turn camera off"><iconify-icon icon="solar:videocamera-record-bold" width="22" height="22" aria-hidden="true"></iconify-icon></button><button class="call-control" id="shareScreen" type="button" aria-label="Share screen" title="Share screen"><iconify-icon icon="solar:screen-share-bold" width="22" height="22" aria-hidden="true"></iconify-icon></button><button class="call-control end" id="endCall" type="button" aria-label="End call" title="End call"><iconify-icon icon="solar:phone-hang-up-bold" width="22" height="22" aria-hidden="true"></iconify-icon></button></div><div class="call-resize-handle" id="callResizeHandle" role="separator" aria-orientation="horizontal" aria-label="Resize call panel" title="Drag to resize call panel"></div></section></div>
+          <div class="call-overlay" id="callOverlay" hidden><section class="call-window"><div class="call-stage"><video id="remoteVideo" autoplay playsinline></video><div id="directCameraOff" class="camera-off-card" hidden><div class="camera-off-banner"></div><div class="camera-off-avatar" aria-label="Participant avatar"></div></div><video id="localVideo" autoplay muted playsinline></video><div class="call-status" id="callStatus">Connecting…</div></div><div class="call-controls"><button class="call-control" id="toggleMic" type="button" aria-label="Mute microphone" title="Mute microphone"><iconify-icon icon="solar:microphone-bold" width="22" height="22" aria-hidden="true"></iconify-icon></button><button class="call-control" id="toggleCamera" type="button" aria-label="Turn camera off" title="Turn camera off"><iconify-icon icon="solar:videocamera-record-bold" width="22" height="22" aria-hidden="true"></iconify-icon></button><button class="call-control" id="shareScreen" type="button" aria-label="Share screen" title="Share screen"><iconify-icon icon="solar:screen-share-bold" width="22" height="22" aria-hidden="true"></iconify-icon></button><button class="call-control end" id="endCall" type="button" aria-label="End call" title="End call"><iconify-icon icon="solar:phone-hangup-bold" width="22" height="22" aria-hidden="true"></iconify-icon></button></div><div class="call-resize-handle" id="callResizeHandle" role="separator" aria-orientation="horizontal" aria-label="Resize call panel" title="Drag to resize call panel"></div></section></div>
         <div class="chat-messages" id="chatMessages" aria-live="polite"><div class="chat-empty">Loading messages…</div></div>
         <div class="composer-wrap"><div class="picker-panel" id="pickerPanel" hidden><div class="picker-tabs"><button type="button" class="picker-tab active" id="emojiTab">Emoji</button><button type="button" class="picker-tab" id="gifTab">GIFs</button><button type="button" class="icon-button picker-close" id="closePicker" aria-label="Close picker"><iconify-icon icon="solar:close-circle-bold" width="19" height="19" aria-hidden="true"></iconify-icon></button></div><div id="emojiPanel" class="emoji-grid" aria-label="Emoji picker"></div><div id="gifPanel" hidden><form class="gif-search" id="gifSearchForm"><input id="gifSearchInput" maxlength="50" placeholder="Search GIPHY" aria-label="Search GIFs"><button class="small-button" type="submit">Search</button></form><div class="gif-results" id="gifResults"><div class="result-message">Search for a GIF to send it in this chat.</div></div><div class="giphy-credit">Powered by GIPHY</div></div></div><form class="chat-composer" id="chatComposer"><button type="button" class="composer-tool" id="openEmoji" aria-label="Open emoji picker" title="Emoji">☺</button><button type="button" class="composer-tool" id="openGif" aria-label="Open GIF picker" title="GIF">GIF</button><textarea id="messageInput" rows="1" maxlength="4000" placeholder="Write a message…" aria-label="Write a message" required></textarea><button class="primary" id="sendMessage" type="submit">Send</button></form></div>
       </section>
@@ -925,14 +929,16 @@
       if (url) { const img = document.createElement('img'); img.src = url; img.alt = 'Profile picture'; el.append(img); }
       else el.textContent = fallback;
     }
-    const statusIcons={online:'solar:check-circle-bold',idle:'solar:clock-circle-bold',dnd:'solar:minus-circle-bold',invisible:'solar:eye-closed-bold',offline:'solar:close-circle-bold'};
-    function setStatusIcon(el,status){if(!el)return;const value=['online','idle','dnd','invisible','offline'].includes(status)?status:'online';el.className=(el.className||'').replace(/\b(online|idle|dnd|invisible|offline)\b/g,'').trim()+' '+value;el.setAttribute('icon',statusIcons[value]);}
+    const statusIcons={online:'solar:circle-bold',idle:'solar:moon-bold',dnd:'solar:minus-circle-bold',offline:'solar:circle-bold'};
+    function visiblePresence(status){return status==='invisible'?'offline':(['online','idle','dnd','offline'].includes(status)?status:'offline');}
+    function setStatusIcon(el,status){if(!el)return;const value=visiblePresence(status);el.className=(el.className||'').replace(/\b(online|idle|dnd|invisible|offline)\b/g,'').trim()+' '+value;el.setAttribute('icon',statusIcons[value]);}
     function setAvatarStatus(el,status='online') {
       if(!el)return;
       el.querySelectorAll(':scope > .avatar-status-badge').forEach(node=>node.remove());
-      const value=['online','idle','dnd','invisible','offline'].includes(status)?status:'online';
-      const badge=document.createElement('span');badge.className='avatar-status-badge '+value;badge.title=({online:'Online',idle:'Idle',dnd:'Do not disturb',invisible:'Invisible',offline:'Offline'})[value];badge.setAttribute('aria-label',badge.title);
-      const icon=document.createElement('iconify-icon');icon.setAttribute('icon',statusIcons[value]);icon.setAttribute('width','12');icon.setAttribute('height','12');icon.setAttribute('aria-hidden','true');badge.append(icon);el.append(badge);
+      const value=visiblePresence(status);
+      const badge=document.createElement('span');badge.className='avatar-status-badge '+value;badge.title=({online:'Online',idle:'Idle',dnd:'Do not disturb',offline:'Offline'})[value];badge.setAttribute('aria-label',badge.title);
+      if(value==='idle'||value==='dnd'){const icon=document.createElement('iconify-icon');icon.setAttribute('icon',statusIcons[value]);icon.setAttribute('width','9');icon.setAttribute('height','9');icon.setAttribute('aria-hidden','true');badge.append(icon);}
+      el.append(badge);
     }
     function openEditor() {
       editor.classList.remove('closing');
@@ -998,13 +1004,13 @@
     }
     function effectivePresence(profile) {
       if (!profile || presenceIsStale(profile)) return 'offline';
-      return ['online','idle','dnd','invisible'].includes(profile.status) ? profile.status : 'offline';
+      return visiblePresence(profile.status);
     }
     function refreshPresenceUI(uid) {
       const profile=profileCache.get(uid);if(!profile)return;
       if(!$("friendsPanel").hidden&&activeFriendsTab!=="pending")renderFriendRows($("friendsList"),lastFriendDocs,false);
       renderConversationList();
-      if(activeConversation?.otherUid===uid){setAvatarStatus($("chatAvatar"),profile.status);const dot=$("chatStatusDot");if(dot)dot.className="status-dot "+profile.status;}
+      if(activeConversation?.otherUid===uid){const presence=effectivePresence(profile);setAvatarStatus($("chatAvatar"),presence);const dot=$("chatStatusDot");if(dot)dot.className="status-dot "+presence;}
     }
     function schedulePresenceExpiry(uid, profile) {
       const previous=presenceExpiryTimers.get(uid);if(previous)window.clearTimeout(previous);
